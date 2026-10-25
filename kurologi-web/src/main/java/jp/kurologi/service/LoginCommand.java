@@ -13,6 +13,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import jp.kurologi.model.MemberDTO;
 import jp.kurologi.repository.MemberDAO;
+import jp.kurologi.web.MemberBridge;
 import jp.kurologi.web.Session;
 
 /**
@@ -68,6 +69,10 @@ public class LoginCommand implements Command {
 		// 이 사이트는 로그인 상태를 Session 클래스(세션 속성 "loginMemberId")로 판단한다.
 		// (기존 세션 폐기 + 새 세션 발급 + CSRF 토큰 발급까지 한 번에 해 준다)
 		Session.login(request, dto.getId());
+
+		// 마이페이지 · 홈 · AuthFilter 는 App.members(메모리 저장소)에서 회원을 찾는다.
+		// DB 로 로그인한 회원도 거기서 찾을 수 있도록 같이 등록해 준다.
+		MemberBridge.sync(request.getServletContext(), dto);
 
 		// 공통 헤더에 보여줄 이름 (로그아웃하면 세션째로 사라진다)
 		request.getSession().setAttribute(LOGIN_NAME_ATTR, dto.getName());

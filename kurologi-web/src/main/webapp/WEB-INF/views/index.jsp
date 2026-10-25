@@ -1037,7 +1037,7 @@ button { font: inherit; cursor: pointer; }
           <div class="card">
             <div class="card__body">
 <%  if (member == null) { %>
-              <form id="loginForm" method="post" action="<%= ctx %>/login">
+             <form id="loginForm" method="post" action="<%= ctx %>/member/login">
                 <input type="hidden" name="_csrf" value="<%= Html.esc(Session.csrfToken(request)) %>">
 <%      if (loginMessage != null) { %>
                 <p class="login-message"><%= loginMessage %></p>
