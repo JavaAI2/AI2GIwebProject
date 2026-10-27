@@ -117,6 +117,6 @@ POST 폼에는 CSRF 한 줄을 넣어야 합니다 (없으면 403):
 |---|---|
 | 회원가입 · ID/PW 찾기 | 버튼만 있음 |
 | DB (JDBC/MyBatis) | `repository/*` 인터페이스 구현으로 교체 |
-| 신청서 · 엑셀 · 트래킹 · 게시판 기능 | 화면만 JSP — 저장 기능은 BACKEND.md 순서대로 |
+| 신청서 · 트래킹 · 게시판 기능 | 화면만 JSP — 저장 기능은 BACKEND.md 순서대로 |
 | 종합현황 · 구매대행 · 배송대행 로그인 필수화 | `AuthFilter` urlPatterns 에 추가 |
 | 토스페이먼츠 · 쿠폰 · 이용실적 집계 | `PaymentServlet` · `PaymentService` · `MemberRepository.usageStats` |
