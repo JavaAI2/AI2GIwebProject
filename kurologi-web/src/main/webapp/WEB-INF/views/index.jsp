@@ -918,9 +918,6 @@ button { font: inherit; cursor: pointer; }
 
     <ul class="topbar__links topbar__links--right">
       <li><a href="#">언어 선택 <i class="caret">▾</i></a></li>
-      <li><a class="kakao-btn" href="#"><img src="<%= ctx %>/images/air_kakao.png" alt="카톡상담"></a></li>
-      <li><a class="kakao-btn" href="#"><img src="<%= ctx %>/images/kakao_sea1.png" alt="카톡상담"></a></li>
-      <li><a class="kakao-btn" href="#"><img src="<%= ctx %>/images/kakao_sea2.png" alt="카톡상담"></a></li>
 <%  boolean topIn = member != null || Session.memberId(request) != null;
     String topName = member != null ? member.getName() : (String) session.getAttribute("loginMemberName");
     if (topName == null || topName.trim().isEmpty()) topName = "회원";
@@ -983,15 +980,14 @@ button { font: inherit; cursor: pointer; }
           <a href="<%= ctx %>/buy/order_form">구매대행</a>
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/buy/order_form">주문서등록</a></li>
-            <li><a href="<%= ctx %>/buy/stock_order">재고구매신청등록</a></li>
-            <li><a href="<%= ctx %>/buy/excel_upload">구매대행 엑셀등록</a></li>
+            <li><a href="<%= ctx %>/stock/form">재고구매신청등록</a></li>
+            <li><a href="<%= ctx %>/buyorder/list">구매대행 주문내역</a></li>
           </ul>
         </li>
         <li class="main-nav__item">
           <a href="<%= ctx %>/ship/order_form">배송대행</a>
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/ship/order_form">주문서등록</a></li>
-            <li><a href="<%= ctx %>/ship/excel_upload">배송대행 엑셀등록</a></li>
           </ul>
         </li>
         <li class="main-nav__item">
@@ -1167,7 +1163,7 @@ button { font: inherit; cursor: pointer; }
   </section>
 
   <!-- ================================================================
-       3) 공지사항 / 센터 현황 / 자동편집기
+       3) 공지사항 / 센터 현황 / 계좌정보
        ================================================================ -->
   <section class="section">
     <div class="container">
@@ -1233,11 +1229,14 @@ button { font: inherit; cursor: pointer; }
         </div>
 
         <div class="col col--one-third">
-          <h4 class="panel-title panel-title--line">신청서 자동편집기</h4>
-          <div class="card">
-            <a class="card__image-link" href="#">
-              <img class="card__image" src="<%= ctx %>/images/editor.png" alt="신청서 자동편집기">
-            </a>
+          <h4 class="panel-title panel-title--line">계좌정보</h4>
+          <div class="card card--pad">
+            <div class="card__body">
+              <p class="text-16 bank-logo"><img src="<%= ctx %>/images/img_bank.png" alt="SBI SUMISHIN NET BANK"></p>
+              <p class="text-16">SBI SUMISHIN NET BANK, LTD.</p>
+              <p class="text-16">예금주명: USPbrain Co., Ltd</p>
+              <p class="text-20 text-blue">1537388 (JAPANESE YEN)/NTSSJPJT</p>
+            </div>
           </div>
         </div>
 
@@ -1246,7 +1245,7 @@ button { font: inherit; cursor: pointer; }
   </section>
 
   <!-- ================================================================
-       4) 고객센터 / 환율정보 / 계좌정보
+       4) 고객센터 / 환율정보
        ================================================================ -->
   <section class="section">
     <div class="container">
@@ -1265,12 +1264,6 @@ button { font: inherit; cursor: pointer; }
                 <a class="btn btn--dark" href="#">자주묻는질문</a>
                 <a class="btn btn--dark" href="#">사용메뉴얼</a>
               </div>
-
-              <div class="stack stack--tight">
-                <a class="kakao-btn" href="#"><img src="<%= ctx %>/images/air_kakao.png" alt="카톡상담"></a>
-                <a class="kakao-btn" href="#"><img src="<%= ctx %>/images/kakao_sea1.png" alt="카톡상담"></a>
-                <a class="kakao-btn" href="#"><img src="<%= ctx %>/images/kakao_sea2.png" alt="카톡상담"></a>
-              </div>
             </div>
           </div>
         </div>
@@ -1285,18 +1278,6 @@ button { font: inherit; cursor: pointer; }
               </p>
               <p class="exchange text-16">기준환율(원)<span class="exchange__value text-blue">854.58</span></p>
               <p class="exchange text-16">송금환율(원)<span class="exchange__value text-blue">862.95</span></p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col col--one-third">
-          <h4 class="panel-title panel-title--line">계좌정보</h4>
-          <div class="card card--pad">
-            <div class="card__body">
-              <p class="text-16 bank-logo"><img src="<%= ctx %>/images/img_bank.png" alt="SBI SUMISHIN NET BANK"></p>
-              <p class="text-16">SBI SUMISHIN NET BANK, LTD.</p>
-              <p class="text-16">예금주명: USPbrain Co., Ltd</p>
-              <p class="text-20 text-blue">1537388 (JAPANESE YEN)/NTSSJPJT</p>
             </div>
           </div>
         </div>

@@ -526,7 +526,6 @@ a:hover { color: var(--teal); }
 
     <div class="info-box">
       <p>일본 쇼핑몰에서 발송된 트래킹번호를 등록하면 입고 시 자동으로 매칭됩니다.</p>
-      <p>한 번에 여러 건을 등록하려면 <a href="#">엑셀 일괄등록</a>을 이용해 주세요.</p>
     </div>
 
     <div class="entry-grid">
