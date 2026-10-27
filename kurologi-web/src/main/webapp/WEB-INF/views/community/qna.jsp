@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.*, jp.kurologi.model.Page, jp.kurologi.model.PostDTO, jp.kurologi.web.Html" %>
 <%
     String ctx = request.getContextPath();
     request.setAttribute("menu", "community");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
@@ -489,6 +490,48 @@ a:hover { color: var(--teal); }
   color: rgba(255, 255, 255, .5);
   background: rgba(0, 0, 0, .2);
 }
+
+/* --------------------------------------------------------------- DB 연결하면서 추가한 스타일 */
+.flash {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #155724;
+  background: #e8f5ec;
+  border: 1px solid #c3e6cb;
+  border-radius: var(--radius);
+}
+.flash--error { color: #8a1f11; background: #fdecea; border-color: #f5c6cb; }
+.field-error { margin: 6px 0 0; font-size: 12px; color: var(--red); }
+
+.state--wait { color: var(--muted); border: 1px solid #cfcfcf; }
+a.pager__item { text-decoration: none; }
+.pager__item.is-active { color: #fff; background: var(--orange); }
+a.btn { text-decoration: none; }
+a.btn:hover { color: #fff; }
+.btn-row form { margin: 0; }
+textarea.input { min-height: 240px; line-height: 1.7; resize: vertical; }
+
+.view-box { margin-bottom: 8px; border-top: 2px solid var(--ink); }
+.view-title { margin: 0; padding: 16px 14px; font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--line); }
+.view-meta { margin: 0; padding: 10px 14px; font-size: 12px; color: var(--muted); background: var(--fill); border-bottom: 1px solid var(--line); }
+.view-meta span + span::before { content: '|'; margin: 0 10px; color: #ccc; }
+.view-content { padding: 22px 14px; min-height: 160px; font-size: 14px; line-height: 1.9; color: var(--ink); border-bottom: 1px solid var(--line); word-break: break-word; }
+
+.answer-box { margin-top: 24px; border: 1px solid var(--orange); border-radius: var(--radius); }
+.answer-box__head { padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--orange); background: var(--orange-bg); }
+.answer-box__body { padding: 16px 14px; font-size: 14px; line-height: 1.8; color: var(--ink); word-break: break-word; }
+.answer-box__meta { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+.deal-card__thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.faq-table li { padding: 5px 0; text-indent: 0; }
+.faq-table li::before { content: none; }
+.faq-table summary { cursor: pointer; list-style: none; color: var(--body); }
+.faq-table summary::-webkit-details-marker { display: none; }
+.faq-table summary::before { content: '› '; color: var(--orange); }
+.faq-table summary:hover { color: var(--teal); }
+.faq-a { margin: 8px 0 4px 12px; padding: 12px 14px; font-size: 13px; line-height: 1.8; color: var(--ink); white-space: pre-line; background: var(--fill); border-radius: var(--radius); }
 </style>
 </head>
 <body>
@@ -509,23 +552,36 @@ a:hover { color: var(--teal); }
 <main class="page-body">
   <div class="container">
 
+<%
+    Page<PostDTO> pg = (Page<PostDTO>) request.getAttribute("pageData");
+    List<PostDTO> items = (pg == null) ? new ArrayList<PostDTO>() : pg.getItems();
+    String searchType = (String) request.getAttribute("searchType");
+    String keyword = (String) request.getAttribute("keyword");
+    if (searchType == null) searchType = "all";
+    if (keyword == null) keyword = "";
+    long rowNo = (pg == null) ? 0 : pg.getTotalCount() - (long) (pg.getPage() - 1) * pg.size();
+    request.setAttribute("pagerBase", ctx + "/community/qna"
+            + (keyword.isEmpty() ? "" : "?searchType=" + Html.url(searchType) + "&keyword=" + Html.url(keyword)));
+%>
+    <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="flash" /></jsp:include>
+
     <h1 class="sub-title"><span class="sub-title__dash"></span>1:1게시판</h1>
 
     <div class="info-box">
       <p>주문·입고·배송 관련 문의를 남겨 주세요. 영업일 기준 1일 이내에 답변드립니다.</p>
     </div>
 
-    <div class="pane-toolbar">
+    <form class="pane-toolbar" method="get" action="<%= ctx %>/community/qna">
       <span class="pane-toolbar__label">검색</span>
-      <select class="pane-toolbar__select" aria-label="검색">
-        <option>전체</option>
-        <option>제목</option>
-        <option>내용</option>
+      <select class="pane-toolbar__select" name="searchType" aria-label="검색">
+        <option value="all"<%= Html.selected("all".equals(searchType)) %>>전체</option>
+        <option value="title"<%= Html.selected("title".equals(searchType)) %>>제목</option>
+        <option value="content"<%= Html.selected("content".equals(searchType)) %>>내용</option>
       </select>
-      <input class="pane-toolbar__input" type="text" placeholder="제목 검색" aria-label="검색어">
-      <button class="pane-toolbar__search" type="button" aria-label="검색">🔍</button>
-      <button class="pane-toolbar__action" type="button">문의하기</button>
-    </div>
+      <input class="pane-toolbar__input" type="text" name="keyword" value="<%= Html.esc(keyword) %>" placeholder="제목·내용 검색" aria-label="검색어">
+      <button class="pane-toolbar__search" type="submit" aria-label="검색">🔍</button>
+      <button class="pane-toolbar__action" type="button" onclick="location.href='<%= ctx %>/community/qna/write'">문의하기</button>
+    </form>
 
     <table class="data-table">
       <thead>
@@ -537,18 +593,21 @@ a:hover { color: var(--teal); }
         </tr>
       </thead>
       <tbody>
+<%  if (items.isEmpty()) { %>
+        <tr><td class="data-table__empty" colspan="4"><%= keyword.isEmpty() ? "등록하신 문의가 없습니다." : "검색 결과가 없습니다." %></td></tr>
+<%  } %>
+<%  for (PostDTO p : items) { %>
         <tr>
-          <td class="is-center">1</td>
-          <td class="is-left"><a href="#">발송 보류 요청드립니다</a></td>
-          <td class="is-center"><span class="state state--done">답변완료</span></td>
-          <td class="is-center">2026-09-28</td>
+          <td class="is-center"><%= rowNo-- %></td>
+          <td class="is-left"><% if (p.isNewPost()) { %><span class="badge--new">N</span><% } %><a href="<%= ctx %>/community/qna/view?id=<%= p.getPostId() %>"><%= Html.esc(p.getTitle()) %></a></td>
+          <td class="is-center"><% if (p.isAnswered()) { %><span class="state state--done">답변완료</span><% } else { %><span class="state state--wait">답변대기</span><% } %></td>
+          <td class="is-center"><%= Html.esc(p.getCreatedAt()) %></td>
         </tr>
+<%  } %>
       </tbody>
     </table>
 
-    <div class="pager">
-      <span class="pager__item is-active">1</span>
-    </div>
+    <jsp:include page="../common/community_pager.jsp" />
 
   </div>
 </main>

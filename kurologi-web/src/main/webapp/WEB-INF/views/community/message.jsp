@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.*, jp.kurologi.model.Page, jp.kurologi.model.MessageDTO, jp.kurologi.web.Html, jp.kurologi.web.Session" %>
 <%
     String ctx = request.getContextPath();
     request.setAttribute("menu", "community");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
@@ -489,6 +490,48 @@ a:hover { color: var(--teal); }
   color: rgba(255, 255, 255, .5);
   background: rgba(0, 0, 0, .2);
 }
+
+/* --------------------------------------------------------------- DB 연결하면서 추가한 스타일 */
+.flash {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #155724;
+  background: #e8f5ec;
+  border: 1px solid #c3e6cb;
+  border-radius: var(--radius);
+}
+.flash--error { color: #8a1f11; background: #fdecea; border-color: #f5c6cb; }
+.field-error { margin: 6px 0 0; font-size: 12px; color: var(--red); }
+
+.state--wait { color: var(--muted); border: 1px solid #cfcfcf; }
+a.pager__item { text-decoration: none; }
+.pager__item.is-active { color: #fff; background: var(--orange); }
+a.btn { text-decoration: none; }
+a.btn:hover { color: #fff; }
+.btn-row form { margin: 0; }
+textarea.input { min-height: 240px; line-height: 1.7; resize: vertical; }
+
+.view-box { margin-bottom: 8px; border-top: 2px solid var(--ink); }
+.view-title { margin: 0; padding: 16px 14px; font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--line); }
+.view-meta { margin: 0; padding: 10px 14px; font-size: 12px; color: var(--muted); background: var(--fill); border-bottom: 1px solid var(--line); }
+.view-meta span + span::before { content: '|'; margin: 0 10px; color: #ccc; }
+.view-content { padding: 22px 14px; min-height: 160px; font-size: 14px; line-height: 1.9; color: var(--ink); border-bottom: 1px solid var(--line); word-break: break-word; }
+
+.answer-box { margin-top: 24px; border: 1px solid var(--orange); border-radius: var(--radius); }
+.answer-box__head { padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--orange); background: var(--orange-bg); }
+.answer-box__body { padding: 16px 14px; font-size: 14px; line-height: 1.8; color: var(--ink); word-break: break-word; }
+.answer-box__meta { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+.deal-card__thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.faq-table li { padding: 5px 0; text-indent: 0; }
+.faq-table li::before { content: none; }
+.faq-table summary { cursor: pointer; list-style: none; color: var(--body); }
+.faq-table summary::-webkit-details-marker { display: none; }
+.faq-table summary::before { content: '› '; color: var(--orange); }
+.faq-table summary:hover { color: var(--teal); }
+.faq-a { margin: 8px 0 4px 12px; padding: 12px 14px; font-size: 13px; line-height: 1.8; color: var(--ink); white-space: pre-line; background: var(--fill); border-radius: var(--radius); }
 </style>
 </head>
 <body>
@@ -509,41 +552,75 @@ a:hover { color: var(--teal); }
 <main class="page-body">
   <div class="container">
 
+<%
+    Page<MessageDTO> pg = (Page<MessageDTO>) request.getAttribute("pageData");
+    List<MessageDTO> items = (pg == null) ? new ArrayList<MessageDTO>() : pg.getItems();
+    String searchType = (String) request.getAttribute("searchType");
+    String keyword = (String) request.getAttribute("keyword");
+    if (searchType == null) searchType = "all";
+    if (keyword == null) keyword = "";
+    int curPage = (pg == null) ? 1 : pg.getPage();
+    request.setAttribute("pagerBase", ctx + "/community/message"
+            + (keyword.isEmpty() ? "" : "?searchType=" + Html.url(searchType) + "&keyword=" + Html.url(keyword)));
+%>
+    <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="flash" /></jsp:include>
+
     <h1 class="sub-title"><span class="sub-title__dash"></span>알림메세지</h1>
 
     <div class="info-box">
       <p>입고·출고·배송 상태 변경 시 발송된 알림 내역입니다.</p>
     </div>
 
-    <div class="pane-toolbar">
-      <span class="pane-toolbar__label">구분</span>
-      <select class="pane-toolbar__select" aria-label="구분">
-        <option>전체</option>
-        <option>제목</option>
-        <option>내용</option>
+    <form class="pane-toolbar" method="get" action="<%= ctx %>/community/message">
+      <span class="pane-toolbar__label">검색</span>
+      <select class="pane-toolbar__select" name="searchType" aria-label="검색 구분">
+        <option value="all"<%= Html.selected("all".equals(searchType)) %>>전체</option>
+        <option value="type"<%= Html.selected("type".equals(searchType)) %>>구분</option>
+        <option value="content"<%= Html.selected("content".equals(searchType)) %>>내용</option>
       </select>
-      <input class="pane-toolbar__input" type="text" placeholder="내용 검색" aria-label="검색어">
-      <button class="pane-toolbar__search" type="button" aria-label="검색">🔍</button>
-    </div>
+      <input class="pane-toolbar__input" type="text" name="keyword" value="<%= Html.esc(keyword) %>" placeholder="검색어" aria-label="검색어">
+      <button class="pane-toolbar__search" type="submit" aria-label="검색">🔍</button>
+    </form>
 
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th class="is-narrow"><input type="checkbox" aria-label="전체 선택"></th>
-          <th>구분</th>
-          <th>내용</th>
-          <th>발송일시</th>
-          <th>확인</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td class="data-table__empty" colspan="9">수신한 알림메세지가 없습니다.</td></tr>
-      </tbody>
-    </table>
+    <form method="post" action="<%= ctx %>/community/message/read">
+      <input type="hidden" name="_csrf" value="<%= Html.esc(Session.csrfToken(request)) %>">
+      <input type="hidden" name="page" value="<%= curPage %>">
 
-    <div class="pager">
-      <span class="pager__item is-active">1</span>
-    </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="is-narrow"><input type="checkbox" aria-label="전체 선택" onclick="var c=this.form.querySelectorAll('input[name=ids]');for(var i=0;i<c.length;i++){c[i].checked=this.checked;}"></th>
+            <th>구분</th>
+            <th>내용</th>
+            <th>발송일시</th>
+            <th>확인</th>
+          </tr>
+        </thead>
+        <tbody>
+<%  if (items.isEmpty()) { %>
+          <tr><td class="data-table__empty" colspan="5"><%= keyword.isEmpty() ? "수신한 알림메세지가 없습니다." : "검색 결과가 없습니다." %></td></tr>
+<%  } %>
+<%  for (MessageDTO m : items) { %>
+          <tr>
+            <td class="is-center"><input type="checkbox" name="ids" value="<%= m.getMessageId() %>" aria-label="알림 선택"></td>
+            <td class="is-center"><%= Html.esc(m.getMsgType()) %></td>
+            <td class="is-left"><%= m.isRead() ? Html.esc(m.getContent()) : "<strong>" + Html.esc(m.getContent()) + "</strong>" %></td>
+            <td class="is-center"><%= Html.esc(m.getSentAt()) %></td>
+            <td class="is-center"><% if (m.isRead()) { %><span class="state state--done">확인</span><% } else { %><span class="state state--wait">미확인</span><% } %></td>
+          </tr>
+<%  } %>
+        </tbody>
+      </table>
+
+<%  if (!items.isEmpty()) { %>
+      <div class="btn-row">
+        <button class="btn btn--navy" type="submit" formaction="<%= ctx %>/community/message/read">선택 확인</button>
+        <button class="btn" type="submit" formaction="<%= ctx %>/community/message/delete" onclick="return confirm('선택한 알림을 삭제하시겠습니까?');">선택 삭제</button>
+      </div>
+<%  } %>
+    </form>
+
+    <jsp:include page="../common/community_pager.jsp" />
 
   </div>
 </main>

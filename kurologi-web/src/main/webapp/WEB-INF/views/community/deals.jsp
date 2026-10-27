@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.*, jp.kurologi.model.Page, jp.kurologi.model.DealDTO, jp.kurologi.web.Html" %>
 <%
     String ctx = request.getContextPath();
     request.setAttribute("menu", "community");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
@@ -518,6 +519,48 @@ a:hover { color: var(--teal); }
   color: rgba(255, 255, 255, .5);
   background: rgba(0, 0, 0, .2);
 }
+
+/* --------------------------------------------------------------- DB 연결하면서 추가한 스타일 */
+.flash {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #155724;
+  background: #e8f5ec;
+  border: 1px solid #c3e6cb;
+  border-radius: var(--radius);
+}
+.flash--error { color: #8a1f11; background: #fdecea; border-color: #f5c6cb; }
+.field-error { margin: 6px 0 0; font-size: 12px; color: var(--red); }
+
+.state--wait { color: var(--muted); border: 1px solid #cfcfcf; }
+a.pager__item { text-decoration: none; }
+.pager__item.is-active { color: #fff; background: var(--orange); }
+a.btn { text-decoration: none; }
+a.btn:hover { color: #fff; }
+.btn-row form { margin: 0; }
+textarea.input { min-height: 240px; line-height: 1.7; resize: vertical; }
+
+.view-box { margin-bottom: 8px; border-top: 2px solid var(--ink); }
+.view-title { margin: 0; padding: 16px 14px; font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--line); }
+.view-meta { margin: 0; padding: 10px 14px; font-size: 12px; color: var(--muted); background: var(--fill); border-bottom: 1px solid var(--line); }
+.view-meta span + span::before { content: '|'; margin: 0 10px; color: #ccc; }
+.view-content { padding: 22px 14px; min-height: 160px; font-size: 14px; line-height: 1.9; color: var(--ink); border-bottom: 1px solid var(--line); word-break: break-word; }
+
+.answer-box { margin-top: 24px; border: 1px solid var(--orange); border-radius: var(--radius); }
+.answer-box__head { padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--orange); background: var(--orange-bg); }
+.answer-box__body { padding: 16px 14px; font-size: 14px; line-height: 1.8; color: var(--ink); word-break: break-word; }
+.answer-box__meta { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+.deal-card__thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.faq-table li { padding: 5px 0; text-indent: 0; }
+.faq-table li::before { content: none; }
+.faq-table summary { cursor: pointer; list-style: none; color: var(--body); }
+.faq-table summary::-webkit-details-marker { display: none; }
+.faq-table summary::before { content: '› '; color: var(--orange); }
+.faq-table summary:hover { color: var(--teal); }
+.faq-a { margin: 8px 0 4px 12px; padding: 12px 14px; font-size: 13px; line-height: 1.8; color: var(--ink); white-space: pre-line; background: var(--fill); border-radius: var(--radius); }
 </style>
 </head>
 <body>
@@ -538,51 +581,39 @@ a:hover { color: var(--teal); }
 <main class="page-body">
   <div class="container">
 
+<%
+    Page<DealDTO> pg = (Page<DealDTO>) request.getAttribute("pageData");
+    List<DealDTO> items = (pg == null) ? new ArrayList<DealDTO>() : pg.getItems();
+    request.setAttribute("pagerBase", ctx + "/community/deals");
+%>
+    <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="flash" /></jsp:include>
+
     <h1 class="sub-title"><span class="sub-title__dash"></span>특가제품안내</h1>
 
     <div class="info-box">
       <p>구매대행 셀러를 위한 인기 일본 제품을 특가로 제안합니다.</p>
     </div>
 
+<%  if (items.isEmpty()) { %>
+    <div class="info-box"><p>현재 안내 중인 특가제품이 없습니다.</p></div>
+<%  } else { %>
     <div class="deal-grid">
-
+<%      for (DealDTO d : items) { %>
+<%          String img = d.getImagePath(); %>
+<%          boolean hasImg = img != null && !img.trim().isEmpty(); %>
+<%          String imgSrc = !hasImg ? "" : (img.startsWith("/") ? ctx + img : img); %>
       <div class="deal-card">
-        <div class="deal-card__thumb" aria-hidden="true">🖼</div>
-        <p class="deal-card__name">상품명 예시</p>
-        <p class="deal-card__price">¥0</p>
-        <p class="deal-card__meta">최소 주문 수량 1</p>
-        <button class="btn btn--sm" type="button">문의하기</button>
+        <div class="deal-card__thumb"<%= hasImg ? "" : " aria-hidden=\"true\"" %>><% if (hasImg) { %><img src="<%= Html.esc(imgSrc) %>" alt="<%= Html.esc(d.getName()) %>"><% } else { %>🖼<% } %></div>
+        <p class="deal-card__name"><%= Html.esc(d.getName()) %></p>
+        <p class="deal-card__price">¥<%= Html.num(d.getPriceJpy()) %></p>
+        <p class="deal-card__meta">최소 주문 수량 <%= d.getMinQty() %></p>
+        <button class="btn btn--sm" type="button" onclick="location.href='<%= ctx %>/community/qna/write?title=<%= Html.url("[특가문의] " + d.getName()) %>'">문의하기</button>
       </div>
-
-      <div class="deal-card">
-        <div class="deal-card__thumb" aria-hidden="true">🖼</div>
-        <p class="deal-card__name">상품명 예시</p>
-        <p class="deal-card__price">¥0</p>
-        <p class="deal-card__meta">최소 주문 수량 1</p>
-        <button class="btn btn--sm" type="button">문의하기</button>
-      </div>
-
-      <div class="deal-card">
-        <div class="deal-card__thumb" aria-hidden="true">🖼</div>
-        <p class="deal-card__name">상품명 예시</p>
-        <p class="deal-card__price">¥0</p>
-        <p class="deal-card__meta">최소 주문 수량 1</p>
-        <button class="btn btn--sm" type="button">문의하기</button>
-      </div>
-
-      <div class="deal-card">
-        <div class="deal-card__thumb" aria-hidden="true">🖼</div>
-        <p class="deal-card__name">상품명 예시</p>
-        <p class="deal-card__price">¥0</p>
-        <p class="deal-card__meta">최소 주문 수량 1</p>
-        <button class="btn btn--sm" type="button">문의하기</button>
-      </div>
-
+<%      } %>
     </div>
+<%  } %>
 
-    <div class="pager">
-      <span class="pager__item is-active">1</span>
-    </div>
+    <jsp:include page="../common/community_pager.jsp" />
 
   </div>
 </main>

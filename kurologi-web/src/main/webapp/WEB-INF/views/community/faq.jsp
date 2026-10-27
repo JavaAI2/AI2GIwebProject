@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.*, jp.kurologi.model.FaqDTO, jp.kurologi.web.Html" %>
 <%
     String ctx = request.getContextPath();
     request.setAttribute("menu", "community");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
@@ -509,6 +510,48 @@ a:hover { color: var(--teal); }
   color: rgba(255, 255, 255, .5);
   background: rgba(0, 0, 0, .2);
 }
+
+/* --------------------------------------------------------------- DB 연결하면서 추가한 스타일 */
+.flash {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #155724;
+  background: #e8f5ec;
+  border: 1px solid #c3e6cb;
+  border-radius: var(--radius);
+}
+.flash--error { color: #8a1f11; background: #fdecea; border-color: #f5c6cb; }
+.field-error { margin: 6px 0 0; font-size: 12px; color: var(--red); }
+
+.state--wait { color: var(--muted); border: 1px solid #cfcfcf; }
+a.pager__item { text-decoration: none; }
+.pager__item.is-active { color: #fff; background: var(--orange); }
+a.btn { text-decoration: none; }
+a.btn:hover { color: #fff; }
+.btn-row form { margin: 0; }
+textarea.input { min-height: 240px; line-height: 1.7; resize: vertical; }
+
+.view-box { margin-bottom: 8px; border-top: 2px solid var(--ink); }
+.view-title { margin: 0; padding: 16px 14px; font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--line); }
+.view-meta { margin: 0; padding: 10px 14px; font-size: 12px; color: var(--muted); background: var(--fill); border-bottom: 1px solid var(--line); }
+.view-meta span + span::before { content: '|'; margin: 0 10px; color: #ccc; }
+.view-content { padding: 22px 14px; min-height: 160px; font-size: 14px; line-height: 1.9; color: var(--ink); border-bottom: 1px solid var(--line); word-break: break-word; }
+
+.answer-box { margin-top: 24px; border: 1px solid var(--orange); border-radius: var(--radius); }
+.answer-box__head { padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--orange); background: var(--orange-bg); }
+.answer-box__body { padding: 16px 14px; font-size: 14px; line-height: 1.8; color: var(--ink); word-break: break-word; }
+.answer-box__meta { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+.deal-card__thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.faq-table li { padding: 5px 0; text-indent: 0; }
+.faq-table li::before { content: none; }
+.faq-table summary { cursor: pointer; list-style: none; color: var(--body); }
+.faq-table summary::-webkit-details-marker { display: none; }
+.faq-table summary::before { content: '› '; color: var(--orange); }
+.faq-table summary:hover { color: var(--teal); }
+.faq-a { margin: 8px 0 4px 12px; padding: 12px 14px; font-size: 13px; line-height: 1.8; color: var(--ink); white-space: pre-line; background: var(--fill); border-radius: var(--radius); }
 </style>
 </head>
 <body>
@@ -529,56 +572,43 @@ a:hover { color: var(--teal); }
 <main class="page-body">
   <div class="container">
 
+<%
+    Map<String, List<FaqDTO>> groups = (Map<String, List<FaqDTO>>) request.getAttribute("faqGroups");
+    if (groups == null) groups = new LinkedHashMap<String, List<FaqDTO>>();
+%>
+    <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="flash" /></jsp:include>
+
     <h1 class="sub-title"><span class="sub-title__dash"></span>자주묻는 질문</h1>
 
     <div class="info-box">
       <p>아래 항목을 누르시면 답변이 펼쳐집니다. 원하는 답을 찾지 못하셨다면 1:1게시판을 이용해 주세요.</p>
     </div>
 
+<%  if (groups.isEmpty()) { %>
+    <div class="info-box"><p>등록된 질문이 없습니다.</p></div>
+<%  } else { %>
     <table class="faq-table">
       <tbody>
+<%      for (Map.Entry<String, List<FaqDTO>> g : groups.entrySet()) { %>
         <tr>
-          <th>회원/기타</th>
+          <th><%= Html.esc(g.getKey()) %></th>
           <td>
             <ul>
-              <li><a href="#">회원가입은 어떻게 하나요?</a></li>
-              <li><a href="#">회원정보는 어떻게 변경하나요?</a></li>
-              <li><a href="#">회원탈퇴는 어떻게 하나요?</a></li>
+<%          for (FaqDTO f : g.getValue()) { %>
+              <li>
+                <details>
+                  <summary><%= Html.esc(f.getQuestion()) %></summary>
+                  <div class="faq-a"><%= Html.esc(f.getAnswer()) %></div>
+                </details>
+              </li>
+<%          } %>
             </ul>
           </td>
         </tr>
-        <tr>
-          <th>배송신청서</th>
-          <td>
-            <ul>
-              <li><a href="#">배송신청서는 언제 작성하나요?</a></li>
-              <li><a href="#">개인통관부호는 어디에 입력하나요?</a></li>
-              <li><a href="#">트래킹번호를 추가하려면?</a></li>
-            </ul>
-          </td>
-        </tr>
-        <tr>
-          <th>입고/출고</th>
-          <td>
-            <ul>
-              <li><a href="#">입고까지 얼마나 걸리나요?</a></li>
-              <li><a href="#">미도착 건은 어떻게 확인하나요?</a></li>
-              <li><a href="#">출고 후 국내 배송은?</a></li>
-            </ul>
-          </td>
-        </tr>
-        <tr>
-          <th>배송비</th>
-          <td>
-            <ul>
-              <li><a href="#">배송비는 어떻게 계산되나요?</a></li>
-              <li><a href="#">무게 측정은 언제 하나요?</a></li>
-              <li><a href="#">묶음배송과 분할배송 차이는?</a></li>
-            </ul>
-          </td>
-        </tr>
+<%      } %>
       </tbody>
     </table>
+<%  } %>
 
     <div class="btn-row">
       <a class="btn btn--navy" href="<%= ctx %>/community/qna">1:1 문의하기</a>

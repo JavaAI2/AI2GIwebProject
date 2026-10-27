@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.*, jp.kurologi.model.Page, jp.kurologi.model.PostDTO, jp.kurologi.web.Html" %>
 <%
     String ctx = request.getContextPath();
     request.setAttribute("menu", "community");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
@@ -489,6 +490,48 @@ a:hover { color: var(--teal); }
   color: rgba(255, 255, 255, .5);
   background: rgba(0, 0, 0, .2);
 }
+
+/* --------------------------------------------------------------- DB 연결하면서 추가한 스타일 */
+.flash {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #155724;
+  background: #e8f5ec;
+  border: 1px solid #c3e6cb;
+  border-radius: var(--radius);
+}
+.flash--error { color: #8a1f11; background: #fdecea; border-color: #f5c6cb; }
+.field-error { margin: 6px 0 0; font-size: 12px; color: var(--red); }
+
+.state--wait { color: var(--muted); border: 1px solid #cfcfcf; }
+a.pager__item { text-decoration: none; }
+.pager__item.is-active { color: #fff; background: var(--orange); }
+a.btn { text-decoration: none; }
+a.btn:hover { color: #fff; }
+.btn-row form { margin: 0; }
+textarea.input { min-height: 240px; line-height: 1.7; resize: vertical; }
+
+.view-box { margin-bottom: 8px; border-top: 2px solid var(--ink); }
+.view-title { margin: 0; padding: 16px 14px; font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--line); }
+.view-meta { margin: 0; padding: 10px 14px; font-size: 12px; color: var(--muted); background: var(--fill); border-bottom: 1px solid var(--line); }
+.view-meta span + span::before { content: '|'; margin: 0 10px; color: #ccc; }
+.view-content { padding: 22px 14px; min-height: 160px; font-size: 14px; line-height: 1.9; color: var(--ink); border-bottom: 1px solid var(--line); word-break: break-word; }
+
+.answer-box { margin-top: 24px; border: 1px solid var(--orange); border-radius: var(--radius); }
+.answer-box__head { padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--orange); background: var(--orange-bg); }
+.answer-box__body { padding: 16px 14px; font-size: 14px; line-height: 1.8; color: var(--ink); word-break: break-word; }
+.answer-box__meta { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+.deal-card__thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.faq-table li { padding: 5px 0; text-indent: 0; }
+.faq-table li::before { content: none; }
+.faq-table summary { cursor: pointer; list-style: none; color: var(--body); }
+.faq-table summary::-webkit-details-marker { display: none; }
+.faq-table summary::before { content: '› '; color: var(--orange); }
+.faq-table summary:hover { color: var(--teal); }
+.faq-a { margin: 8px 0 4px 12px; padding: 12px 14px; font-size: 13px; line-height: 1.8; color: var(--ink); white-space: pre-line; background: var(--fill); border-radius: var(--radius); }
 </style>
 </head>
 <body>
@@ -509,18 +552,31 @@ a:hover { color: var(--teal); }
 <main class="page-body">
   <div class="container">
 
+<%
+    Page<PostDTO> pg = (Page<PostDTO>) request.getAttribute("pageData");
+    List<PostDTO> items = (pg == null) ? new ArrayList<PostDTO>() : pg.getItems();
+    String searchType = (String) request.getAttribute("searchType");
+    String keyword = (String) request.getAttribute("keyword");
+    if (searchType == null) searchType = "all";
+    if (keyword == null) keyword = "";
+    long rowNo = (pg == null) ? 0 : pg.getTotalCount() - (long) (pg.getPage() - 1) * pg.size();
+    request.setAttribute("pagerBase", ctx + "/community/notice"
+            + (keyword.isEmpty() ? "" : "?searchType=" + Html.url(searchType) + "&keyword=" + Html.url(keyword)));
+%>
+    <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="flash" /></jsp:include>
+
     <h1 class="sub-title"><span class="sub-title__dash"></span>공지사항</h1>
 
-    <div class="pane-toolbar">
+    <form class="pane-toolbar" method="get" action="<%= ctx %>/community/notice">
       <span class="pane-toolbar__label">검색</span>
-      <select class="pane-toolbar__select" aria-label="검색">
-        <option>전체</option>
-        <option>제목</option>
-        <option>내용</option>
+      <select class="pane-toolbar__select" name="searchType" aria-label="검색">
+        <option value="all"<%= Html.selected("all".equals(searchType)) %>>전체</option>
+        <option value="title"<%= Html.selected("title".equals(searchType)) %>>제목</option>
+        <option value="content"<%= Html.selected("content".equals(searchType)) %>>내용</option>
       </select>
-      <input class="pane-toolbar__input" type="text" placeholder="제목 검색" aria-label="검색어">
-      <button class="pane-toolbar__search" type="button" aria-label="검색">🔍</button>
-    </div>
+      <input class="pane-toolbar__input" type="text" name="keyword" value="<%= Html.esc(keyword) %>" placeholder="검색어" aria-label="검색어">
+      <button class="pane-toolbar__search" type="submit" aria-label="검색">🔍</button>
+    </form>
 
     <table class="data-table">
       <thead>
@@ -533,40 +589,22 @@ a:hover { color: var(--teal); }
         </tr>
       </thead>
       <tbody>
+<%  if (items.isEmpty()) { %>
+        <tr><td class="data-table__empty" colspan="5"><%= keyword.isEmpty() ? "등록된 공지사항이 없습니다." : "검색 결과가 없습니다." %></td></tr>
+<%  } %>
+<%  for (PostDTO p : items) { %>
         <tr>
-          <td class="is-center">4</td>
-          <td class="is-left"><span class="badge--new">N</span><a href="#">[공지] 클릭 2번으로 끝나는 배송대행신청서 안내</a></td>
-          <td class="is-center">관리자</td>
-          <td class="is-center">2026-10-01</td>
-          <td class="is-center">128</td>
+          <td class="is-center"><%= rowNo-- %></td>
+          <td class="is-left"><% if (p.isNewPost()) { %><span class="badge--new">N</span><% } %><a href="<%= ctx %>/community/notice/view?id=<%= p.getPostId() %>"><%= Html.esc(p.getTitle()) %></a></td>
+          <td class="is-center"><%= p.getWriterName() == null ? "관리자" : Html.esc(p.getWriterName()) %></td>
+          <td class="is-center"><%= Html.esc(p.getCreatedAt()) %></td>
+          <td class="is-center"><%= p.getViewCount() %></td>
         </tr>
-        <tr>
-          <td class="is-center">3</td>
-          <td class="is-left"><span class="badge--new">N</span><a href="#">[공지] 10월 한국세터 개천절 대체휴무 안내</a></td>
-          <td class="is-center">관리자</td>
-          <td class="is-center">2026-10-01</td>
-          <td class="is-center">96</td>
-        </tr>
-        <tr>
-          <td class="is-center">2</td>
-          <td class="is-left"><a href="#">[공지] 일본 현지 반품 관련 안내</a></td>
-          <td class="is-center">관리자</td>
-          <td class="is-center">2026-09-23</td>
-          <td class="is-center">74</td>
-        </tr>
-        <tr>
-          <td class="is-center">1</td>
-          <td class="is-left"><a href="#">[공지] 일본 야마토 주소 및 휴일 설정 관련</a></td>
-          <td class="is-center">관리자</td>
-          <td class="is-center">2026-09-23</td>
-          <td class="is-center">61</td>
-        </tr>
+<%  } %>
       </tbody>
     </table>
 
-    <div class="pager">
-      <span class="pager__item is-active">1</span>
-    </div>
+    <jsp:include page="../common/community_pager.jsp" />
 
   </div>
 </main>
