@@ -38,10 +38,18 @@ public class BuyOrderView implements Command {
 		// 없는 주문이거나 남의 주문이면 똑같이 "없다"고 알려 준다 (남의 주문 번호를 추측하지 못하게)
 		if (order == null || order.getMemberId() != memberId.longValue()) {
 			Session.flash(request, "error", "존재하지 않는 주문입니다.");
-			response.sendRedirect(ctx + "/buyorder/list");
+			response.sendRedirect(ctx + ServiceType.base(ServiceType.of(request)) + "/list");
 			return false;
 		}
 
+		// 배송대행 주문을 구매대행 주소로 열었으면(또는 반대) 맞는 주소로 보낸다
+		String svc = ServiceType.normalize(order.getServiceType());
+		if (!svc.equals(ServiceType.of(request))) {
+			response.sendRedirect(ctx + ServiceType.base(svc) + "/view?id=" + id);
+			return false;
+		}
+
+		request.setAttribute("svc", svc);
 		request.setAttribute("order", order);
 		return true;   // order_view.jsp 로 forward
 	}

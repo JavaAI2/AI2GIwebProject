@@ -1,8 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"
-    import="jp.kurologi.web.Session,jp.kurologi.web.Html,jp.kurologi.model.BuyOrderDTO,jp.kurologi.model.BuyOrderItemDTO,java.util.ArrayList,java.util.Arrays,java.util.HashSet,java.util.List,java.util.Set" %>
+    import="jp.kurologi.web.Session,jp.kurologi.web.Html,jp.kurologi.model.ExchangeRate,jp.kurologi.service.ExchangeRateService,jp.kurologi.model.BuyOrderDTO,jp.kurologi.model.BuyOrderItemDTO,java.util.ArrayList,java.util.Arrays,java.util.HashSet,java.util.List,java.util.Set" %>
 <%
     String ctx = request.getContextPath();
-    request.setAttribute("menu", "buy");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
+    // 구매대행(BUY) / 배송대행(SHIP) : 컨트롤러가 request 에 담아 준다.
+    // 주소창에서 /buy/... JSP 를 바로 열면 값이 없으므로 구매대행으로 본다.
+    String svc = (String) request.getAttribute("svc");
+    boolean ship = "SHIP".equals(svc);
+    String base = ship ? "/shiporder" : "/buyorder";   // 이 서비스의 컨트롤러 주소
+    String svcName = ship ? "배송대행" : "구매대행";
+    request.setAttribute("menu", ship ? "ship" : "buy");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
+    ExchangeRate rate = ExchangeRateService.current();   // 오늘의 환율 (없으면 null)
+    java.text.DecimalFormat rateFmt = new java.text.DecimalFormat("#,##0.00");
 
     // 컨트롤러가 담아 준 주문 정보 (formOrder)
     //   - 없음            : 새 주문서(빈 화면)
@@ -25,7 +33,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>구매대행 주문서등록 | KURO Logi</title>
+<title><%= ship ? "배송대행 신청" : "구매대행 주문서등록" %> | KURO Logi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
@@ -601,11 +609,11 @@ a:hover { color: var(--teal); }
 <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="top" /></jsp:include>
 <section class="page-head">
   <div class="container page-head__inner">
-    <h1 class="page-head__title">구매대행 주문서등록</h1>
+    <h1 class="page-head__title"><%= ship ? "배송대행 신청" : "구매대행 주문서등록" %></h1>
     <ol class="breadcrumb">
       <li class="breadcrumb__item"><a href="<%= ctx %>/">홈</a></li>
-      <li class="breadcrumb__item"><a href="#">구매대행</a></li>
-      <li class="breadcrumb__item is-current">구매대행 주문서등록</li>
+      <li class="breadcrumb__item"><a href="<%= ctx %><%= base %>/list"><%= svcName %></a></li>
+      <li class="breadcrumb__item is-current"><%= ship ? "배송대행 신청" : "구매대행 주문서등록" %></li>
     </ol>
   </div>
 </section>
@@ -615,10 +623,10 @@ a:hover { color: var(--teal); }
 <main class="page-body">
   <div class="container">
 
-    <form id="orderForm" action="<%= ctx %>/buyorder/save" method="post" autocomplete="off">
+    <form id="orderForm" action="<%= ctx %><%= base %>/save" method="post" autocomplete="off">
     <input type="hidden" name="_csrf" value="<%= Session.csrfToken(request) %>">
 
-    <h1 class="form-title"><%= editing ? "구매대행 주문서수정" : "구매대행 주문서등록" %></h1>
+    <h1 class="form-title"><%= editing ? (ship ? "배송대행 신청 수정" : "구매대행 주문서수정") : (ship ? "배송대행 신청" : "구매대행 주문서등록") %></h1>
 <% if (editing) { %>
     <input type="hidden" name="orderId" value="<%= fo.getOrderId() %>">
     <div class="info-box"><p>주문번호 <strong><%= Html.esc(fo.getOrderNo()) %></strong> 을(를) 수정하고 있습니다. 접수대기 상태에서만 수정할 수 있습니다.</p></div>
@@ -996,6 +1004,21 @@ a:hover { color: var(--teal); }
             <input class="input" id="totalUsd" type="text" value="0" readonly>
           </div>
         </div>
+<% if (!ship) { %>
+        <div class="field-grid field-grid--3">
+          <div class="field">
+            <label class="field__label" for="appliedRate">적용 환율 (100엔)</label>
+            <input class="input" id="appliedRate" type="text" value="<%= rate == null ? "환율 정보 없음" : "₩" + rateFmt.format(rate.getNoticeRate()) %>" readonly>
+          </div>
+          <div class="field">
+            <label class="field__label" for="totalKrw">예상 결제금액 ₩</label>
+            <input class="input" id="totalKrw" type="text" value="0" readonly>
+          </div>
+        </div>
+        <p class="note">* <%= rate == null ? "환율 정보가 없어 원화 금액을 계산할 수 없습니다." : rate.getRateDate().toString().replace('-', '.') + " 기준 고시환율로 계산한 금액입니다. 저장할 때의 환율이 주문에 기록되며, 접수신청 시점의 환율로 확정됩니다." %></p>
+<% } else { %>
+        <p class="note">* 배송대행은 상품 금액을 세관 신고용으로만 사용합니다. (결제 대상은 배송비 · 관부가세)</p>
+<% } %>
         <p class="note">* 세관에 신고되는 금액 입니다 (소량품 결제 금액과 동일)</p>
         <p class="note">* 총금액이 미화 150달러 이상인 경우, 통관수수료가 부과됩니다.</p>
         <p class="note">* 목록통관이 불가한 식품, 액체, 서물, 분말은 간이 통관으로 진행합니다 (*세관 절차비 책임지지 않습니다. 주의 하시기 바랍니다)</p>
@@ -1241,7 +1264,9 @@ a:hover { color: var(--teal); }
   var list = document.getElementById('itemList');
   var MAX_ITEMS = 20;          // 제품품목수 20건 제한
   var AGREE_COUNT = 25;        // 해외배송규정 동의 항목 수
-  var JPY_PER_USD = 150;       // 임시 환율(¥ -> $ 화면 표시용). 나중에 환율 테이블과 연결하세요.
+  // 오늘의 환율 (서버가 DB 에서 읽은 값). 환율 정보가 없으면 KRW 는 0 이라 원화 금액을 '-' 로 표시한다
+  var KRW_PER_100JPY = <%= rate == null ? "0" : rate.getNoticeRate().toPlainString() %>;   // 고시환율(원) / 100엔
+  var USD_PER_JPY = <%= rate == null ? "0.00666667" : rate.getJpyUsd().toPlainString() %>;   // 1엔 = 몇 달러 (세관 신고 금액)
   var CTX = '<%= ctx %>';
   var CSRF = '<%= Session.csrfToken(request) %>';
   var MAX_IMG_BYTES = 5 * 1024 * 1024;   // 이미지 5MB 제한 (서버도 같은 제한)
@@ -1319,7 +1344,9 @@ a:hover { color: var(--teal); }
     }
     document.getElementById('totalQty').value = qty.toLocaleString();
     document.getElementById('totalYen').value = Math.round(yen).toLocaleString();
-    document.getElementById('totalUsd').value = (yen / JPY_PER_USD).toFixed(2);
+    document.getElementById('totalUsd').value = (yen * USD_PER_JPY).toFixed(2);
+    var krwEl = document.getElementById('totalKrw');   // 배송대행 화면에는 이 칸이 없다
+    if (krwEl) krwEl.value = KRW_PER_100JPY > 0 ? Math.round(yen * KRW_PER_100JPY / 100).toLocaleString() : '-';   // 화면 표시용. 저장할 때는 서버가 다시 계산
   }
 
   function clearBlock(b) {

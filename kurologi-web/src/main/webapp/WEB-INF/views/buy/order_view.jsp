@@ -2,11 +2,17 @@
     import="jp.kurologi.web.Html,jp.kurologi.model.BuyOrderDTO,jp.kurologi.model.BuyOrderItemDTO,jp.kurologi.service.UploadStore,java.text.DecimalFormat,java.util.List" %>
 <%
     String ctx = request.getContextPath();
-    request.setAttribute("menu", "buy");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
+    // 구매대행(BUY) / 배송대행(SHIP) : 컨트롤러가 request 에 담아 준다.
+    // 주소창에서 /buy/... JSP 를 바로 열면 값이 없으므로 구매대행으로 본다.
+    String svc = (String) request.getAttribute("svc");
+    boolean ship = "SHIP".equals(svc);
+    String base = ship ? "/shiporder" : "/buyorder";   // 이 서비스의 컨트롤러 주소
+    String svcName = ship ? "배송대행" : "구매대행";
+    request.setAttribute("menu", ship ? "ship" : "buy");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
     // 주소창에서 /buy/order_view 로 직접 들어오면 데이터가 없으므로 컨트롤러 주소로 보낸다
     BuyOrderDTO o = (BuyOrderDTO) request.getAttribute("order");
     if (o == null) {
-        response.sendRedirect(ctx + "/buyorder/list");
+        response.sendRedirect(ctx + base + "/list");
         return;
     }
     boolean wait = "WAIT".equals(o.getStatus());
@@ -17,7 +23,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>구매대행 주문상세 | KURO Logi</title>
+<title><%= ship ? "배송대행 신청상세" : "구매대행 주문상세" %> | KURO Logi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
@@ -527,10 +533,10 @@ a.pager__item:hover { background: var(--orange-bg); }
 <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="top" /></jsp:include>
 <section class="page-head">
   <div class="container page-head__inner">
-    <h1 class="page-head__title">구매대행 주문상세</h1>
+    <h1 class="page-head__title"><%= ship ? "배송대행 신청상세" : "구매대행 주문상세" %></h1>
     <ol class="breadcrumb">
       <li class="breadcrumb__item"><a href="<%= ctx %>/">홈</a></li>
-      <li class="breadcrumb__item"><a href="<%= ctx %>/buyorder/list">구매대행 주문내역</a></li>
+      <li class="breadcrumb__item"><a href="<%= ctx %><%= base %>/list"><%= ship ? "배송대행 신청내역" : "구매대행 주문내역" %></a></li>
       <li class="breadcrumb__item is-current">주문상세</li>
     </ol>
   </div>
@@ -541,7 +547,7 @@ a.pager__item:hover { background: var(--orange-bg); }
 <main class="page-body">
   <div class="container">
 
-    <h1 class="sub-title"><span class="sub-title__dash"></span>구매대행 주문상세</h1>
+    <h1 class="sub-title"><span class="sub-title__dash"></span><%= ship ? "배송대행 신청상세" : "구매대행 주문상세" %></h1>
 
     <div class="view-head">
       <span>주문번호 <strong><%= Html.esc(o.getOrderNo()) %></strong></span>
@@ -583,6 +589,19 @@ a.pager__item:hover { background: var(--orange-bg); }
           <th>예치금 결제</th>
           <td class="is-readonly" colspan="3"><%= o.isAutoPay() ? "자동결제" : "수동결제" %></td>
         </tr>
+<% if (!ship) { %>
+        <tr>
+          <th><%= wait ? "결제 예정 금액" : "결제 금액" %></th>
+          <td class="is-readonly" colspan="3">
+<% if (o.getAppliedRate() != null) { %>
+            <strong>₩<%= new java.text.DecimalFormat("#,##0").format(o.getTotalKrw()) %></strong>
+            <span class="item-sub">총 <%= df.format(o.getTotalYen()) %>엔 x 고시환율 100엔 = <%= new java.text.DecimalFormat("#,##0.00").format(o.getAppliedRate()) %>원 적용<%= wait ? " (접수신청 시점의 환율로 확정됩니다)" : " (접수 시점 환율로 확정)" %></span>
+<% } else { %>
+            환율 정보 없음
+<% } %>
+          </td>
+        </tr>
+<% } %>
       </tbody>
     </table>
 
@@ -642,10 +661,10 @@ a.pager__item:hover { background: var(--orange-bg); }
     </table>
 
     <div class="btn-row">
-      <a class="btn" href="<%= ctx %>/buyorder/list">목록</a>
+      <a class="btn" href="<%= ctx %><%= base %>/list">목록</a>
 <% if (wait) { %>
-      <a class="btn btn--navy" href="<%= ctx %>/buyorder/form?id=<%= o.getOrderId() %>">수정</a>
-      <form class="inline-form" action="<%= ctx %>/buyorder/delete" method="post" onsubmit="return confirm('이 주문을 삭제할까요? 삭제하면 되돌릴 수 없습니다.');">
+      <a class="btn btn--navy" href="<%= ctx %><%= base %>/form?id=<%= o.getOrderId() %>">수정</a>
+      <form class="inline-form" action="<%= ctx %><%= base %>/delete" method="post" onsubmit="return confirm('이 주문을 삭제할까요? 삭제하면 되돌릴 수 없습니다.');">
         <input type="hidden" name="_csrf" value="<%= jp.kurologi.web.Session.csrfToken(request) %>">
         <input type="hidden" name="id" value="<%= o.getOrderId() %>">
         <button class="btn btn--danger" type="submit">삭제</button>

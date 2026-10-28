@@ -3,6 +3,7 @@ package jp.kurologi.repository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,8 +45,8 @@ public class BuyOrderDAO {
 		String orderSql = "INSERT INTO BUY_ORDER "
 				+ "(ORDER_ID, ORDER_NO, MEMBER_ID, STATUS, CENTER, RECV_NAME_KO, RECV_NAME_EN, POSTCODE, "
 				+ "ADDR1, ADDR2, BIZ_NO, MOBILE, DELIVER_NOTE, TOTAL_QTY, TOTAL_YEN, ADDON_OPTIONS, "
-				+ "LOGISTICS_NOTE, AUTO_PAY) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "LOGISTICS_NOTE, AUTO_PAY, SERVICE_TYPE, APPLIED_RATE, TOTAL_KRW) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		Connection conn = null;
 
@@ -72,6 +73,8 @@ public class BuyOrderDAO {
 				pstmt.setString(16, order.getAddonOptions());
 				pstmt.setString(17, order.getLogisticsNote());
 				pstmt.setString(18, order.isAutoPay() ? "Y" : "N");
+				pstmt.setString(19, order.getServiceType());
+				bindRate(pstmt, 20, 21, order);
 				pstmt.executeUpdate();
 			}
 
@@ -98,7 +101,7 @@ public class BuyOrderDAO {
 
 		String sql = "UPDATE BUY_ORDER SET STATUS = ?, RECV_NAME_KO = ?, RECV_NAME_EN = ?, POSTCODE = ?, "
 				+ "ADDR1 = ?, ADDR2 = ?, BIZ_NO = ?, MOBILE = ?, DELIVER_NOTE = ?, TOTAL_QTY = ?, TOTAL_YEN = ?, "
-				+ "ADDON_OPTIONS = ?, LOGISTICS_NOTE = ?, AUTO_PAY = ? "
+				+ "ADDON_OPTIONS = ?, LOGISTICS_NOTE = ?, AUTO_PAY = ?, APPLIED_RATE = ?, TOTAL_KRW = ? "
 				+ "WHERE ORDER_ID = ? AND MEMBER_ID = ? AND STATUS = 'WAIT'";
 
 		Connection conn = null;
@@ -122,8 +125,9 @@ public class BuyOrderDAO {
 				pstmt.setString(12, order.getAddonOptions());
 				pstmt.setString(13, order.getLogisticsNote());
 				pstmt.setString(14, order.isAutoPay() ? "Y" : "N");
-				pstmt.setLong(15, order.getOrderId());
-				pstmt.setLong(16, order.getMemberId());
+				bindRate(pstmt, 15, 16, order);
+				pstmt.setLong(17, order.getOrderId());
+				pstmt.setLong(18, order.getMemberId());
 				if (pstmt.executeUpdate() != 1) {
 					conn.rollback();
 					return false;
@@ -167,14 +171,15 @@ public class BuyOrderDAO {
 
 	// ------------------------------------------------------------------ 조회
 
-	/** 내 주문 개수 */
-	public int countByMember(long memberId) {
+	/** 내 주문 개수 (구매대행 BUY / 배송대행 SHIP 별) */
+	public int countByMember(long memberId, String serviceType) {
 
-		String sql = "SELECT COUNT(*) FROM BUY_ORDER WHERE MEMBER_ID = ?";
+		String sql = "SELECT COUNT(*) FROM BUY_ORDER WHERE MEMBER_ID = ? AND SERVICE_TYPE = ?";
 
 		try (Connection conn = DBmanager.getInstance();
 				PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setLong(1, memberId);
+			pstmt.setString(2, serviceType);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				if (rs.next()) {
 					return rs.getInt(1);
@@ -190,15 +195,15 @@ public class BuyOrderDAO {
 	 * 내 주문 목록 (최신순, 한 페이지에 size 건).
 	 * 오라클은 LIMIT 이 없어서 ROWNUM 을 바깥 SELECT 로 한 번 더 감싸는 방식으로 페이지를 나눈다.
 	 */
-	public List<BuyOrderDTO> listByMember(long memberId, int page, int size) {
+	public List<BuyOrderDTO> listByMember(long memberId, String serviceType, int page, int size) {
 
 		String sql = "SELECT * FROM ("
 				+ " SELECT a.*, ROWNUM RN FROM ("
-				+ "  SELECT o.ORDER_ID, o.ORDER_NO, o.STATUS, o.RECV_NAME_KO, o.TOTAL_QTY, o.TOTAL_YEN, "
+				+ "  SELECT o.ORDER_ID, o.ORDER_NO, o.STATUS, o.RECV_NAME_KO, o.TOTAL_QTY, o.TOTAL_YEN, o.APPLIED_RATE, o.TOTAL_KRW, "
 				+ "   TO_CHAR(o.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_TXT, "
 				+ "   (SELECT COUNT(*) FROM BUY_ORDER_ITEM i WHERE i.ORDER_ID = o.ORDER_ID) AS ITEM_CNT, "
 				+ "   (SELECT i.ITEM_NAME_EN FROM BUY_ORDER_ITEM i WHERE i.ORDER_ID = o.ORDER_ID AND i.ITEM_NO = 1) AS FIRST_ITEM "
-				+ "  FROM BUY_ORDER o WHERE o.MEMBER_ID = ? ORDER BY o.ORDER_ID DESC"
+				+ "  FROM BUY_ORDER o WHERE o.MEMBER_ID = ? AND o.SERVICE_TYPE = ? ORDER BY o.ORDER_ID DESC"
 				+ " ) a WHERE ROWNUM <= ?"
 				+ ") WHERE RN > ?";
 
@@ -207,8 +212,9 @@ public class BuyOrderDAO {
 		try (Connection conn = DBmanager.getInstance();
 				PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setLong(1, memberId);
-			pstmt.setInt(2, page * size);
-			pstmt.setInt(3, (page - 1) * size);
+			pstmt.setString(2, serviceType);
+			pstmt.setInt(3, page * size);
+			pstmt.setInt(4, (page - 1) * size);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				while (rs.next()) {
 					BuyOrderDTO dto = new BuyOrderDTO();
@@ -218,6 +224,8 @@ public class BuyOrderDAO {
 					dto.setRecvNameKo(rs.getString("RECV_NAME_KO"));
 					dto.setTotalQty(rs.getInt("TOTAL_QTY"));
 					dto.setTotalYen(rs.getBigDecimal("TOTAL_YEN"));
+					dto.setAppliedRate(rs.getBigDecimal("APPLIED_RATE"));
+					dto.setTotalKrw(rs.getLong("TOTAL_KRW"));
 					dto.setCreatedAt(rs.getString("CREATED_TXT"));
 					dto.setItemCount(rs.getInt("ITEM_CNT"));
 					dto.setFirstItemName(rs.getString("FIRST_ITEM"));
@@ -235,7 +243,7 @@ public class BuyOrderDAO {
 
 		String orderSql = "SELECT ORDER_ID, ORDER_NO, MEMBER_ID, STATUS, CENTER, RECV_NAME_KO, RECV_NAME_EN, "
 				+ "POSTCODE, ADDR1, ADDR2, BIZ_NO, MOBILE, DELIVER_NOTE, TOTAL_QTY, TOTAL_YEN, ADDON_OPTIONS, "
-				+ "LOGISTICS_NOTE, AUTO_PAY, TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_TXT "
+				+ "LOGISTICS_NOTE, AUTO_PAY, SERVICE_TYPE, APPLIED_RATE, TOTAL_KRW, TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_TXT "
 				+ "FROM BUY_ORDER WHERE ORDER_ID = ?";
 
 		String itemSql = "SELECT ITEM_ID, ITEM_NO, SHOP_SITE, BRAND, SHOP_ORDER_NO, TRACKING_NO, ITEM_NAME_EN, "
@@ -270,6 +278,9 @@ public class BuyOrderDAO {
 						order.setAddonOptions(rs.getString("ADDON_OPTIONS"));
 						order.setLogisticsNote(rs.getString("LOGISTICS_NOTE"));
 						order.setAutoPay("Y".equals(rs.getString("AUTO_PAY")));
+						order.setServiceType(rs.getString("SERVICE_TYPE"));
+						order.setAppliedRate(rs.getBigDecimal("APPLIED_RATE"));
+						order.setTotalKrw(rs.getLong("TOTAL_KRW"));
 						order.setCreatedAt(rs.getString("CREATED_TXT"));
 					}
 				}
@@ -350,6 +361,17 @@ public class BuyOrderDAO {
 				pstmt.addBatch();
 			}
 			pstmt.executeBatch();
+		}
+	}
+
+	/** 적용 환율과 원화 금액을 바인딩한다. 환율 정보가 없었으면 두 칸 모두 NULL */
+	private void bindRate(PreparedStatement pstmt, int rateIdx, int krwIdx, BuyOrderDTO order) throws Exception {
+		if (order.getAppliedRate() == null) {
+			pstmt.setNull(rateIdx, Types.NUMERIC);
+			pstmt.setNull(krwIdx, Types.NUMERIC);
+		} else {
+			pstmt.setBigDecimal(rateIdx, order.getAppliedRate());
+			pstmt.setLong(krwIdx, order.getTotalKrw());
 		}
 	}
 

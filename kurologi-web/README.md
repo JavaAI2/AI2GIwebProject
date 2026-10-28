@@ -34,8 +34,10 @@ Tomcat 확장(Al-rimi.tomcat) — `.vscode/settings.json` 에 설정되어 있�
 | `/` | 홈 (로그인 상자 · 배송센터 · 운송장 조회) | PageServlet |
 | `/service/info_company` · `info_grade` · `weightchart2` · `info_regulation` · `clearance_policy` · `listpass_help` · `manual` | 서비스안내 | PageServlet |
 | `/status/dashboard` · `tracking` · `nodata` · `storage` | 종합현황 | PageServlet |
-| `/buy/order_form` · `stock_order` · `excel_upload` | 구매대행 | PageServlet |
-| `/ship/order_form` · `excel_upload` | 배송대행 | PageServlet |
+| `/buy/order_form` | 구매대행 주문서 (새 주문서 화면) | PageServlet |
+| `/ship/order_form` | 배송대행 신청 (→ `/shiporder/form` 으로 전달) | PageServlet |
+| `/buyorder/*` · `/shiporder/*` | 구매대행 · 배송대행 주문서 저장 · 조회 · 수정 · 삭제 (아래 "구매대행 · 배송대행" 참고) | BuyOrderController |
+| `/uploads/buy/*` | 업로드한 상품 이미지 보기 | UploadFileServlet |
 | `/community/notice` · `qna` · `message` · `deals` · `faq` | 커뮤니티 | PageServlet |
 | `/mypage` | 마이페이지 — 나의 정보 · 사서함 주소(클릭 복사) | MyPageServlet |
 | `/mypage/account` (+`/withdraw`) | 계정관리 — 정보수정 · 탈퇴 | AccountServlet |
@@ -104,6 +106,33 @@ POST 폼에는 CSRF 한 줄을 넣어야 합니다 (없으면 403):
 <input type="hidden" name="_csrf" value="<%= Html.esc(session.getAttribute(Session.CSRF)) %>">
 ```
 
+## 구매대행 · 배송대행 (DB 연동)
+
+두 서비스는 **같은 코드 · 같은 테이블(`BUY_ORDER`, `BUY_ORDER_ITEM`)** 을 쓰고, 주소로만 구분합니다 (`ServiceType`: `/buyorder` = 구매대행 `BUY`, `/shiporder` = 배송대행 `SHIP`).
+주문서 JSP 는 `buy/order_form.jsp` 하나를 두 서비스가 같이 씁니다. (`ship/order_form.jsp` 는 연결만 하는 파일)
+
+| 주소 | 내용 |
+|---|---|
+| `/buyorder/form` · `/shiporder/form` | 주문서 입력 (`?id=` 가 있으면 접수대기 주문 수정, 검사 실패 시 입력값 유지) |
+| `/buyorder/save` · `/shiporder/save` | 저장 · 수정 (POST) |
+| `/buyorder/list` · `/shiporder/list` | 내 주문 목록 (10건씩) |
+| `/buyorder/view` · `/shiporder/view` | 주문 상세 |
+| `/buyorder/delete` · `/shiporder/delete` | 접수대기 주문 삭제 (POST) |
+| `/buyorder/upload` | 상품 이미지 업로드 (Ajax, 5MB 이하 JPG · PNG · GIF · WEBP) |
+
+- **접수대기**: 받는 사람 + 상품명(영문)만 있으면 저장 · 이후 수정 / 삭제 가능
+- **접수신청**: 주소 · 휴대전화 · 트래킹번호 · 해외배송규정 25개 동의 필요 · 이후 수정 불가
+- 파일 흐름: `BuyOrderController` → `BuyOrder*` Command(`service/`) → `BuyOrderDAO` (주문 + 상품은 한 트랜잭션)
+- 이미지 파일은 프로젝트 밖(`사용자폴더/kurologi-upload/buy`)에 저장됩니다. 바꾸려면 `-Dkurologi.upload.dir=경로`
+
+**환율 · 결제 연동**
+- 메인 하단 환율과 주문 금액은 `EXCHANGE_RATE` 테이블의 가장 최근 값을 씁니다. 서버가 하루 한 번 환율을 받아 저장합니다 (`ExchangeRateScheduler` → `ExchangeRateService`).
+- **구매대행** 주문은 저장할 때의 고시환율로 원화 결제 예정 금액을 계산해 주문에 기록하고, **접수신청하면 마이페이지 > 결제관리의 결제 대기건**으로 올라갑니다.
+- **배송대행** 은 상품 금액이 세관 신고용이라 원화 결제 금액 · 결제 대기건을 만들지 않습니다.
+- 결제관리는 아직 메모리 저장이라 서버를 재시작하면 결제 대기건이 사라집니다. (주문은 DB 에 남음)
+
+**SQL 실행 순서** (`sql/`, `ai2gi` 계정): `00_create_user_ai2gi` (계정이 없을 때) → `01_kuro_member` → `02_buy_order` → `04_ship_and_rate`
+
 ## 결제 규칙 (`PaymentService`)
 
 - 금액은 화면 값을 믿지 않고 서버에서 대기건 합계로 다시 계산
@@ -117,6 +146,16 @@ POST 폼에는 CSRF 한 줄을 넣어야 합니다 (없으면 403):
 |---|---|
 | 회원가입 · ID/PW 찾기 | 버튼만 있음 |
 | DB (JDBC/MyBatis) | `repository/*` 인터페이스 구현으로 교체 |
-| 신청서 · 트래킹 · 게시판 기능 | 화면만 JSP — 저장 기능은 BACKEND.md 순서대로 |
+| 트래킹 · 게시판 기능 | 화면만 JSP — 저장 기능은 BACKEND.md 순서대로 |
+| 개인통관고유부호 확인 · 통관품목 검색 · 상품URL 가져오기 · 카드(토스) 결제 | 구현하지 않음 — 화면 버튼은 "준비 중" 알림만 표시 |
 | 종합현황 · 구매대행 · 배송대행 로그인 필수화 | `AuthFilter` urlPatterns 에 추가 |
 | 토스페이먼츠 · 쿠폰 · 이용실적 집계 | `PaymentServlet` · `PaymentService` · `MemberRepository.usageStats` |
+
+## 제거한 기능
+
+| 기능 | 처리 |
+|---|---|
+| 구매대행 · 배송대행 **엑셀등록** | 만들지 않기로 함 — 화면(`excel_upload.jsp`)과 메뉴 링크 삭제 |
+| **재고구매신청등록** | 제외 — 코드 · 화면 · 메뉴 삭제 (`sql/03_stock.sql` 삭제, 만들었다면 `05_drop_stock.sql` 로 테이블 삭제) |
+| **카톡상담** 버튼 | 상단 바 · 홈 · 고객센터 카드에서 삭제 |
+| 홈의 **신청서 자동편집기** | 삭제 — 그 자리에 계좌정보 칸을 옮김 |

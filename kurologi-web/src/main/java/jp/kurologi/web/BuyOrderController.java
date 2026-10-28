@@ -17,9 +17,11 @@ import jp.kurologi.service.BuyOrderInsert;
 import jp.kurologi.service.BuyOrderList;
 import jp.kurologi.service.BuyOrderView;
 import jp.kurologi.service.Command;
+import jp.kurologi.service.ServiceType;
 
 /**
- * /buyorder/* 로 들어오는 구매대행 요청을 받는 컨트롤러
+ * /buyorder/* (구매대행) 와 /shiporder/* (배송대행) 요청을 같이 받는 컨트롤러
+ *   두 서비스는 같은 코드를 쓰고, 어느 주소로 들어왔는지(ServiceType)로만 구분한다.
  *
  *   /buyorder/form     주문서 입력 화면 (GET, id 가 있으면 수정)  -> BuyOrderForm   -> order_form.jsp
  *   /buyorder/save     주문서 저장 / 수정 (POST)                  -> BuyOrderInsert (실패하면 order_form.jsp)
@@ -30,7 +32,7 @@ import jp.kurologi.service.Command;
  *
  * 흐름 : 컨트롤러(주소 판단) -> Command(실제 처리) -> DAO(DB) -> (true 이면) JSP forward
  */
-@WebServlet("/buyorder/*")
+@WebServlet({ "/buyorder/*", "/shiporder/*" })
 @MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 5L * 1024 * 1024, maxRequestSize = 6L * 1024 * 1024)
 public class BuyOrderController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -54,6 +56,9 @@ public class BuyOrderController extends HttpServlet {
 
 		// 파라미터를 읽기 전에 먼저 지정해야 한글이 깨지지 않는다
 		request.setCharacterEncoding("UTF-8");
+
+		// JSP 가 제목 · 링크를 서비스에 맞게 그리도록 알려 준다 (BUY / SHIP)
+		request.setAttribute("svc", ServiceType.of(request));
 
 		String pathInfo = request.getPathInfo();   // /buyorder/save 이면 "/save"
 		if (pathInfo == null) {

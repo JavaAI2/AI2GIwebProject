@@ -2,11 +2,17 @@
     import="jp.kurologi.web.Html,jp.kurologi.model.BuyOrderDTO,jp.kurologi.model.BuyOrderItemDTO,jp.kurologi.service.UploadStore,java.text.DecimalFormat,java.util.List" %>
 <%
     String ctx = request.getContextPath();
-    request.setAttribute("menu", "buy");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
+    // 구매대행(BUY) / 배송대행(SHIP) : 컨트롤러가 request 에 담아 준다.
+    // 주소창에서 /buy/... JSP 를 바로 열면 값이 없으므로 구매대행으로 본다.
+    String svc = (String) request.getAttribute("svc");
+    boolean ship = "SHIP".equals(svc);
+    String base = ship ? "/shiporder" : "/buyorder";   // 이 서비스의 컨트롤러 주소
+    String svcName = ship ? "배송대행" : "구매대행";
+    request.setAttribute("menu", ship ? "ship" : "buy");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
     // 주소창에서 /buy/order_list 로 직접 들어오면 데이터가 없으므로 컨트롤러 주소로 보낸다
     List<BuyOrderDTO> orders = (List<BuyOrderDTO>) request.getAttribute("orders");
     if (orders == null) {
-        response.sendRedirect(ctx + "/buyorder/list");
+        response.sendRedirect(ctx + base + "/list");
         return;
     }
     int curPage = (Integer) request.getAttribute("page");
@@ -19,7 +25,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>구매대행 주문내역 | KURO Logi</title>
+<title><%= ship ? "배송대행 신청내역" : "구매대행 주문내역" %> | KURO Logi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
@@ -529,11 +535,11 @@ a.pager__item:hover { background: var(--orange-bg); }
 <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="top" /></jsp:include>
 <section class="page-head">
   <div class="container page-head__inner">
-    <h1 class="page-head__title">구매대행 주문내역</h1>
+    <h1 class="page-head__title"><%= ship ? "배송대행 신청내역" : "구매대행 주문내역" %></h1>
     <ol class="breadcrumb">
       <li class="breadcrumb__item"><a href="<%= ctx %>/">홈</a></li>
-      <li class="breadcrumb__item"><a href="<%= ctx %>/buy/order_form">구매대행</a></li>
-      <li class="breadcrumb__item is-current">구매대행 주문내역</li>
+      <li class="breadcrumb__item"><a href="<%= ctx %><%= base %>/form"><%= svcName %></a></li>
+      <li class="breadcrumb__item is-current"><%= ship ? "배송대행 신청내역" : "구매대행 주문내역" %></li>
     </ol>
   </div>
 </section>
@@ -543,7 +549,7 @@ a.pager__item:hover { background: var(--orange-bg); }
 <main class="page-body">
   <div class="container">
 
-    <h1 class="sub-title"><span class="sub-title__dash"></span>구매대행 주문내역</h1>
+    <h1 class="sub-title"><span class="sub-title__dash"></span><%= ship ? "배송대행 신청내역" : "구매대행 주문내역" %></h1>
 
     <div class="info-box">
       <p>접수대기 주문은 수정 · 삭제할 수 있고, 접수신청된 주문은 수정할 수 없습니다.</p>
@@ -551,7 +557,7 @@ a.pager__item:hover { background: var(--orange-bg); }
 
     <div class="list-top">
       <span>전체 <strong><%= totalCount %></strong>건</span>
-      <a class="btn btn--navy btn--sm" href="<%= ctx %>/buyorder/form">주문서 작성</a>
+      <a class="btn btn--navy btn--sm" href="<%= ctx %><%= base %>/form"><%= ship ? "배송대행 신청하기" : "주문서 작성" %></a>
     </div>
 
     <table class="data-table">
@@ -562,13 +568,16 @@ a.pager__item:hover { background: var(--orange-bg); }
           <th>상품</th>
           <th>수량</th>
           <th>총 금액(¥)</th>
+<% if (!ship) { %>
+          <th>결제예정(₩)</th>
+<% } %>
           <th>상태</th>
           <th>접수일시</th>
         </tr>
       </thead>
       <tbody>
 <% if (orders.isEmpty()) { %>
-        <tr><td class="data-table__empty" colspan="7">등록한 주문이 없습니다.</td></tr>
+        <tr><td class="data-table__empty" colspan="<%= ship ? 7 : 8 %>"><%= ship ? "등록한 배송대행 신청이 없습니다." : "등록한 주문이 없습니다." %></td></tr>
 <% } %>
 <% for (int i = 0; i < orders.size(); i++) {
        BuyOrderDTO o = orders.get(i);
@@ -577,10 +586,13 @@ a.pager__item:hover { background: var(--orange-bg); }
 %>
         <tr>
           <td class="is-center"><%= rowNo %></td>
-          <td class="is-center"><a href="<%= ctx %>/buyorder/view?id=<%= o.getOrderId() %>"><%= Html.esc(o.getOrderNo()) %></a></td>
+          <td class="is-center"><a href="<%= ctx %><%= base %>/view?id=<%= o.getOrderId() %>"><%= Html.esc(o.getOrderNo()) %></a></td>
           <td class="is-left"><%= Html.esc(o.getFirstItemName()) %><% if (o.getItemCount() > 1) { %> 외 <%= o.getItemCount() - 1 %>건<% } %></td>
           <td class="is-center"><%= o.getTotalQty() %></td>
           <td class="is-right"><%= df.format(o.getTotalYen()) %></td>
+<% if (!ship) { %>
+          <td class="is-right"><%= o.getAppliedRate() == null ? "-" : df.format(o.getTotalKrw()) %></td>
+<% } %>
           <td class="is-center"><span class="state <%= wait ? "state--wait" : "state--submit" %>"><%= wait ? "접수대기" : "접수신청" %></span></td>
           <td class="is-center"><%= Html.esc(o.getCreatedAt()) %></td>
         </tr>
@@ -590,13 +602,13 @@ a.pager__item:hover { background: var(--orange-bg); }
 
     <div class="pager">
 <% if (curPage > 1) { %>
-      <a class="pager__item" href="<%= ctx %>/buyorder/list?page=<%= curPage - 1 %>" aria-label="이전">&lsaquo;</a>
+      <a class="pager__item" href="<%= ctx %><%= base %>/list?page=<%= curPage - 1 %>" aria-label="이전">&lsaquo;</a>
 <% } %>
 <% for (int p = 1; p <= totalPages; p++) { %>
-      <a class="pager__item<%= p == curPage ? " is-active" : "" %>" href="<%= ctx %>/buyorder/list?page=<%= p %>"><%= p %></a>
+      <a class="pager__item<%= p == curPage ? " is-active" : "" %>" href="<%= ctx %><%= base %>/list?page=<%= p %>"><%= p %></a>
 <% } %>
 <% if (curPage < totalPages) { %>
-      <a class="pager__item" href="<%= ctx %>/buyorder/list?page=<%= curPage + 1 %>" aria-label="다음">&rsaquo;</a>
+      <a class="pager__item" href="<%= ctx %><%= base %>/list?page=<%= curPage + 1 %>" aria-label="다음">&rsaquo;</a>
 <% } %>
     </div>
 

@@ -17,6 +17,7 @@ public class BuyOrderDelete implements Command {
 			throws ServletException, IOException {
 
 		String ctx = request.getContextPath();
+		String base = ServiceType.base(ServiceType.of(request));   // 삭제 뒤 돌아갈 목록 주소
 
 		Long memberId = Session.memberId(request);
 		if (memberId == null) {
@@ -26,7 +27,7 @@ public class BuyOrderDelete implements Command {
 		}
 
 		if (!"POST".equalsIgnoreCase(request.getMethod())) {
-			response.sendRedirect(ctx + "/buyorder/list");
+			response.sendRedirect(ctx + base + "/list");
 			return false;
 		}
 
@@ -43,7 +44,7 @@ public class BuyOrderDelete implements Command {
 		} else {
 			Session.flash(request, "error", "삭제할 수 없는 주문입니다. (접수신청된 주문은 삭제할 수 없습니다)");
 		}
-		response.sendRedirect(ctx + "/buyorder/list");
+		response.sendRedirect(ctx + base + "/list");
 		return false;
 	}
 }

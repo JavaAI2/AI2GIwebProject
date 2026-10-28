@@ -179,6 +179,35 @@ public class BuyOrderDTO {
 		this.items = items;
 	}
 
+	// ---- 서비스 구분 · 적용 환율 (04_ship_and_rate.sql 로 추가한 컬럼) ----
+	private String serviceType = "BUY";   // SERVICE_TYPE — BUY 구매대행 / SHIP 배송대행
+	private BigDecimal appliedRate;       // APPLIED_RATE — 적용한 고시환율(원/100엔). 환율 정보가 없었으면 null
+	private long totalKrw;                // TOTAL_KRW — 결제 예정 금액(원)
+
+	public String getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(String serviceType) {
+		this.serviceType = serviceType;
+	}
+
+	public BigDecimal getAppliedRate() {
+		return appliedRate;
+	}
+
+	public void setAppliedRate(BigDecimal appliedRate) {
+		this.appliedRate = appliedRate;
+	}
+
+	public long getTotalKrw() {
+		return totalKrw;
+	}
+
+	public void setTotalKrw(long totalKrw) {
+		this.totalKrw = totalKrw;
+	}
+
 	// ---- 목록 화면 전용 (BUY_ORDER 테이블 컬럼은 아니고, 조회할 때 계산해서 담는 값) ----
 	private int itemCount;          // 상품 개수
 	private String firstItemName;   // 첫 번째 상품명

@@ -47,9 +47,6 @@
     </ul>
     <ul class="topbar__links topbar__links--right">
       <li><a href="#">언어 선택 <i>▾</i></a></li>
-      <li><a class="kakao-btn" href="#"><img src="<%= ctx %>/images/air_kakao.png" alt="카톡상담"></a></li>
-      <li><a class="kakao-btn" href="#"><img src="<%= ctx %>/images/kakao_sea1.png" alt="카톡상담"></a></li>
-      <li><a class="kakao-btn" href="#"><img src="<%= ctx %>/images/kakao_sea2.png" alt="카톡상담"></a></li>
 <%  if (loggedIn) { %>
       <li><span class="topbar__welcome"><strong><%= Html.esc(topName) %></strong>님 환영합니다.</span></li>
       <li><a href="<%= ctx %>/logout">로그아웃</a></li>
@@ -103,15 +100,14 @@
           <a href="<%= ctx %>/buy/order_form">구매대행</a>
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/buy/order_form">주문서등록</a></li>
-            <li><a href="<%= ctx %>/buy/stock_order">재고구매신청등록</a></li>
-            <li><a href="<%= ctx %>/buy/excel_upload">구매대행 엑셀등록</a></li>
+            <li><a href="<%= ctx %>/buyorder/list">구매대행 주문내역</a></li>
           </ul>
         </li>
         <li class="main-nav__item<%= Html.cls("ship".equals(menu), "is-current") %>">
           <a href="<%= ctx %>/ship/order_form">배송대행</a>
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/ship/order_form">주문서등록</a></li>
-            <li><a href="<%= ctx %>/ship/excel_upload">배송대행 엑셀등록</a></li>
+            <li><a href="<%= ctx %>/shiporder/list">배송대행 신청내역</a></li>
           </ul>
         </li>
         <li class="main-nav__item<%= Html.cls("community".equals(menu), "is-current") %>">

@@ -2,8 +2,14 @@
 <%@ page import="jp.kurologi.model.Member" %>
 <%@ page import="jp.kurologi.web.Html" %>
 <%@ page import="jp.kurologi.web.Session" %>
+<%@ page import="jp.kurologi.model.ExchangeRate" %>
+<%@ page import="jp.kurologi.service.ExchangeRateService" %>
 <%
     String ctx = request.getContextPath();
+
+    // 오늘의 환율 (DB 에 저장된 가장 최근 값. 서버가 하루 한 번 자동으로 갱신한다)
+    ExchangeRate rate = ExchangeRateService.current();
+    java.text.DecimalFormat rateFmt = new java.text.DecimalFormat("#,##0.00");
 
     // 홈은 자기만의 헤더 · 푸터를 가진 독립 페이지입니다 (layout.jsp 를 쓰지 않음).
     // PageServlet 이 로그인한 회원이면 member 를, 아이디저장 쿠키가 있으면 savedId 를 넣어 줍니다.
@@ -980,7 +986,6 @@ button { font: inherit; cursor: pointer; }
           <a href="<%= ctx %>/buy/order_form">구매대행</a>
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/buy/order_form">주문서등록</a></li>
-            <li><a href="<%= ctx %>/stock/form">재고구매신청등록</a></li>
             <li><a href="<%= ctx %>/buyorder/list">구매대행 주문내역</a></li>
           </ul>
         </li>
@@ -988,6 +993,7 @@ button { font: inherit; cursor: pointer; }
           <a href="<%= ctx %>/ship/order_form">배송대행</a>
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/ship/order_form">주문서등록</a></li>
+            <li><a href="<%= ctx %>/shiporder/list">배송대행 신청내역</a></li>
           </ul>
         </li>
         <li class="main-nav__item">
@@ -1272,12 +1278,20 @@ button { font: inherit; cursor: pointer; }
           <h4 class="panel-title panel-title--line">환율정보(100엔)</h4>
           <div class="card card--pad">
             <div class="card__body text-center">
-              <p class="text-15">환율 기준일 :  2026.10.03</p>
+<% if (rate != null) { %>
+              <p class="text-15">환율 기준일 :  <%= rate.getRateDate().toString().replace('-', '.') %></p>
               <p class="exchange exchange--main">
-                <img class="exchange__flag" src="<%= ctx %>/images/flag_jp.png" alt="JP"> 고시환율(원)<span class="exchange__value text-red">876.31</span>
+                <img class="exchange__flag" src="<%= ctx %>/images/flag_jp.png" alt="JP"> 고시환율(원)<span class="exchange__value text-red"><%= rateFmt.format(rate.getNoticeRate()) %></span>
               </p>
-              <p class="exchange text-16">기준환율(원)<span class="exchange__value text-blue">854.58</span></p>
-              <p class="exchange text-16">송금환율(원)<span class="exchange__value text-blue">862.95</span></p>
+              <p class="exchange text-16">기준환율(원)<span class="exchange__value text-blue"><%= rateFmt.format(rate.getBaseRate()) %></span></p>
+              <p class="exchange text-16">송금환율(원)<span class="exchange__value text-blue"><%= rateFmt.format(rate.getSendRate()) %></span></p>
+<% if ("SEED".equals(rate.getSource())) { %>
+              <p style="margin-top:6px;font-size:12px;color:#999">※ 초기 입력값입니다. 서버가 오늘 환율을 받으면 자동으로 바뀝니다.</p>
+<% } %>
+<% } else { %>
+              <p class="text-15">환율 정보를 불러오지 못했습니다.</p>
+<% } %>
+              <p style="margin-top:8px;font-size:11px;color:#999"><a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">Rates By Exchange Rate API</a></p>
             </div>
           </div>
         </div>

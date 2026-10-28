@@ -37,6 +37,21 @@ public class PaymentService {
         return payments.findPendingCharges(memberId);
     }
 
+    /**
+     * 결제 대기건을 하나 만든다. 구매대행 · 배송대행 주문이 "접수신청" 될 때 상품대금(원화)을 비용결제 목록에 올리는 데 쓴다.
+     * 금액(amount)은 호출하는 쪽이 접수 시점의 고시환율로 계산해서 넘긴다.
+     */
+    public Charge addCharge(long memberId, String title, String orderNo, long amount) {
+        Charge c = new Charge();
+        c.setMemberId(memberId);
+        c.setTitle(title);
+        c.setOrderNo(orderNo);
+        c.setAmount(amount);
+        c.setCreatedAt(LocalDateTime.now());
+        payments.saveCharge(c);
+        return c;
+    }
+
     public long pendingTotal(long memberId) {
         return pendingCharges(memberId).stream().mapToLong(Charge::getAmount).sum();
     }

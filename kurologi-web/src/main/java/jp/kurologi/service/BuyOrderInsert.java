@@ -14,8 +14,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.model.BuyOrderDTO;
+import jp.kurologi.model.ExchangeRate;
 import jp.kurologi.model.BuyOrderItemDTO;
 import jp.kurologi.repository.BuyOrderDAO;
+import jp.kurologi.web.App;
 import jp.kurologi.web.Session;
 
 /**
@@ -41,10 +43,12 @@ public class BuyOrderInsert implements Command {
 			throws ServletException, IOException {
 
 		String ctx = request.getContextPath();
+		String svc = ServiceType.of(request);   // BUY 구매대행 / SHIP 배송대행 (같은 코드를 두 서비스가 같이 쓴다)
+		String base = ServiceType.base(svc);    // /buyorder 또는 /shiporder
 
 		// 주소창에 직접 들어온 경우(GET)는 주문서 화면으로
 		if (!"POST".equalsIgnoreCase(request.getMethod())) {
-			response.sendRedirect(ctx + "/buyorder/form");
+			response.sendRedirect(ctx + base + "/form");
 			return false;
 		}
 
@@ -64,14 +68,15 @@ public class BuyOrderInsert implements Command {
 		BuyOrderDTO existing = null;
 		if (editId > 0) {
 			existing = dao.findById(editId);
-			if (existing == null || existing.getMemberId() != memberId.longValue()) {
+			if (existing == null || existing.getMemberId() != memberId.longValue()
+					|| !svc.equals(ServiceType.normalize(existing.getServiceType()))) {
 				Session.flash(request, "error", "존재하지 않는 주문입니다.");
-				response.sendRedirect(ctx + "/buyorder/list");
+				response.sendRedirect(ctx + base + "/list");
 				return false;
 			}
 			if (!"WAIT".equals(existing.getStatus())) {
 				Session.flash(request, "error", "접수신청된 주문은 수정할 수 없습니다.");
-				response.sendRedirect(ctx + "/buyorder/view?id=" + editId);
+				response.sendRedirect(ctx + base + "/view?id=" + editId);
 				return false;
 			}
 		}
@@ -79,6 +84,7 @@ public class BuyOrderInsert implements Command {
 		// ---- 화면에서 넘어온 값 읽기 (숫자가 이상해도 멈추지 않고 읽은 뒤 아래에서 검사) ----
 		String[] parseError = new String[1];
 		BuyOrderDTO order = readOrder(request, memberId, submit, parseError);
+		order.setServiceType(svc);
 		if (existing != null) {
 			order.setOrderId(existing.getOrderId());
 			order.setOrderNo(existing.getOrderNo());
@@ -87,6 +93,17 @@ public class BuyOrderInsert implements Command {
 		String error = (parseError[0] != null) ? parseError[0] : validate(request, order, submit);
 		if (error != null) {
 			return fail(request, order, error);
+		}
+
+		// ---- 오늘의 환율 적용 (구매대행만) ----
+		// 구매대행은 상품값도 우리가 대신 결제하므로, 저장하는 시점의 고시환율로 결제 예정 금액(원)을 계산해 함께 저장한다.
+		// 배송대행은 고객이 쇼핑몰에 이미 상품값을 냈고 상품 금액은 세관 신고용일 뿐이라 원화 결제 금액을 만들지 않는다.
+		// 접수대기 주문을 다시 저장하면 그 날의 환율로 다시 계산되고, 접수신청된 주문은 수정할 수 없어서 그 시점의 환율로 확정된다.
+		// 환율 정보가 아직 없으면(DB 에 한 번도 저장된 적이 없음) 원화 금액 없이 저장한다.
+		ExchangeRate rate = ExchangeRateService.current();
+		if (rate != null && ServiceType.BUY.equals(svc)) {
+			order.setAppliedRate(rate.getNoticeRate());
+			order.setTotalKrw(rate.toKrw(order.getTotalYen()));
 		}
 
 		// ---- DB 저장 ----
@@ -99,7 +116,7 @@ public class BuyOrderInsert implements Command {
 				return fail(request, order, "주문서 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
 			}
 			order.setOrderId(orderId);
-			order.setOrderNo("B" + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE)
+			order.setOrderNo((ServiceType.SHIP.equals(svc) ? "D" : "B") + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE)
 					+ "-" + String.format("%05d", orderId));
 			ok = dao.insert(order);
 		}
@@ -107,8 +124,21 @@ public class BuyOrderInsert implements Command {
 			return fail(request, order, "주문서 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
 		}
 
-		Session.flash(request, "info", (submit ? "접수신청" : "접수대기") + "으로 저장했습니다. 주문번호 : " + order.getOrderNo());
-		response.sendRedirect(ctx + "/buyorder/view?id=" + order.getOrderId());
+		// 접수신청이면 상품대금(원화)을 마이페이지 > 결제관리 > 비용결제 목록에 결제 대기건으로 올린다.
+		// 금액은 위에서 계산한 "접수 시점 고시환율" 기준이라, 이후 환율이 바뀌어도 이 주문의 결제 금액은 변하지 않는다.
+		boolean charged = false;
+		if (submit && order.getAppliedRate() != null && order.getTotalKrw() > 0) {
+			App app = App.of(request.getServletContext());
+			if (app != null) {
+				String title = ServiceType.label(svc) + " 상품대금 (고시환율 100엔=" + order.getAppliedRate().toPlainString() + "원 적용)";
+				app.payments.addCharge(memberId, title, order.getOrderNo(), order.getTotalKrw());
+				charged = true;
+			}
+		}
+
+		Session.flash(request, "info", (submit ? "접수신청" : "접수대기") + "으로 저장했습니다. 주문번호 : " + order.getOrderNo()
+				+ (charged ? " (결제 금액 ₩" + String.format("%,d", order.getTotalKrw()) + " 은 마이페이지 > 결제관리에서 결제할 수 있습니다)" : ""));
+		response.sendRedirect(ctx + base + "/view?id=" + order.getOrderId());
 		return false;
 	}
 

@@ -28,8 +28,9 @@ public class BuyOrderList implements Command {
 		}
 
 		BuyOrderDAO dao = new BuyOrderDAO();
+		String svc = ServiceType.of(request);   // 구매대행 / 배송대행 중 요청한 쪽의 주문만 보여 준다
 
-		int totalCount = dao.countByMember(memberId);
+		int totalCount = dao.countByMember(memberId, svc);
 		int totalPages = Math.max(1, (totalCount + PAGE_SIZE - 1) / PAGE_SIZE);
 
 		int page = 1;
@@ -40,8 +41,9 @@ public class BuyOrderList implements Command {
 		}
 		page = Math.max(1, Math.min(page, totalPages));   // 범위를 벗어나면 맞춰 준다
 
-		List<BuyOrderDTO> orders = dao.listByMember(memberId, page, PAGE_SIZE);
+		List<BuyOrderDTO> orders = dao.listByMember(memberId, svc, page, PAGE_SIZE);
 
+		request.setAttribute("svc", svc);
 		request.setAttribute("orders", orders);
 		request.setAttribute("page", page);
 		request.setAttribute("totalPages", totalPages);

@@ -22,6 +22,7 @@ public class BuyOrderForm implements Command {
 			throws ServletException, IOException {
 
 		String ctx = request.getContextPath();
+		String svc = ServiceType.of(request);
 		String idParam = request.getParameter("id");
 
 		if (idParam == null || idParam.trim().isEmpty()) {
@@ -45,12 +46,16 @@ public class BuyOrderForm implements Command {
 		BuyOrderDTO order = (id > 0) ? new BuyOrderDAO().findById(id) : null;
 		if (order == null || order.getMemberId() != memberId.longValue()) {
 			Session.flash(request, "error", "존재하지 않는 주문입니다.");
-			response.sendRedirect(ctx + "/buyorder/list");
+			response.sendRedirect(ctx + ServiceType.base(svc) + "/list");
 			return false;
 		}
 		if (!"WAIT".equals(order.getStatus())) {
 			Session.flash(request, "error", "접수신청된 주문은 수정할 수 없습니다.");
-			response.sendRedirect(ctx + "/buyorder/view?id=" + id);
+			response.sendRedirect(ctx + ServiceType.base(ServiceType.normalize(order.getServiceType())) + "/view?id=" + id);
+			return false;
+		}
+		if (!svc.equals(ServiceType.normalize(order.getServiceType()))) {   // 서비스가 다른 주소로 열었으면 맞는 주소로
+			response.sendRedirect(ctx + ServiceType.base(ServiceType.normalize(order.getServiceType())) + "/form?id=" + id);
 			return false;
 		}
 
