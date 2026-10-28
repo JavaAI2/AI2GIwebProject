@@ -1002,7 +1002,6 @@ button { font: inherit; cursor: pointer; }
             <li><a href="<%= ctx %>/community/notice">공지사항</a></li>
             <li><a href="<%= ctx %>/community/qna">1:1게시판</a></li>
             <li><a href="<%= ctx %>/community/message">알림메세지</a></li>
-            <li><a href="<%= ctx %>/community/deals">특가제품안내</a></li>
             <li><a href="<%= ctx %>/community/faq">자주묻는 질문</a></li>
           </ul>
         </li>

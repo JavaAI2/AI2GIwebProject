@@ -36,7 +36,7 @@ public class AdminDAO {
 
 	/**
 	 * 관리자 첫 화면의 현황 숫자 (한 번의 조회로 모두 가져온다). 실패하면 빈 Map
-	 *   QNA_WAIT 답변 대기 문의 / QNA_ALL 전체 문의 / NOTICE_CNT 공지 / FAQ_CNT FAQ / DEAL_CNT 특가 / MSG_CNT 알림 발송 누적
+	 *   QNA_WAIT 답변 대기 문의 / QNA_ALL 전체 문의 / NOTICE_CNT 공지 / FAQ_CNT FAQ / MSG_CNT 알림 발송 누적
 	 */
 	public Map<String, Integer> summary() {
 
@@ -45,7 +45,6 @@ public class AdminDAO {
 				+ "(SELECT COUNT(*) FROM COMMUNITY_POST WHERE BOARD_TYPE = 'QNA') AS QNA_ALL, "
 				+ "(SELECT COUNT(*) FROM COMMUNITY_POST WHERE BOARD_TYPE = 'NOTICE') AS NOTICE_CNT, "
 				+ "(SELECT COUNT(*) FROM COMMUNITY_FAQ) AS FAQ_CNT, "
-				+ "(SELECT COUNT(*) FROM COMMUNITY_DEAL) AS DEAL_CNT, "
 				+ "(SELECT COUNT(*) FROM COMMUNITY_MESSAGE) AS MSG_CNT "
 				+ "FROM DUAL";
 
@@ -54,7 +53,7 @@ public class AdminDAO {
 				PreparedStatement pstmt = conn.prepareStatement(sql);
 				ResultSet rs = pstmt.executeQuery()) {
 			if (rs.next()) {
-				for (String key : new String[] { "QNA_WAIT", "QNA_ALL", "NOTICE_CNT", "FAQ_CNT", "DEAL_CNT", "MSG_CNT" }) {
+				for (String key : new String[] { "QNA_WAIT", "QNA_ALL", "NOTICE_CNT", "FAQ_CNT", "MSG_CNT" }) {
 					stats.put(key, rs.getInt(key));
 				}
 			}

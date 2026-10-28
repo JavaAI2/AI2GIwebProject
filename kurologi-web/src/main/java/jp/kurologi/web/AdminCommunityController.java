@@ -10,6 +10,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.service.AdminHome;
+import jp.kurologi.service.AdminFaqDelete;
+import jp.kurologi.service.AdminFaqList;
+import jp.kurologi.service.AdminFaqUpdate;
+import jp.kurologi.service.AdminFaqVisible;
+import jp.kurologi.service.AdminFaqWrite;
+import jp.kurologi.service.AdminNoticeDelete;
+import jp.kurologi.service.AdminNoticeList;
+import jp.kurologi.service.AdminNoticeUpdate;
+import jp.kurologi.service.AdminNoticeWrite;
 import jp.kurologi.service.AdminQnaAnswer;
 import jp.kurologi.service.AdminQnaList;
 import jp.kurologi.service.Command;
@@ -21,7 +30,16 @@ import jp.kurologi.service.Command;
  *   /admin/community               현황 (답변 대기 문의 수 등)
  *   /admin/community/qna           1:1 문의 목록 (전체 회원)
  *   /admin/community/qna/answer    문의 보기 + 답변 등록 (GET 화면 / POST 저장)
- *   (이후 단계에서 공지, FAQ, 특가, 알림 발송 주소를 이 switch 에 하나씩 추가한다)
+ *   /admin/community/notice        공지사항 목록 (관리)
+ *   /admin/community/notice/write  공지 등록 (GET 폼 / POST 저장)
+ *   /admin/community/notice/update 공지 수정 (GET 폼 / POST 저장)
+ *   /admin/community/notice/delete 공지 삭제 (POST)
+ *   /admin/community/faq           자주묻는 질문 목록 (관리)
+ *   /admin/community/faq/write     FAQ 등록 (GET 폼 / POST 저장)
+ *   /admin/community/faq/update    FAQ 수정 (GET 폼 / POST 저장)
+ *   /admin/community/faq/visible   FAQ 노출 / 숨김 바꾸기 (POST)
+ *   /admin/community/faq/delete    FAQ 삭제 (POST)
+ *   (이후 단계에서 특가, 알림 발송 주소를 이 switch 에 하나씩 추가한다)
  *
  * 흐름은 CommunityController 와 같다 : 컨트롤러 -> Command(서비스) -> DAO,
  * Command 가 true 를 돌려주면 JSP 로 forward, false 면 이미 응답(redirect 등)을 끝낸 것.
@@ -74,6 +92,44 @@ public class AdminCommunityController extends HttpServlet {
 		case "/admin/community/qna/answer":
 			command = new AdminQnaAnswer();
 			page = "qna_answer.jsp";
+			break;
+
+		case "/admin/community/notice":
+			command = new AdminNoticeList();
+			page = "notice_list.jsp";
+			break;
+		case "/admin/community/notice/write":
+			command = new AdminNoticeWrite();
+			page = "notice_form.jsp";
+			break;
+		case "/admin/community/notice/update":
+			command = new AdminNoticeUpdate();
+			page = "notice_form.jsp";   // 등록 폼을 같이 쓴다 (post 값이 있으면 수정 화면)
+			break;
+		case "/admin/community/notice/delete":
+			command = new AdminNoticeDelete();
+			postOnly = true;
+			break;
+
+		case "/admin/community/faq":
+			command = new AdminFaqList();
+			page = "faq_list.jsp";
+			break;
+		case "/admin/community/faq/write":
+			command = new AdminFaqWrite();
+			page = "faq_form.jsp";
+			break;
+		case "/admin/community/faq/update":
+			command = new AdminFaqUpdate();
+			page = "faq_form.jsp";   // 등록 폼을 같이 쓴다 (faqId 가 0 보다 크면 수정 화면)
+			break;
+		case "/admin/community/faq/visible":
+			command = new AdminFaqVisible();
+			postOnly = true;
+			break;
+		case "/admin/community/faq/delete":
+			command = new AdminFaqDelete();
+			postOnly = true;
 			break;
 
 		default:

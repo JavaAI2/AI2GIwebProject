@@ -525,6 +525,8 @@ a.admin-stat:hover { border-color: var(--orange); }
 .admin-stat--alert .admin-stat__value { color: var(--orange); }
 
 .filter-row { display: flex; gap: 6px; margin: 0 0 14px; }
+.inline-form { display: inline; margin: 0; }
+.row-actions { white-space: nowrap; }
 
 .view-box { margin-bottom: 8px; border-top: 2px solid var(--ink); }
 .view-title { margin: 0; padding: 16px 14px; font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--line); }
@@ -580,18 +582,14 @@ a.admin-stat:hover { border-color: var(--orange); }
         <p class="admin-stat__label">전체 1:1 문의</p>
         <p class="admin-stat__value"><%= Html.num(stats.getOrDefault("QNA_ALL", 0)) %></p>
       </a>
-      <div class="admin-stat">
+      <a class="admin-stat" href="<%= ctx %>/admin/community/notice">
         <p class="admin-stat__label">공지사항</p>
         <p class="admin-stat__value"><%= Html.num(stats.getOrDefault("NOTICE_CNT", 0)) %></p>
-      </div>
-      <div class="admin-stat">
+      </a>
+      <a class="admin-stat" href="<%= ctx %>/admin/community/faq">
         <p class="admin-stat__label">자주묻는 질문</p>
         <p class="admin-stat__value"><%= Html.num(stats.getOrDefault("FAQ_CNT", 0)) %></p>
-      </div>
-      <div class="admin-stat">
-        <p class="admin-stat__label">특가제품</p>
-        <p class="admin-stat__value"><%= Html.num(stats.getOrDefault("DEAL_CNT", 0)) %></p>
-      </div>
+      </a>
       <div class="admin-stat">
         <p class="admin-stat__label">발송된 알림(누적)</p>
         <p class="admin-stat__value"><%= Html.num(stats.getOrDefault("MSG_CNT", 0)) %></p>

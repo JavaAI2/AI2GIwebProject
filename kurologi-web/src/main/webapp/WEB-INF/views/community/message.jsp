@@ -532,6 +532,9 @@ textarea.input { min-height: 240px; line-height: 1.7; resize: vertical; }
 .faq-table summary::before { content: '› '; color: var(--orange); }
 .faq-table summary:hover { color: var(--teal); }
 .faq-a { margin: 8px 0 4px 12px; padding: 12px 14px; font-size: 13px; line-height: 1.8; color: var(--ink); white-space: pre-line; background: var(--fill); border-radius: var(--radius); }
+
+/* 알림메세지 : [선택 확인 / 선택 삭제] 버튼과 아래 페이지 번호 사이를 띄운다 */
+.pager { margin-top: 44px; }
 </style>
 </head>
 <body>
