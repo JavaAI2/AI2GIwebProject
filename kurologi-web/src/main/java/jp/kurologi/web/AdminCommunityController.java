@@ -10,14 +10,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.service.AdminHome;
+import jp.kurologi.service.AdminQnaAnswer;
+import jp.kurologi.service.AdminQnaList;
 import jp.kurologi.service.Command;
 
 /**
  * 관리자용 커뮤니티 관리 화면을 받는 컨트롤러 (/admin/community/*)
  * 관리자만 들어올 수 있게 AdminFilter 가 앞에서 막아 준다.
  *
- *   /admin/community        현황 (답변 대기 문의 수 등)
- *   (이후 단계에서 1:1 문의 답변, 공지, FAQ, 특가, 알림 발송 주소를 이 switch 에 하나씩 추가한다)
+ *   /admin/community               현황 (답변 대기 문의 수 등)
+ *   /admin/community/qna           1:1 문의 목록 (전체 회원)
+ *   /admin/community/qna/answer    문의 보기 + 답변 등록 (GET 화면 / POST 저장)
+ *   (이후 단계에서 공지, FAQ, 특가, 알림 발송 주소를 이 switch 에 하나씩 추가한다)
  *
  * 흐름은 CommunityController 와 같다 : 컨트롤러 -> Command(서비스) -> DAO,
  * Command 가 true 를 돌려주면 JSP 로 forward, false 면 이미 응답(redirect 등)을 끝낸 것.
@@ -61,6 +65,15 @@ public class AdminCommunityController extends HttpServlet {
 		case "/admin/community":
 			command = new AdminHome();
 			page = "community_home.jsp";
+			break;
+
+		case "/admin/community/qna":
+			command = new AdminQnaList();
+			page = "qna_list.jsp";
+			break;
+		case "/admin/community/qna/answer":
+			command = new AdminQnaAnswer();
+			page = "qna_answer.jsp";
 			break;
 
 		default:
