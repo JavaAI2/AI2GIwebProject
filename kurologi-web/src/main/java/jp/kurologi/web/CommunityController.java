@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.service.Command;
-import jp.kurologi.service.DealList;
 import jp.kurologi.service.FaqList;
 import jp.kurologi.service.MessageDelete;
 import jp.kurologi.service.MessageList;
@@ -24,7 +23,7 @@ import jp.kurologi.service.QnaView;
 import jp.kurologi.service.QnaWrite;
 
 /**
- * 커뮤니티 5개 화면(공지사항 · 1:1게시판 · 알림메세지 · 특가제품 · FAQ)을 받는 컨트롤러
+ * 커뮤니티 4개 화면(공지사항 · 1:1게시판 · 알림메세지 · FAQ)을 받는 컨트롤러
  *
  *   /community/notice            공지 목록          /community/notice/view?id=   공지 상세
  *   /community/qna               내 문의 목록 *     /community/qna/view?id=      문의 상세 *
@@ -32,19 +31,19 @@ import jp.kurologi.service.QnaWrite;
  *   /community/qna/update?id=    문의 수정(GET 폼 / POST 저장) *
  *   /community/qna/delete        문의 삭제(POST) *
  *   /community/message           알림 목록 *        /community/message/read, /delete  선택 알림 확인/삭제(POST) *
- *   /community/deals             특가제품           /community/faq               자주묻는 질문
+ *   /community/faq               자주묻는 질문
  *                                                   (* = 로그인한 회원만)
  *
  * 흐름 : 컨트롤러(주소 판단) -> Command(서비스, 실제 처리) -> DAO(DB)
  *        Command 가 true 를 돌려주면 JSP 로 forward, false 면 이미 응답(redirect 등)을 끝낸 것
  *
  * 주소 규칙 : PageServlet 이 /community/* 전체를 받고 있어서 같은 주소를 쓰면 서버가 시작되지 않는다.
- *            그래서 /community/notice/* 처럼 더 구체적인 주소 5개만 이 컨트롤러가 받는다
+ *            그래서 /community/notice/* 처럼 더 구체적인 주소 4개만 이 컨트롤러가 받는다
  *            (서블릿은 더 구체적인 주소가 우선이라 PageServlet 은 고치지 않아도 된다).
  */
 @WebServlet(urlPatterns = {
 		"/community/notice/*", "/community/qna/*", "/community/message/*",
-		"/community/deals/*", "/community/faq/*" })
+		"/community/faq/*" })
 public class CommunityController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -130,11 +129,6 @@ public class CommunityController extends HttpServlet {
 		case "/community/message/delete":
 			command = new MessageDelete();
 			postOnly = true;
-			break;
-
-		case "/community/deals":
-			command = new DealList();
-			page = "deals.jsp";
 			break;
 
 		case "/community/faq":

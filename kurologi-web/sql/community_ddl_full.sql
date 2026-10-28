@@ -6,7 +6,7 @@
 --   * 전제: KURO_MEMBER 테이블이 먼저 만들어져 있어야 합니다 (회원 연결 FK).
 --   * DROP 문장은 없습니다. 문장을 하나씩 선택해서 실행하세요 (SQL Developer: Ctrl+Enter).
 --
--- 만들어지는 것: 시퀀스 5개, 테이블 5개 (글 / 댓글 / 알림 / 특가 / FAQ)
+-- 만들어지는 것: 시퀀스 4개, 테이블 4개 (글 / 댓글 / 알림 / FAQ)
 -- =====================================================================
 
 
@@ -16,7 +16,6 @@
 CREATE SEQUENCE SEQ_COMMUNITY_POST    START WITH 1 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE SEQ_COMMUNITY_COMMENT START WITH 1 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE SEQ_COMMUNITY_MESSAGE START WITH 1 INCREMENT BY 1 NOCACHE;
-CREATE SEQUENCE SEQ_COMMUNITY_DEAL    START WITH 1 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE SEQ_COMMUNITY_FAQ     START WITH 1 INCREMENT BY 1 NOCACHE;
 
 
@@ -87,24 +86,7 @@ CREATE INDEX IDX_MESSAGE_MEMBER ON COMMUNITY_MESSAGE (MEMBER_ID, MESSAGE_ID);
 
 
 -- ---------------------------------------------------------------------
--- [5] 특가제품
--- ---------------------------------------------------------------------
-CREATE TABLE COMMUNITY_DEAL (
-    DEAL_ID     NUMBER               CONSTRAINT PK_COMMUNITY_DEAL PRIMARY KEY,
-    NAME        VARCHAR2(200 CHAR)   NOT NULL,
-    PRICE_JPY   NUMBER(10)           DEFAULT 0 NOT NULL,       -- 가격 (엔)
-    MIN_QTY     NUMBER(5)            DEFAULT 1 NOT NULL,       -- 최소 주문 수량
-    IMAGE_PATH  VARCHAR2(300),                                 -- 이미지 경로 (없으면 기본 아이콘)
-    VISIBLE_YN  CHAR(1)              DEFAULT 'Y' NOT NULL,
-    CREATED_AT  DATE                 DEFAULT SYSDATE NOT NULL,
-    CONSTRAINT CK_DEAL_PRICE   CHECK (PRICE_JPY >= 0),
-    CONSTRAINT CK_DEAL_QTY     CHECK (MIN_QTY >= 1),
-    CONSTRAINT CK_DEAL_VISIBLE CHECK (VISIBLE_YN IN ('Y', 'N'))
-);
-
-
--- ---------------------------------------------------------------------
--- [6] 자주묻는 질문
+-- [5] 자주묻는 질문
 -- ---------------------------------------------------------------------
 CREATE TABLE COMMUNITY_FAQ (
     FAQ_ID      NUMBER               CONSTRAINT PK_COMMUNITY_FAQ PRIMARY KEY,
@@ -119,10 +101,10 @@ CREATE TABLE COMMUNITY_FAQ (
 
 
 -- ---------------------------------------------------------------------
--- [7] 설치 확인 : 테이블 5개 + 시퀀스 5개가 나와야 합니다
+-- [6] 설치 확인 : 테이블 4개 + 시퀀스 4개가 나와야 합니다
 -- ---------------------------------------------------------------------
 SELECT 'TABLE' AS KIND, TABLE_NAME AS NAME FROM USER_TABLES
- WHERE TABLE_NAME IN ('COMMUNITY_POST', 'COMMUNITY_COMMENT', 'COMMUNITY_MESSAGE', 'COMMUNITY_DEAL', 'COMMUNITY_FAQ')
+ WHERE TABLE_NAME IN ('COMMUNITY_POST', 'COMMUNITY_COMMENT', 'COMMUNITY_MESSAGE', 'COMMUNITY_FAQ')
 UNION ALL
 SELECT 'SEQUENCE', SEQUENCE_NAME FROM USER_SEQUENCES
- WHERE SEQUENCE_NAME IN ('SEQ_COMMUNITY_POST', 'SEQ_COMMUNITY_COMMENT', 'SEQ_COMMUNITY_MESSAGE', 'SEQ_COMMUNITY_DEAL', 'SEQ_COMMUNITY_FAQ');
+ WHERE SEQUENCE_NAME IN ('SEQ_COMMUNITY_POST', 'SEQ_COMMUNITY_COMMENT', 'SEQ_COMMUNITY_MESSAGE', 'SEQ_COMMUNITY_FAQ');

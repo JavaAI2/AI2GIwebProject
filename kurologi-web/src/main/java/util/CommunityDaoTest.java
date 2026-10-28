@@ -2,10 +2,8 @@ package util;
 
 import java.util.List;
 
-import jp.kurologi.model.DealDTO;
 import jp.kurologi.model.FaqDTO;
 import jp.kurologi.model.PostDTO;
-import jp.kurologi.repository.DealDAO;
 import jp.kurologi.repository.FaqDAO;
 import jp.kurologi.repository.PostDAO;
 
@@ -44,13 +42,6 @@ public class CommunityDaoTest {
 		System.out.println("[FAQ] 개수 = " + faqs.size());
 		for (FaqDTO f : faqs) {
 			System.out.println("  " + f.getCategory() + " | " + f.getQuestion());
-		}
-
-		// 5. 특가제품
-		DealDAO dealDao = new DealDAO();
-		System.out.println("[특가] 개수 = " + dealDao.selectCount());
-		for (DealDTO d : dealDao.selectList(1, 10)) {
-			System.out.println("  " + d.getName() + " | ¥" + d.getPriceJpy() + " | 최소 " + d.getMinQty());
 		}
 	}
 }

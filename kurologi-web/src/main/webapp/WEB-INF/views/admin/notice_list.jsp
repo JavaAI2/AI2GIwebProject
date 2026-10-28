@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.*, jp.kurologi.model.Page, jp.kurologi.model.DealDTO, jp.kurologi.web.Html" %>
+<%@ page import="java.util.*, jp.kurologi.model.Page, jp.kurologi.model.PostDTO, jp.kurologi.web.Html, jp.kurologi.web.Session" %>
 <%
     String ctx = request.getContextPath();
     request.setAttribute("menu", "community");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
@@ -9,12 +9,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>특가제품안내 | KURO Logi</title>
+<title>공지사항 관리 | KURO Logi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-/* inlined from deals.css */
+/* inlined from notice.css */
 /* ==========================================================================
    KURO Logi — 종합현황 (마이페이지 대시보드)
 
@@ -457,35 +457,6 @@ a:hover { color: var(--teal); }
 }
 .form-table td.is-readonly { color: var(--ink); }
 
-.deal-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.deal-card {
-  padding: 16px;
-  text-align: center;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-
-.deal-card__thumb {
-  height: 140px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 12px;
-  font-size: 34px;
-  color: #c9c9c9;
-  background: var(--fill);
-}
-
-.deal-card__name { margin: 0 0 6px; font-size: 14px; color: var(--ink); }
-.deal-card__price { margin: 0 0 4px; font-size: 16px; font-weight: 700; color: var(--orange); }
-.deal-card__meta { margin: 0 0 12px; font-size: 12px; color: var(--muted); }
-
 /* --------------------------------------------------------------- 푸터 */
 
 .site-footer { margin-top: 10px; background: #333; color: #ccc; }
@@ -520,7 +491,7 @@ a:hover { color: var(--teal); }
   background: rgba(0, 0, 0, .2);
 }
 
-/* --------------------------------------------------------------- DB 연결하면서 추가한 스타일 */
+/* --------------------------------------------------------------- 관리자 화면에서 추가한 스타일 */
 .flash {
   margin: 0 0 16px;
   padding: 12px 16px;
@@ -532,35 +503,41 @@ a:hover { color: var(--teal); }
 }
 .flash--error { color: #8a1f11; background: #fdecea; border-color: #f5c6cb; }
 .field-error { margin: 6px 0 0; font-size: 12px; color: var(--red); }
-
 .state--wait { color: var(--muted); border: 1px solid #cfcfcf; }
 a.pager__item { text-decoration: none; }
 .pager__item.is-active { color: #fff; background: var(--orange); }
 a.btn { text-decoration: none; }
 a.btn:hover { color: #fff; }
 .btn-row form { margin: 0; }
-textarea.input { min-height: 240px; line-height: 1.7; resize: vertical; }
+textarea.input { min-height: 200px; line-height: 1.7; resize: vertical; }
+
+.admin-tabs { display: flex; gap: 4px; margin: 0 0 22px; padding: 0; list-style: none; border-bottom: 2px solid var(--ink); }
+.admin-tabs a { display: block; padding: 10px 18px; font-size: 14px; color: var(--body); text-decoration: none; background: var(--fill); border: 1px solid var(--line); border-bottom: 0; }
+.admin-tabs a:hover { color: var(--ink); background: #ececec; }
+.admin-tabs a.is-current { color: #fff; background: var(--ink); border-color: var(--ink); }
+
+.admin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 30px; }
+.admin-stat { display: block; padding: 22px 16px; text-align: center; text-decoration: none; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+a.admin-stat:hover { border-color: var(--orange); }
+.admin-stat__label { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.admin-stat__value { margin: 0; font-size: 30px; font-weight: 700; color: var(--ink); }
+.admin-stat--alert { border-color: var(--orange); background: var(--orange-bg); }
+.admin-stat--alert .admin-stat__value { color: var(--orange); }
+
+.filter-row { display: flex; gap: 6px; margin: 0 0 14px; }
+.inline-form { display: inline; margin: 0; }
+.row-actions { white-space: nowrap; }
 
 .view-box { margin-bottom: 8px; border-top: 2px solid var(--ink); }
 .view-title { margin: 0; padding: 16px 14px; font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--line); }
 .view-meta { margin: 0; padding: 10px 14px; font-size: 12px; color: var(--muted); background: var(--fill); border-bottom: 1px solid var(--line); }
 .view-meta span + span::before { content: '|'; margin: 0 10px; color: #ccc; }
-.view-content { padding: 22px 14px; min-height: 160px; font-size: 14px; line-height: 1.9; color: var(--ink); border-bottom: 1px solid var(--line); word-break: break-word; }
+.view-content { padding: 22px 14px; min-height: 120px; font-size: 14px; line-height: 1.9; color: var(--ink); border-bottom: 1px solid var(--line); word-break: break-word; }
 
-.answer-box { margin-top: 24px; border: 1px solid var(--orange); border-radius: var(--radius); }
+.answer-box { margin-top: 20px; border: 1px solid var(--orange); border-radius: var(--radius); }
 .answer-box__head { padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--orange); background: var(--orange-bg); }
 .answer-box__body { padding: 16px 14px; font-size: 14px; line-height: 1.8; color: var(--ink); word-break: break-word; }
 .answer-box__meta { margin-top: 8px; font-size: 12px; color: var(--muted); }
-
-.deal-card__thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-.faq-table li { padding: 5px 0; text-indent: 0; }
-.faq-table li::before { content: none; }
-.faq-table summary { cursor: pointer; list-style: none; color: var(--body); }
-.faq-table summary::-webkit-details-marker { display: none; }
-.faq-table summary::before { content: '› '; color: var(--orange); }
-.faq-table summary:hover { color: var(--teal); }
-.faq-a { margin: 8px 0 4px 12px; padding: 12px 14px; font-size: 13px; line-height: 1.8; color: var(--ink); white-space: pre-line; background: var(--fill); border-radius: var(--radius); }
 </style>
 </head>
 <body>
@@ -568,11 +545,12 @@ textarea.input { min-height: 240px; line-height: 1.7; resize: vertical; }
 <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="top" /></jsp:include>
 <section class="page-head">
   <div class="container page-head__inner">
-    <h1 class="page-head__title">특가제품안내</h1>
+    <h1 class="page-head__title">공지사항 관리</h1>
     <ol class="breadcrumb">
       <li class="breadcrumb__item"><a href="<%= ctx %>/">홈</a></li>
-      <li class="breadcrumb__item"><a href="<%= ctx %>/community/notice">커뮤니티</a></li>
-      <li class="breadcrumb__item is-current">특가제품안내</li>
+      <li class="breadcrumb__item">관리자</li>
+      <li class="breadcrumb__item"><a href="<%= ctx %>/admin/community">커뮤니티 관리</a></li>
+      <li class="breadcrumb__item is-current">공지사항</li>
     </ol>
   </div>
 </section>
@@ -582,36 +560,70 @@ textarea.input { min-height: 240px; line-height: 1.7; resize: vertical; }
   <div class="container">
 
 <%
-    Page<DealDTO> pg = (Page<DealDTO>) request.getAttribute("pageData");
-    List<DealDTO> items = (pg == null) ? new ArrayList<DealDTO>() : pg.getItems();
-    request.setAttribute("pagerBase", ctx + "/community/deals");
+    Page<PostDTO> pg = (Page<PostDTO>) request.getAttribute("pageData");
+    List<PostDTO> items = (pg == null) ? new ArrayList<PostDTO>() : pg.getItems();
+    String searchType = (String) request.getAttribute("searchType");
+    String keyword = (String) request.getAttribute("keyword");
+    if (searchType == null) searchType = "all";
+    if (keyword == null) keyword = "";
+    int curPage = (pg == null) ? 1 : pg.getPage();
+    long rowNo = (pg == null) ? 0 : pg.getTotalCount() - (long) (pg.getPage() - 1) * pg.size();
+
+    String listBase = ctx + "/admin/community/notice";
+    request.setAttribute("pagerBase", listBase
+            + (keyword.isEmpty() ? "" : "?searchType=" + Html.url(searchType) + "&keyword=" + Html.url(keyword)));
 %>
     <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="flash" /></jsp:include>
 
-    <h1 class="sub-title"><span class="sub-title__dash"></span>특가제품안내</h1>
+    <jsp:include page="../common/admin_tabs.jsp"><jsp:param name="current" value="notice" /></jsp:include>
 
-    <div class="info-box">
-      <p>구매대행 셀러를 위한 인기 일본 제품을 특가로 제안합니다.</p>
-    </div>
+    <h1 class="sub-title"><span class="sub-title__dash"></span>공지사항 관리</h1>
 
+    <form class="pane-toolbar" method="get" action="<%= listBase %>">
+      <span class="pane-toolbar__label">검색</span>
+      <select class="pane-toolbar__select" name="searchType" aria-label="검색">
+        <option value="all"<%= Html.selected("all".equals(searchType)) %>>제목+내용</option>
+        <option value="title"<%= Html.selected("title".equals(searchType)) %>>제목</option>
+        <option value="content"<%= Html.selected("content".equals(searchType)) %>>내용</option>
+      </select>
+      <input class="pane-toolbar__input" type="text" name="keyword" value="<%= Html.esc(keyword) %>" placeholder="검색어" aria-label="검색어">
+      <button class="pane-toolbar__search" type="submit" aria-label="검색">🔍</button>
+      <button class="pane-toolbar__action" type="button" onclick="location.href='<%= ctx %>/admin/community/notice/write'">공지 등록</button>
+    </form>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="is-narrow">번호</th>
+          <th>제목</th>
+          <th>등록일</th>
+          <th>조회</th>
+          <th>관리</th>
+        </tr>
+      </thead>
+      <tbody>
 <%  if (items.isEmpty()) { %>
-    <div class="info-box"><p>현재 안내 중인 특가제품이 없습니다.</p></div>
-<%  } else { %>
-    <div class="deal-grid">
-<%      for (DealDTO d : items) { %>
-<%          String img = d.getImagePath(); %>
-<%          boolean hasImg = img != null && !img.trim().isEmpty(); %>
-<%          String imgSrc = !hasImg ? "" : (img.startsWith("/") ? ctx + img : img); %>
-      <div class="deal-card">
-        <div class="deal-card__thumb"<%= hasImg ? "" : " aria-hidden=\"true\"" %>><% if (hasImg) { %><img src="<%= Html.esc(imgSrc) %>" alt="<%= Html.esc(d.getName()) %>"><% } else { %>🖼<% } %></div>
-        <p class="deal-card__name"><%= Html.esc(d.getName()) %></p>
-        <p class="deal-card__price">¥<%= Html.num(d.getPriceJpy()) %></p>
-        <p class="deal-card__meta">최소 주문 수량 <%= d.getMinQty() %></p>
-        <button class="btn btn--sm" type="button" onclick="location.href='<%= ctx %>/community/qna/write?title=<%= Html.url("[특가문의] " + d.getName()) %>'">문의하기</button>
-      </div>
-<%      } %>
-    </div>
+        <tr><td class="data-table__empty" colspan="5"><%= keyword.isEmpty() ? "등록된 공지사항이 없습니다." : "검색 결과가 없습니다." %></td></tr>
 <%  } %>
+<%  for (PostDTO p : items) { %>
+        <tr>
+          <td class="is-center"><%= rowNo-- %></td>
+          <td class="is-left"><% if (p.isNewPost()) { %><span class="badge--new">N</span><% } %><a href="<%= ctx %>/community/notice/view?id=<%= p.getPostId() %>" target="_blank" rel="noopener"><%= Html.esc(p.getTitle()) %></a></td>
+          <td class="is-center"><%= Html.esc(p.getCreatedAt()) %></td>
+          <td class="is-center"><%= p.getViewCount() %></td>
+          <td class="is-center row-actions">
+            <a class="btn btn--sm" href="<%= ctx %>/admin/community/notice/update?id=<%= p.getPostId() %>&page=<%= curPage %>">수정</a>
+            <form class="inline-form" method="post" action="<%= ctx %>/admin/community/notice/delete" onsubmit="return confirm('이 공지사항을 삭제하시겠습니까?');">
+              <input type="hidden" name="_csrf" value="<%= Html.esc(Session.csrfToken(request)) %>">
+              <input type="hidden" name="id" value="<%= p.getPostId() %>">
+              <input type="hidden" name="page" value="<%= curPage %>">
+              <button class="btn btn--sm" type="submit">삭제</button>
+            </form>
+          </td>
+        </tr>
+<%  } %>
+      </tbody>
+    </table>
 
     <jsp:include page="../common/community_pager.jsp" />
 

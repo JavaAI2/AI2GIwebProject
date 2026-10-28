@@ -1,5 +1,5 @@
 -- =====================================================================
--- 커뮤니티 화면 확인용 테스트 데이터 (공지 2건 · FAQ 4건 · 특가 2건)
+-- 커뮤니티 화면 확인용 테스트 데이터 (공지 2건 · FAQ 4건)
 -- 모두 "[테스트]" 로 시작해서 나중에 골라서 지울 수 있습니다.
 -- 문장을 한 번에 실행(SQL Developer: F5) 해도 되고, 마지막에 COMMIT 까지 실행하세요.
 -- =====================================================================
@@ -22,12 +22,6 @@ VALUES (SEQ_COMMUNITY_FAQ.NEXTVAL, '배송비', '[테스트] 배송비는 어떻
 INSERT INTO COMMUNITY_FAQ (FAQ_ID, CATEGORY, QUESTION, ANSWER, SORT_ORDER)
 VALUES (SEQ_COMMUNITY_FAQ.NEXTVAL, '배송비', '[테스트] 무게 측정은 언제 하나요?', '테스트 답변입니다.', 21);
 
-INSERT INTO COMMUNITY_DEAL (DEAL_ID, NAME, PRICE_JPY, MIN_QTY)
-VALUES (SEQ_COMMUNITY_DEAL.NEXTVAL, '[테스트] 특가 상품 A', 1280, 3);
-
-INSERT INTO COMMUNITY_DEAL (DEAL_ID, NAME, PRICE_JPY, MIN_QTY)
-VALUES (SEQ_COMMUNITY_DEAL.NEXTVAL, '[테스트] 특가 상품 B', 3500, 1);
-
 COMMIT;
 
 -- ---------------------------------------------------------------------
@@ -35,5 +29,4 @@ COMMIT;
 -- ---------------------------------------------------------------------
 -- DELETE FROM COMMUNITY_POST WHERE TITLE LIKE '[테스트]%';
 -- DELETE FROM COMMUNITY_FAQ  WHERE QUESTION LIKE '[테스트]%';
--- DELETE FROM COMMUNITY_DEAL WHERE NAME LIKE '[테스트]%';
 -- COMMIT;
