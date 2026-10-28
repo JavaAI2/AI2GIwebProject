@@ -9,6 +9,7 @@
     String ctx = request.getContextPath();
     String[][] TABS = {
         { "home", "현황", "/admin/community" },
+        { "qna", "1:1 문의", "/admin/community/qna" },
     };
 %>
 <ul class="admin-tabs">

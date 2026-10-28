@@ -509,6 +509,7 @@ a.pager__item { text-decoration: none; }
 a.btn { text-decoration: none; }
 a.btn:hover { color: #fff; }
 .btn-row form { margin: 0; }
+textarea.input { min-height: 200px; line-height: 1.7; resize: vertical; }
 
 .admin-tabs { display: flex; gap: 4px; margin: 0 0 22px; padding: 0; list-style: none; border-bottom: 2px solid var(--ink); }
 .admin-tabs a { display: block; padding: 10px 18px; font-size: 14px; color: var(--body); text-decoration: none; background: var(--fill); border: 1px solid var(--line); border-bottom: 0; }
@@ -516,11 +517,25 @@ a.btn:hover { color: #fff; }
 .admin-tabs a.is-current { color: #fff; background: var(--ink); border-color: var(--ink); }
 
 .admin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 30px; }
-.admin-stat { padding: 22px 16px; text-align: center; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+.admin-stat { display: block; padding: 22px 16px; text-align: center; text-decoration: none; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+a.admin-stat:hover { border-color: var(--orange); }
 .admin-stat__label { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
 .admin-stat__value { margin: 0; font-size: 30px; font-weight: 700; color: var(--ink); }
 .admin-stat--alert { border-color: var(--orange); background: var(--orange-bg); }
 .admin-stat--alert .admin-stat__value { color: var(--orange); }
+
+.filter-row { display: flex; gap: 6px; margin: 0 0 14px; }
+
+.view-box { margin-bottom: 8px; border-top: 2px solid var(--ink); }
+.view-title { margin: 0; padding: 16px 14px; font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--line); }
+.view-meta { margin: 0; padding: 10px 14px; font-size: 12px; color: var(--muted); background: var(--fill); border-bottom: 1px solid var(--line); }
+.view-meta span + span::before { content: '|'; margin: 0 10px; color: #ccc; }
+.view-content { padding: 22px 14px; min-height: 120px; font-size: 14px; line-height: 1.9; color: var(--ink); border-bottom: 1px solid var(--line); word-break: break-word; }
+
+.answer-box { margin-top: 20px; border: 1px solid var(--orange); border-radius: var(--radius); }
+.answer-box__head { padding: 10px 14px; font-size: 13px; font-weight: 700; color: var(--orange); background: var(--orange-bg); }
+.answer-box__body { padding: 16px 14px; font-size: 14px; line-height: 1.8; color: var(--ink); word-break: break-word; }
+.answer-box__meta { margin-top: 8px; font-size: 12px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -557,14 +572,14 @@ a.btn:hover { color: #fff; }
     </div>
 
     <div class="admin-stats">
-      <div class="admin-stat<%= qnaWait > 0 ? " admin-stat--alert" : "" %>">
+      <a class="admin-stat<%= qnaWait > 0 ? " admin-stat--alert" : "" %>" href="<%= ctx %>/admin/community/qna?status=wait">
         <p class="admin-stat__label">답변 대기 문의</p>
         <p class="admin-stat__value"><%= Html.num(qnaWait) %></p>
-      </div>
-      <div class="admin-stat">
+      </a>
+      <a class="admin-stat" href="<%= ctx %>/admin/community/qna?status=all">
         <p class="admin-stat__label">전체 1:1 문의</p>
         <p class="admin-stat__value"><%= Html.num(stats.getOrDefault("QNA_ALL", 0)) %></p>
-      </div>
+      </a>
       <div class="admin-stat">
         <p class="admin-stat__label">공지사항</p>
         <p class="admin-stat__value"><%= Html.num(stats.getOrDefault("NOTICE_CNT", 0)) %></p>
