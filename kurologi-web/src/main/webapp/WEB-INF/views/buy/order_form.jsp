@@ -601,6 +601,15 @@ a:hover { color: var(--teal); }
 .flash--error { color: #8a1f11; background: #fdecea; border-color: #f5c6cb; }
 .thumb { position: relative; overflow: hidden; }
 .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* ------------------------------------------------- 불러오기 팝업 (주소록 · 등록상품 · 이전 주문) */
+.pick-dialog { width: min(640px, 92vw); padding: 20px; border: 1px solid var(--line); border-radius: 4px; }
+.pick-dialog::backdrop { background: rgba(0, 0, 0, .35); }
+.pick-dialog__title { margin: 0 0 12px; font-size: 18px; color: var(--ink); }
+.pick-dialog__msg { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+.pick-list { max-height: 50vh; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+.pick-item { display: block; width: 100%; padding: 10px 12px; text-align: left; font-size: 13px; background: #fff; border: 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.pick-item:hover { background: var(--orange-bg); }
+.pick-dialog__foot { margin-top: 12px; text-align: right; }
 .item-block + .item-block { margin-top: 28px; padding-top: 18px; border-top: 1px dashed var(--line); }
 </style>
 </head>
@@ -671,7 +680,7 @@ a:hover { color: var(--teal); }
               </div>
               <div class="field" style="padding-top:20px">
                 <button class="btn btn--sm" type="button" id="btnPostcode">우편번호 검색</button>
-                <button class="btn btn--sm" type="button">주소록</button>
+                <button class="btn btn--sm" type="button" id="btnAddrBook">주소록</button>
               </div>
               <div class="field"></div>
             </div>
@@ -871,9 +880,9 @@ a:hover { color: var(--teal); }
         <p class="note note--red" style="font-weight:700">상품 <span class="item-no"><%= idx + 1 %></span> &nbsp;* 적색 테두리 필수항목</p>
 
         <div class="btn-row btn-row--left" style="margin:10px 0 18px">
-          <button class="btn" type="button">등록상품 불러오기</button>
+          <button class="btn" type="button" data-act="products">등록상품 불러오기</button>
           <button class="btn" type="button">상품URL 가져오기</button>
-          <button class="btn" type="button">오더내역복사</button>
+          <button class="btn" type="button" data-act="copyorder">오더내역복사</button>
           <button class="btn" type="button" data-act="copy">↻ 복사</button>
           <button class="btn" type="button" data-act="add">⊞ 추가</button>
           <button class="btn" type="button" data-act="del">␡ 삭제</button>
@@ -885,8 +894,6 @@ a:hover { color: var(--teal); }
               <span class="thumb__ph" aria-hidden="true">🖼</span>
               <img class="thumb__img" alt="상품 이미지 미리보기" style="display:none">
             </div>
-            <input type="file" class="img-file" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none">
-            <button class="btn btn--navy btn--sm" type="button" data-act="img" style="margin-top:8px">이미지 업로드</button>
           </div>
 
           <div style="flex:1 1 auto;min-width:0">
@@ -1254,6 +1261,13 @@ a:hover { color: var(--teal); }
 
     </form>
 
+    <dialog id="pickDialog" class="pick-dialog">
+      <h2 id="pickTitle" class="pick-dialog__title"></h2>
+      <p id="pickMsg" class="pick-dialog__msg"></p>
+      <ul id="pickList" class="pick-list"></ul>
+      <div class="pick-dialog__foot"><button class="btn btn--sm" type="button" id="pickClose">닫기</button></div>
+    </dialog>
+
   </div>
 </main>
 
@@ -1268,17 +1282,15 @@ a:hover { color: var(--teal); }
   var KRW_PER_100JPY = <%= rate == null ? "0" : rate.getNoticeRate().toPlainString() %>;   // 고시환율(원) / 100엔
   var USD_PER_JPY = <%= rate == null ? "0.00666667" : rate.getJpyUsd().toPlainString() %>;   // 1엔 = 몇 달러 (세관 신고 금액)
   var CTX = '<%= ctx %>';
-  var CSRF = '<%= Session.csrfToken(request) %>';
-  var MAX_IMG_BYTES = 5 * 1024 * 1024;   // 이미지 5MB 제한 (서버도 같은 제한)
+  var BASE = '<%= base %>';   // /buyorder 또는 /shiporder
 
-  // 이미지URL 칸의 값(http 주소 또는 /uploads/... 업로드 경로)으로 미리보기를 바꾼다
+  // 이미지URL 칸의 값(http 주소)으로 미리보기를 바꾼다
   function setPreview(block, value) {
     var img = block.querySelector('.thumb__img');
     var ph = block.querySelector('.thumb__ph');
     var src = '';
     value = (value || '').trim();
     if (/^https?:\/\//i.test(value)) src = value;
-    else if (value.indexOf('/uploads/buy/') === 0) src = CTX + value;
     if (src) {
       img.onerror = function () { img.style.display = 'none'; ph.style.display = ''; };
       img.src = src;
@@ -1289,28 +1301,6 @@ a:hover { color: var(--teal); }
       img.style.display = 'none';
       ph.style.display = '';
     }
-  }
-
-  // 선택한 사진을 서버로 보내 저장하고, 돌려받은 경로를 이미지URL 칸에 넣는다
-  function uploadImage(block, file) {
-    if (!file) return;
-    if (file.size > MAX_IMG_BYTES) { alert('이미지는 5MB 이하만 올릴 수 있습니다.'); return; }
-    var btn = block.querySelector('[data-act="img"]');
-    var fd = new FormData();
-    fd.append('file', file);
-    btn.disabled = true;
-    btn.textContent = '업로드 중...';
-    fetch(CTX + '/buyorder/upload?_csrf=' + encodeURIComponent(CSRF), { method: 'POST', body: fd, credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
-        if (!j.ok) throw new Error(j.message);
-        block.querySelector('[name="itemImageUrl"]').value = j.path;
-        setPreview(block, j.path);
-      })
-      .catch(function (e) {
-        alert(e instanceof SyntaxError ? '이미지 업로드에 실패했습니다. 로그인 상태를 확인하고 다시 시도해 주세요.' : e.message);
-      })
-      .then(function () { btn.disabled = false; btn.textContent = '이미지 업로드'; });
   }
 
   function blocks() { return list.querySelectorAll('.item-block'); }
@@ -1374,8 +1364,10 @@ a:hover { color: var(--teal); }
       if (act === 'add') { clearBlock(clone); setPreview(clone, ''); }   // 추가는 빈 상품
       block.parentNode.insertBefore(clone, block.nextSibling);
       renumber();
-    } else if (act === 'img') {
-      block.querySelector('.img-file').click();   // 숨겨 둔 파일 선택창을 연다
+    } else if (act === 'products') {
+      openProductPicker(block);
+    } else if (act === 'copyorder') {
+      openOrderPicker();
     } else if (act === 'del') {
       if (blocks().length <= 1) { alert('상품은 최소 1개가 필요합니다.'); return; }
       if (confirm('이 상품을 삭제할까요?')) { block.parentNode.removeChild(block); renumber(); }
@@ -1385,19 +1377,98 @@ a:hover { color: var(--teal); }
     calc();
     if (e.target.name === 'itemImageUrl') setPreview(e.target.closest('.item-block'), e.target.value);   // 주소를 직접 붙여넣어도 미리보기
   });
-  list.addEventListener('change', function (e) {
-    if (e.target.classList.contains('img-file')) {
-      uploadImage(e.target.closest('.item-block'), e.target.files[0]);
-      e.target.value = '';   // 같은 파일을 다시 골라도 change 가 일어나게 비운다
-    }
-  });
 
   // 아직 연결하지 않은 버튼(등록상품 불러오기, 통관품목 검색 등)은 안내만 한다
   form.addEventListener('click', function (e) {
     var btn = e.target.closest('button[type="button"]');
-    if (!btn || btn.hasAttribute('data-act') || btn.id === 'btnPostcode') return;
+    if (!btn || btn.hasAttribute('data-act') || btn.id === 'btnPostcode' || btn.id === 'btnAddrBook') return;
     alert('준비 중인 기능입니다.');
   });
+
+  // ---- 주소록 · 등록상품 불러오기 · 오더내역복사 : 팝업 목록에서 하나를 고른다 ----
+  var dlg = document.getElementById('pickDialog');
+
+  // url 에서 목록(JSON)을 받아 팝업에 보여 준다. build(button, item) 이 버튼 글자와 클릭 동작을 정한다.
+  function openPicker(title, url, emptyMsg, build) {
+    var ul = document.getElementById('pickList');
+    var msg = document.getElementById('pickMsg');
+    if (typeof dlg.showModal !== 'function') { alert('이 브라우저에서는 팝업을 열 수 없습니다.'); return; }
+    document.getElementById('pickTitle').textContent = title;
+    ul.innerHTML = '';
+    msg.textContent = '불러오는 중...';
+    msg.style.display = '';
+    dlg.showModal();
+    fetch(CTX + url, { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok) throw new Error(j.message);
+        if (!j.items.length) { msg.textContent = emptyMsg; return; }
+        msg.style.display = 'none';
+        j.items.forEach(function (it) {
+          var li = document.createElement('li');
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'pick-item';
+          build(b, it);   // 글자는 textContent 로만 채워서 HTML 로 해석되지 않는다
+          li.appendChild(b);
+          ul.appendChild(li);
+        });
+      })
+      .catch(function (e) {
+        msg.textContent = (e instanceof SyntaxError) ? '불러오지 못했습니다. 로그인 상태를 확인해 주세요.' : e.message;
+      });
+  }
+  document.getElementById('pickClose').addEventListener('click', function () { dlg.close(); });
+
+  function setValue(root, name, value) {
+    var el = root.querySelector('[name="' + name + '"]');
+    if (el) el.value = (value == null) ? '' : value;
+  }
+
+  // 주소록 : 받는 사람 · 휴대전화 · 주소를 채운다
+  document.getElementById('btnAddrBook').addEventListener('click', function () {
+    openPicker('주소록', '/buyorder/addresses', '저장된 주소가 없습니다. 마이페이지 > 주소관리에서 먼저 추가해 주세요.', function (b, a) {
+      b.textContent = a.name + ' · ' + a.phone + ' · [' + a.zipcode + '] ' + a.address1 + ' ' + a.address2;
+      b.onclick = function () {
+        setValue(form, 'recvNameKo', a.name);
+        setValue(form, 'mobile', a.phone);
+        setValue(form, 'postcode', a.zipcode);
+        setValue(form, 'addr1', a.address1);
+        setValue(form, 'addr2', a.address2);
+        dlg.close();
+      };
+    });
+  });
+
+  // 등록상품 불러오기 : 이전에 주문했던 상품 정보를 이 상품 칸에 채운다
+  function openProductPicker(block) {
+    openPicker('등록상품 불러오기', '/buyorder/products', '이전에 주문한 상품이 없습니다.', function (b, p) {
+      var opt = [p.color, p.size].filter(Boolean).join(' / ');
+      b.textContent = p.name + (opt ? ' (' + opt + ')' : '') + ' · ¥' + Number(p.unitPrice).toLocaleString();
+      b.onclick = function () {
+        setValue(block, 'itemNameEn', p.name);
+        setValue(block, 'itemShopSite', p.shopSite);
+        setValue(block, 'itemBrand', p.brand);
+        setValue(block, 'itemColor', p.color);
+        setValue(block, 'itemSize', p.size);
+        setValue(block, 'itemProductUrl', p.productUrl);
+        setValue(block, 'itemImageUrl', /^https?:\/\//i.test(p.imageUrl) ? p.imageUrl : '');
+        setValue(block, 'itemHsCode', p.hsCode);
+        setValue(block, 'itemUnitPrice', p.unitPrice);
+        setPreview(block, /^https?:\/\//i.test(p.imageUrl) ? p.imageUrl : '');
+        calc();
+        dlg.close();
+      };
+    });
+  }
+
+  // 오더내역복사 : 이전 주문을 골라 그 내용으로 새 주문서를 연다
+  function openOrderPicker() {
+    openPicker('오더내역복사', '/buyorder/recent', '복사할 이전 주문이 없습니다.', function (b, o) {
+      b.textContent = o.orderNo + ' · ' + o.service + ' · ' + o.status + ' · ' + o.date + ' · ' + o.summary;
+      b.onclick = function () { location.href = CTX + BASE + '/form?copy=' + encodeURIComponent(o.id); };
+    });
+  }
 
   // 우편번호 검색 (Daum 우편번호 서비스)
   document.getElementById('btnPostcode').addEventListener('click', function () {

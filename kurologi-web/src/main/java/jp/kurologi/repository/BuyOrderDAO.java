@@ -199,7 +199,7 @@ public class BuyOrderDAO {
 
 		String sql = "SELECT * FROM ("
 				+ " SELECT a.*, ROWNUM RN FROM ("
-				+ "  SELECT o.ORDER_ID, o.ORDER_NO, o.STATUS, o.RECV_NAME_KO, o.TOTAL_QTY, o.TOTAL_YEN, o.APPLIED_RATE, o.TOTAL_KRW, "
+				+ "  SELECT o.ORDER_ID, o.ORDER_NO, o.STATUS, o.RECV_NAME_KO, o.TOTAL_QTY, o.TOTAL_YEN, o.APPLIED_RATE, o.TOTAL_KRW, o.PAY_STATUS, "
 				+ "   TO_CHAR(o.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_TXT, "
 				+ "   (SELECT COUNT(*) FROM BUY_ORDER_ITEM i WHERE i.ORDER_ID = o.ORDER_ID) AS ITEM_CNT, "
 				+ "   (SELECT i.ITEM_NAME_EN FROM BUY_ORDER_ITEM i WHERE i.ORDER_ID = o.ORDER_ID AND i.ITEM_NO = 1) AS FIRST_ITEM "
@@ -226,6 +226,7 @@ public class BuyOrderDAO {
 					dto.setTotalYen(rs.getBigDecimal("TOTAL_YEN"));
 					dto.setAppliedRate(rs.getBigDecimal("APPLIED_RATE"));
 					dto.setTotalKrw(rs.getLong("TOTAL_KRW"));
+					dto.setPayStatus(rs.getString("PAY_STATUS"));
 					dto.setCreatedAt(rs.getString("CREATED_TXT"));
 					dto.setItemCount(rs.getInt("ITEM_CNT"));
 					dto.setFirstItemName(rs.getString("FIRST_ITEM"));
@@ -243,7 +244,7 @@ public class BuyOrderDAO {
 
 		String orderSql = "SELECT ORDER_ID, ORDER_NO, MEMBER_ID, STATUS, CENTER, RECV_NAME_KO, RECV_NAME_EN, "
 				+ "POSTCODE, ADDR1, ADDR2, BIZ_NO, MOBILE, DELIVER_NOTE, TOTAL_QTY, TOTAL_YEN, ADDON_OPTIONS, "
-				+ "LOGISTICS_NOTE, AUTO_PAY, SERVICE_TYPE, APPLIED_RATE, TOTAL_KRW, TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_TXT "
+				+ "LOGISTICS_NOTE, AUTO_PAY, SERVICE_TYPE, APPLIED_RATE, TOTAL_KRW, PAY_STATUS, TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_TXT "
 				+ "FROM BUY_ORDER WHERE ORDER_ID = ?";
 
 		String itemSql = "SELECT ITEM_ID, ITEM_NO, SHOP_SITE, BRAND, SHOP_ORDER_NO, TRACKING_NO, ITEM_NAME_EN, "
@@ -281,6 +282,7 @@ public class BuyOrderDAO {
 						order.setServiceType(rs.getString("SERVICE_TYPE"));
 						order.setAppliedRate(rs.getBigDecimal("APPLIED_RATE"));
 						order.setTotalKrw(rs.getLong("TOTAL_KRW"));
+						order.setPayStatus(rs.getString("PAY_STATUS"));
 						order.setCreatedAt(rs.getString("CREATED_TXT"));
 					}
 				}
@@ -324,6 +326,103 @@ public class BuyOrderDAO {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	// ------------------------------------------------------------------ 결제 확인 · 불러오기 목록
+
+	/** 결제완료로 표시한다 (예치금 자동결제 성공 때). 접수신청 이후 + 아직 미결제인 주문만 바뀐다. */
+	public boolean markPaid(long orderId) {
+
+		String sql = "UPDATE BUY_ORDER SET PAY_STATUS = 'PAID', STATUS_UPDATED_AT = SYSTIMESTAMP "
+				+ "WHERE ORDER_ID = ? AND STATUS <> 'WAIT' AND PAY_STATUS = 'UNPAID'";
+
+		try (Connection conn = DBmanager.getInstance();
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setLong(1, orderId);
+			return pstmt.executeUpdate() == 1;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	/** "오더내역복사" 팝업용 : 내 최근 주문 (구매대행 + 배송대행 모두) */
+	public List<BuyOrderDTO> recentOrders(long memberId, int limit) {
+
+		String sql = "SELECT * FROM ("
+				+ " SELECT o.ORDER_ID, o.ORDER_NO, o.SERVICE_TYPE, o.STATUS, "
+				+ "  TO_CHAR(o.CREATED_AT, 'YYYY-MM-DD') AS CREATED_TXT, "
+				+ "  (SELECT COUNT(*) FROM BUY_ORDER_ITEM i WHERE i.ORDER_ID = o.ORDER_ID) AS ITEM_CNT, "
+				+ "  (SELECT i.ITEM_NAME_EN FROM BUY_ORDER_ITEM i WHERE i.ORDER_ID = o.ORDER_ID AND i.ITEM_NO = 1) AS FIRST_ITEM "
+				+ " FROM BUY_ORDER o WHERE o.MEMBER_ID = ? ORDER BY o.ORDER_ID DESC"
+				+ ") WHERE ROWNUM <= ?";
+
+		List<BuyOrderDTO> list = new ArrayList<>();
+
+		try (Connection conn = DBmanager.getInstance();
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setLong(1, memberId);
+			pstmt.setInt(2, limit);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					BuyOrderDTO dto = new BuyOrderDTO();
+					dto.setOrderId(rs.getLong("ORDER_ID"));
+					dto.setOrderNo(rs.getString("ORDER_NO"));
+					dto.setServiceType(rs.getString("SERVICE_TYPE"));
+					dto.setStatus(rs.getString("STATUS"));
+					dto.setCreatedAt(rs.getString("CREATED_TXT"));
+					dto.setItemCount(rs.getInt("ITEM_CNT"));
+					dto.setFirstItemName(rs.getString("FIRST_ITEM"));
+					list.add(dto);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	/**
+	 * "등록상품 불러오기" 팝업용 : 내가 주문했던 상품 (같은 상품은 한 번만, 최근 순).
+	 * 같은 상품을 여러 번 주문했으면 GROUP BY 로 묶고 가장 최근 것만 남긴다.
+	 */
+	public List<BuyOrderItemDTO> recentProducts(long memberId, int limit) {
+
+		String sql = "SELECT * FROM ("
+				+ " SELECT i.ITEM_NAME_EN, i.SHOP_SITE, i.BRAND, i.COLOR, i.ITEM_SIZE, i.PRODUCT_URL, i.IMAGE_URL, "
+				+ "  i.UNIT_PRICE, i.HS_CODE, MAX(i.ITEM_ID) AS LAST_ID "
+				+ " FROM BUY_ORDER_ITEM i JOIN BUY_ORDER o ON o.ORDER_ID = i.ORDER_ID "
+				+ " WHERE o.MEMBER_ID = ? "
+				+ " GROUP BY i.ITEM_NAME_EN, i.SHOP_SITE, i.BRAND, i.COLOR, i.ITEM_SIZE, i.PRODUCT_URL, i.IMAGE_URL, "
+				+ "  i.UNIT_PRICE, i.HS_CODE "
+				+ " ORDER BY LAST_ID DESC"
+				+ ") WHERE ROWNUM <= ?";
+
+		List<BuyOrderItemDTO> list = new ArrayList<>();
+
+		try (Connection conn = DBmanager.getInstance();
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setLong(1, memberId);
+			pstmt.setInt(2, limit);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					BuyOrderItemDTO item = new BuyOrderItemDTO();
+					item.setItemNameEn(rs.getString("ITEM_NAME_EN"));
+					item.setShopSite(rs.getString("SHOP_SITE"));
+					item.setBrand(rs.getString("BRAND"));
+					item.setColor(rs.getString("COLOR"));
+					item.setItemSize(rs.getString("ITEM_SIZE"));
+					item.setProductUrl(rs.getString("PRODUCT_URL"));
+					item.setImageUrl(rs.getString("IMAGE_URL"));
+					item.setUnitPrice(rs.getBigDecimal("UNIT_PRICE"));
+					item.setHsCode(rs.getString("HS_CODE"));
+					list.add(item);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
 	}
 
 	// ------------------------------------------------------------------ 공통 도우미

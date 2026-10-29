@@ -1,0 +1,18 @@
+<%-- ==========================================================================
+  언어 선택 (한국어 / 日本語 / English) — 화면의 모든 글자를 번역한다.
+  구글의 공식 웹사이트 번역 위젯은 2026-10-01 에 지원이 종료되어, 같은 방식으로 쓸 수 있는
+  GTranslate 무료 위젯(교육 · 비영리 용도 무료, 번역은 구글 번역 사용)으로 대신한다.
+  · 상단 바의 <div class="gtranslate_wrapper"> 자리에 언어 선택 상자가 만들어진다.
+  · 이미지 속 글자와 JavaScript alert 문구는 번역되지 않는다.
+  · 인터넷이 연결되어 있어야 하고, 번역할 때 화면의 글자가 번역 서비스로 전송된다.
+  · layout.jsp(아래쪽 part) 와 index.jsp 두 곳에서 이 파일을 include 한다.
+========================================================================== --%>
+<script>
+window.gtranslateSettings = {
+  "default_language": "ko",
+  "native_language_names": true,
+  "languages": ["ko", "ja", "en"],
+  "wrapper_selector": ".gtranslate_wrapper"
+};
+</script>
+<script src="https://cdn.gtranslate.net/widgets/latest/dropdown.js" defer></script>

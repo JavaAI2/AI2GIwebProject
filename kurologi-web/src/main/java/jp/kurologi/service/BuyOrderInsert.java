@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -14,7 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.model.BuyOrderDTO;
+import jp.kurologi.model.Charge;
 import jp.kurologi.model.ExchangeRate;
+import jp.kurologi.model.Member;
+import jp.kurologi.model.Payment;
 import jp.kurologi.model.BuyOrderItemDTO;
 import jp.kurologi.repository.BuyOrderDAO;
 import jp.kurologi.web.App;
@@ -127,17 +131,28 @@ public class BuyOrderInsert implements Command {
 		// 접수신청이면 상품대금(원화)을 마이페이지 > 결제관리 > 비용결제 목록에 결제 대기건으로 올린다.
 		// 금액은 위에서 계산한 "접수 시점 고시환율" 기준이라, 이후 환율이 바뀌어도 이 주문의 결제 금액은 변하지 않는다.
 		boolean charged = false;
+		String payNote = "";
 		if (submit && order.getAppliedRate() != null && order.getTotalKrw() > 0) {
 			App app = App.of(request.getServletContext());
 			if (app != null) {
 				String title = ServiceType.label(svc) + " 상품대금 (고시환율 100엔=" + order.getAppliedRate().toPlainString() + "원 적용)";
-				app.payments.addCharge(memberId, title, order.getOrderNo(), order.getTotalKrw());
+				Charge charge = app.payments.addCharge(memberId, title, order.getOrderNo(), order.getTotalKrw());
 				charged = true;
+
+				// 예치금 자동결제를 선택했으면 방금 만든 결제 대기건을 예치금으로 바로 결제한다.
+				// 예치금이 모자라면 결제하지 않고(부분 결제 없음) 마이페이지 > 결제관리에서 직접 결제하도록 안내한다.
+				if (order.isAutoPay()) {
+					if (tryAutoPay(app, memberId, charge, dao, order.getOrderId())) {
+						payNote = " 예치금으로 자동결제했습니다.";
+					} else {
+						payNote = " 예치금이 부족해 자동결제하지 못했습니다. 마이페이지 > 결제관리에서 직접 결제해 주세요.";
+					}
+				}
 			}
 		}
 
 		Session.flash(request, "info", (submit ? "접수신청" : "접수대기") + "으로 저장했습니다. 주문번호 : " + order.getOrderNo()
-				+ (charged ? " (결제 금액 ₩" + String.format("%,d", order.getTotalKrw()) + " 은 마이페이지 > 결제관리에서 결제할 수 있습니다)" : ""));
+				+ (charged ? " (결제 금액 ₩" + String.format("%,d", order.getTotalKrw()) + ")" + payNote : ""));
 		response.sendRedirect(ctx + base + "/view?id=" + order.getOrderId());
 		return false;
 	}
@@ -214,7 +229,9 @@ public class BuyOrderInsert implements Command {
 			item.setColor(cut(at(color, i), 100));
 			item.setItemSize(cut(at(size, i), 100));
 			item.setProductUrl(cut(at(productUrl, i), 1000));
-			item.setImageUrl(cut(at(imageUrl, i), 1000));
+			// 옛 이미지 업로드 기능으로 저장된 /uploads/... 경로는 더 이상 쓰지 않으므로 비운다 (이미지는 http(s) 주소만 사용)
+			String img = cut(at(imageUrl, i), 1000);
+			item.setImageUrl(img.startsWith("/uploads/") ? "" : img);
 			item.setMarketName(cut(at(marketName, i), 100));
 			item.setMarketOrderNo(cut(at(marketOrder, i), 100));
 			item.setHsCode(cut(at(hsCode, i), 30));
@@ -292,13 +309,13 @@ public class BuyOrderInsert implements Command {
 			if (item.getItemNameEn().isEmpty()) {
 				return label + "상품명(영문)을 입력해 주세요.";
 			}
-			// 상품URL · 이미지URL 은 나중에 링크/이미지로 화면에 출력되므로 http(s) 또는 우리 업로드 주소만 허용
+			// 상품URL · 이미지URL 은 나중에 링크/이미지로 화면에 출력되므로 http(s) 주소만 허용
 			// (javascript: 같은 주소를 막기 위해)
-			if (!isSafeUrl(item.getProductUrl(), false)) {
+			if (!isSafeUrl(item.getProductUrl())) {
 				return label + "상품URL은 http:// 또는 https:// 로 시작해야 합니다.";
 			}
-			if (!isSafeUrl(item.getImageUrl(), true)) {
-				return label + "이미지URL은 http:// 또는 https:// 로 시작하거나, 이미지 업로드 버튼으로 올려 주세요.";
+			if (!isSafeUrl(item.getImageUrl())) {
+				return label + "이미지URL은 http:// 또는 https:// 로 시작해야 합니다.";
 			}
 			if (submit && item.getTrackingNo().isEmpty()) {
 				return label + "트래킹번호를 입력해 주세요. (없으면 '접수대기'로 저장하세요)";
@@ -315,6 +332,25 @@ public class BuyOrderInsert implements Command {
 	}
 
 	/**
+	 * 예치금으로 결제 대기건을 결제한다. 성공하면 주문을 "결제완료" 로 표시하고 true.
+	 * 결제 계산은 기존 PaymentService.pay 가 한다. (예치금이 모자라면 pay 가 무통장 입금 절차로 넘어가 버리므로 미리 확인한다)
+	 */
+	private boolean tryAutoPay(App app, long memberId, Charge charge, BuyOrderDAO dao, long orderId) {
+		try {
+			Member m = app.members.findById(memberId).orElse(null);
+			if (m == null || m.getDeposit() < charge.getAmount()) {
+				return false;
+			}
+			app.payments.pay(memberId, new PaymentService.PayRequest(List.of(charge.getId()), Payment.Method.DEPOSIT, charge.getAmount(), null));
+			dao.markPaid(orderId);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	/**
 	 * 검사에 실패했을 때 : 입력한 값을 formOrder 에 담고 오류 메시지를 띄운 채 주문서 화면으로 forward 한다.
 	 * (redirect 가 아니라 forward 라서 사용자가 쓴 내용이 지워지지 않는다)
 	 * true 를 돌려주면 컨트롤러가 order_form.jsp 로 forward 한다.
@@ -325,17 +361,13 @@ public class BuyOrderInsert implements Command {
 		return true;
 	}
 
-	/** 빈 값이거나 http(s) 주소이거나, (allowUpload 일 때) 우리가 만든 업로드 주소인지 */
-	private static boolean isSafeUrl(String url, boolean allowUpload) {
+	/** 빈 값이거나 http:// , https:// 로 시작하는 주소인지 (javascript: 같은 주소를 막는다) */
+	private static boolean isSafeUrl(String url) {
 		if (url.isEmpty()) {
 			return true;
 		}
 		String lower = url.toLowerCase();
-		if (lower.startsWith("http://") || lower.startsWith("https://")) {
-			return true;
-		}
-		return allowUpload && url.startsWith(UploadStore.URL_PREFIX)
-				&& UploadStore.FILE_NAME.matcher(url.substring(UploadStore.URL_PREFIX.length())).matches();
+		return lower.startsWith("http://") || lower.startsWith("https://");
 	}
 
 	/** 동의 체크박스(name="agree", value=1~25) 25개가 모두 넘어왔는지 */

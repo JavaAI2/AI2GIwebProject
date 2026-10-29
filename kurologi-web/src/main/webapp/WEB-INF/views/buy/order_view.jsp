@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"
-    import="jp.kurologi.web.Html,jp.kurologi.model.BuyOrderDTO,jp.kurologi.model.BuyOrderItemDTO,jp.kurologi.service.UploadStore,java.text.DecimalFormat,java.util.List" %>
+    import="jp.kurologi.service.OrderStatus,jp.kurologi.web.Html,jp.kurologi.model.BuyOrderDTO,jp.kurologi.model.BuyOrderItemDTO,java.text.DecimalFormat,java.util.List" %>
 <%
     String ctx = request.getContextPath();
     // 구매대행(BUY) / 배송대행(SHIP) : 컨트롤러가 request 에 담아 준다.
@@ -510,6 +510,8 @@ a:hover { color: var(--teal); }
 .flash--error { color: #8a1f11; background: #fdecea; border-color: #f5c6cb; }
 .state--wait { color: var(--muted); border: 1px solid #bbb; }
 .state--submit { color: var(--teal); border: 1px solid var(--teal); }
+.state--received { color: #8a5a00; border: 1px solid #d9a441; }
+.state--shipped { color: #fff; background: #37b149; border: 1px solid #37b149; }
 .list-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--body); }
 .list-top strong { color: var(--orange); }
 a.pager__item { text-decoration: none; margin: 0 2px; }
@@ -551,7 +553,8 @@ a.pager__item:hover { background: var(--orange-bg); }
 
     <div class="view-head">
       <span>주문번호 <strong><%= Html.esc(o.getOrderNo()) %></strong></span>
-      <span class="state <%= wait ? "state--wait" : "state--submit" %>"><%= wait ? "접수대기" : "접수신청" %></span>
+      <span class="state <%= OrderStatus.css(o.getStatus()) %>"><%= OrderStatus.label(o.getStatus()) %></span>
+      <span>결제 <strong><%= OrderStatus.payLabel(o.getStatus(), o.getPayStatus()) %></strong></span>
       <span>접수일시 <%= Html.esc(o.getCreatedAt()) %></span>
       <span>물류센터 <%= Html.esc(o.getCenter()) %></span>
     </div>
@@ -620,7 +623,8 @@ a.pager__item:hover { background: var(--orange-bg); }
       </thead>
       <tbody>
 <% for (BuyOrderItemDTO it : o.getItems()) {
-       String img = UploadStore.imageSrc(ctx, it.getImageUrl());
+       String imgRaw = it.getImageUrl() == null ? "" : it.getImageUrl().trim();
+       String img = (imgRaw.toLowerCase().startsWith("http://") || imgRaw.toLowerCase().startsWith("https://")) ? imgRaw : "";   // http(s) 주소만 이미지로 표시
        String link = it.getProductUrl() == null ? "" : it.getProductUrl().trim();
        boolean linkOk = link.toLowerCase().startsWith("http://") || link.toLowerCase().startsWith("https://");
 %>

@@ -567,7 +567,7 @@ a:hover { color: var(--teal); }
 
 .bottom-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0;
 }
 
@@ -759,7 +759,6 @@ a:hover { color: var(--teal); }
       <div class="summary-tabs">
         <a class="is-active" href="#">배송대행 조회</a>
         <a class="summary-tabs--teal" href="#">구매대행 조회</a>
-        <a class="summary-tabs--green" href="#">AI 신청서 자동생성</a>
         <a class="summary-tabs--blue" href="#">입고내역조회</a>
       </div>
       <ul class="summary-links">
@@ -824,29 +823,7 @@ a:hover { color: var(--teal); }
       </div>
     </div>
 
-    <!-- ============ 3. AI 신청서 자동 생성 ============ -->
-    <div class="box">
-      <div class="box__head">
-        <p class="box__title">AI 신청서 자동 생성</p>
-        <p class="box__note">AI가 자동으로 주문 정보를 불러와 배송 신청서 작성을 도와드립니다. 원하시는 신청서 입력 방식을 선택하세요.</p>
-      </div>
-      <div class="box__body">
-        <div class="ai-cards">
-          <div class="ai-card">
-            <p class="ai-card__title">gmail 주문 자동등록</p>
-            <p class="ai-card__desc">쇼핑몰에서 주문한 내역을 Gmail에서<br>자동으로 불러와, 배송 신청서를 쉽게 작성할<br>수 있습니다.</p>
-            <a class="ai-card__btn" href="#">gmail 연동하기</a>
-          </div>
-          <div class="ai-card">
-            <p class="ai-card__title">셀러 주문 연동</p>
-            <p class="ai-card__desc">쿠팡 · 스마트스토어에서 판매된 주문건을<br>불러와 신청서를 자동 생성합니다.</p>
-            <a class="ai-card__btn" href="#">셀러 연동하기</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ 4. 공지 / 환율 / 1:1 ============ -->
+    <!-- ============ 3. 공지 / 1:1 ============ -->
     <div class="box">
       <div class="box__body">
         <div class="bottom-grid">
@@ -873,31 +850,6 @@ a:hover { color: var(--teal); }
               <span class="notice-item__text">[공지] 일본 야마토 주소 및 휴일 설정 관련</span>
               <span class="notice-item__date">2026-09-23</span>
             </div>
-          </div>
-
-          <!-- 관세청 고시환율 -->
-          <div class="bottom-col">
-            <div class="bottom-col__head">
-              <p class="bottom-col__title">관세청 고시환율</p>
-              <a class="bottom-col__more" href="#">더보기</a>
-            </div>
-            <table class="fx-table">
-              <tbody>
-                <tr>
-                  <td class="fx-country">미국 $1</td>
-                  <td class="fx-rate">1,357.14 원</td>
-                  <td class="fx-date" rowspan="3">2026<small>10/04 ~ 10/10</small></td>
-                </tr>
-                <tr>
-                  <td class="fx-country">중국 ¥1</td>
-                  <td class="fx-rate">202.24 원</td>
-                </tr>
-                <tr>
-                  <td class="fx-country">독일 €1</td>
-                  <td class="fx-rate">1,537.92 원</td>
-                </tr>
-              </tbody>
-            </table>
           </div>
 
           <!-- 나의 1:1 질문 -->
@@ -928,7 +880,7 @@ a:hover { color: var(--teal); }
       </div>
     </div>
 
-    <!-- ============ 5. 자주하는 질문 ============ -->
+    <!-- ============ 4. 자주하는 질문 ============ -->
     <div class="box">
       <div class="box__head">
         <p class="box__title">자주하는 질문</p>

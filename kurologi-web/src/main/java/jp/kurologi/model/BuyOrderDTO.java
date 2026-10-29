@@ -236,4 +236,35 @@ public class BuyOrderDTO {
 	public void setCreatedAt(String createdAt) {
 		this.createdAt = createdAt;
 	}
+
+	// ---- 접수 이후 처리 (06_order_process.sql) ----
+	private String payStatus = "UNPAID";   // PAY_STATUS — UNPAID 미결제 / PAID 결제완료
+
+	// ---- 관리자 목록 전용 (주문한 회원 정보. 조인해서 채움) ----
+	private String memberLoginId;
+	private String memberName;
+
+	public String getPayStatus() {
+		return payStatus;
+	}
+
+	public void setPayStatus(String payStatus) {
+		this.payStatus = payStatus;
+	}
+
+	public String getMemberLoginId() {
+		return memberLoginId;
+	}
+
+	public void setMemberLoginId(String memberLoginId) {
+		this.memberLoginId = memberLoginId;
+	}
+
+	public String getMemberName() {
+		return memberName;
+	}
+
+	public void setMemberName(String memberName) {
+		this.memberName = memberName;
+	}
 }

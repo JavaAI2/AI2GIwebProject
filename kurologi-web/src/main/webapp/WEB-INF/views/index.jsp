@@ -556,39 +556,12 @@ button { font: inherit; cursor: pointer; }
 
 .hero__link { position: absolute; inset: 0; z-index: 1; }
 
-.hero__arrow {
-  position: absolute;
-  top: 50%;
-  z-index: 2;
-  width: 40px;
-  height: 40px;
-  margin-top: -20px;
-  font-size: 26px;
-  color: #fff;
-  background: transparent;
-  border: 0;
-  opacity: .6;
-}
-.hero__arrow:hover { opacity: 1; }
-.hero__arrow--prev { left: 12px; }
-.hero__arrow--next { right: 12px; }
+/* 언어별 배너 : images/banner1_ja.png , banner1_en.png 를 넣으면 언어를 바꿀 때 자동으로 바뀝니다.
+   (배너 속 글자는 그림이라 번역되지 않기 때문입니다) 파일이 없으면 한국어 배너가 그대로 보입니다. */
+html[data-kuro-lang="ja"] .hero { background-image: url('<%= ctx %>/images/banner1_ja.png'), url('<%= ctx %>/images/banner1.png'); }
+html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banner1_en.png'), url('<%= ctx %>/images/banner1.png'); }
 
-.hero__dots {
-  position: absolute;
-  bottom: 20px;
-  z-index: 2;
-  width: 100%;
-  text-align: center;
-}
-.hero__dots span {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin: 0 4px;
-  border: 1px solid #fff;
-  border-radius: 50%;
-}
-.hero__dots span.is-active { background: #fff; }
+
 
 /* ==========================================================================
    9. 운송장 조회
@@ -923,7 +896,7 @@ button { font: inherit; cursor: pointer; }
     </ul>
 
     <ul class="topbar__links topbar__links--right">
-      <li><a href="#">언어 선택 <i class="caret">▾</i></a></li>
+      <li class="lang-slot"><div class="gtranslate_wrapper"></div></li>
 <%  boolean topIn = member != null || Session.memberId(request) != null;
     String topName = member != null ? member.getName() : (String) session.getAttribute("loginMemberName");
     if (topName == null || topName.trim().isEmpty()) topName = "회원";
@@ -969,8 +942,6 @@ button { font: inherit; cursor: pointer; }
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/status/dashboard">종합현황</a></li>
             <li><a href="<%= ctx %>/status/tracking">트레킹입력</a></li>
-            <li><a href="<%= ctx %>/status/nodata">노데이터 확인</a></li>
-            <li><a href="<%= ctx %>/status/storage">보관현황</a></li>
           </ul>
         </li>
         <li class="main-nav__item">
@@ -1024,11 +995,6 @@ button { font: inherit; cursor: pointer; }
         <div class="col col--two-thirds">
           <div class="hero">
             <a class="hero__link" href="#" aria-label="배너 자세히 보기"></a>
-            <button class="hero__arrow hero__arrow--prev" type="button" aria-label="이전">‹</button>
-            <button class="hero__arrow hero__arrow--next" type="button" aria-label="다음">›</button>
-            <div class="hero__dots">
-              <span class="is-active"></span><span></span><span></span>
-            </div>
           </div>
         </div>
 
@@ -1371,5 +1337,18 @@ button { font: inherit; cursor: pointer; }
   });
 })();
 </script>
+<script>
+(function () {
+  // 번역 위젯은 선택한 언어를 googtrans 쿠키(예: /ko/ja)에 저장한다. 그 값을 읽어 언어별 배너(CSS)가 바뀌게 한다.
+  function sync() {
+    var m = document.cookie.match(/(?:^|;\s*)googtrans=\/[^\/]*\/([a-z-]+)/i);
+    var l = m ? m[1].toLowerCase() : 'ko';
+    if (document.documentElement.getAttribute('data-kuro-lang') !== l) document.documentElement.setAttribute('data-kuro-lang', l);
+  }
+  sync();
+  setInterval(sync, 1000);
+})();
+</script>
+<%@ include file="common/translate.jspf" %>
 </body>
 </html>

@@ -4,17 +4,16 @@ import java.io.IOException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jp.kurologi.service.BuyImageUpload;
 import jp.kurologi.service.BuyOrderDelete;
 import jp.kurologi.service.BuyOrderForm;
 import jp.kurologi.service.BuyOrderInsert;
 import jp.kurologi.service.BuyOrderList;
+import jp.kurologi.service.BuyOrderLookup;
 import jp.kurologi.service.BuyOrderView;
 import jp.kurologi.service.Command;
 import jp.kurologi.service.ServiceType;
@@ -28,12 +27,11 @@ import jp.kurologi.service.ServiceType;
  *   /buyorder/list     내 주문 목록 (GET)                         -> BuyOrderList   -> order_list.jsp
  *   /buyorder/view     주문 상세 (GET)                            -> BuyOrderView   -> order_view.jsp
  *   /buyorder/delete   접수대기 주문 삭제 (POST)                  -> BuyOrderDelete
- *   /buyorder/upload   상품 이미지 업로드 (POST, Ajax)            -> BuyImageUpload (파일을 받으므로 @MultipartConfig 필요)
+ *   /buyorder/addresses · products · recent   주소록 · 등록상품 · 최근 주문 불러오기 (JSON, Ajax) -> BuyOrderLookup
  *
  * 흐름 : 컨트롤러(주소 판단) -> Command(실제 처리) -> DAO(DB) -> (true 이면) JSP forward
  */
 @WebServlet({ "/buyorder/*", "/shiporder/*" })
-@MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 5L * 1024 * 1024, maxRequestSize = 6L * 1024 * 1024)
 public class BuyOrderController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -94,8 +92,10 @@ public class BuyOrderController extends HttpServlet {
 			command = new BuyOrderDelete();
 			break;
 
-		case "/upload":
-			command = new BuyImageUpload();
+		case "/addresses":
+		case "/products":
+		case "/recent":
+			command = new BuyOrderLookup(pathInfo.substring(1));
 			break;
 
 		default:

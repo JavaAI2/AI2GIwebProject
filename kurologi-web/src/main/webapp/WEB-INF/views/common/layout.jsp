@@ -46,7 +46,7 @@
       <li><a href="<%= ctx %>/community/qna">1:1게시판</a></li>
     </ul>
     <ul class="topbar__links topbar__links--right">
-      <li><a href="#">언어 선택 <i>▾</i></a></li>
+      <li class="lang-slot"><div class="gtranslate_wrapper"></div></li>
 <%  if (loggedIn) { %>
       <li><span class="topbar__welcome"><strong><%= Html.esc(topName) %></strong>님 환영합니다.</span></li>
       <li><a href="<%= ctx %>/logout">로그아웃</a></li>
@@ -83,8 +83,6 @@
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/status/dashboard">종합현황</a></li>
             <li><a href="<%= ctx %>/status/tracking">트레킹입력</a></li>
-            <li><a href="<%= ctx %>/status/nodata">노데이터 확인</a></li>
-            <li><a href="<%= ctx %>/status/storage">보관현황</a></li>
           </ul>
         </li>
         <li class="main-nav__item<%= Html.cls("mypage".equals(menu), "is-current") %>">
@@ -265,6 +263,7 @@
   });
 })();
 </script>
+<%@ include file="translate.jspf" %>
 </body>
 </html>
 <%  } %>

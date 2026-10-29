@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"
-    import="jp.kurologi.web.Html,jp.kurologi.model.BuyOrderDTO,jp.kurologi.model.BuyOrderItemDTO,jp.kurologi.service.UploadStore,java.text.DecimalFormat,java.util.List" %>
+    import="jp.kurologi.service.OrderStatus,jp.kurologi.web.Html,jp.kurologi.model.BuyOrderDTO,jp.kurologi.model.BuyOrderItemDTO,java.text.DecimalFormat,java.util.List" %>
 <%
     String ctx = request.getContextPath();
     // 구매대행(BUY) / 배송대행(SHIP) : 컨트롤러가 request 에 담아 준다.
@@ -512,6 +512,8 @@ a:hover { color: var(--teal); }
 .flash--error { color: #8a1f11; background: #fdecea; border-color: #f5c6cb; }
 .state--wait { color: var(--muted); border: 1px solid #bbb; }
 .state--submit { color: var(--teal); border: 1px solid var(--teal); }
+.state--received { color: #8a5a00; border: 1px solid #d9a441; }
+.state--shipped { color: #fff; background: #37b149; border: 1px solid #37b149; }
 .list-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--body); }
 .list-top strong { color: var(--orange); }
 a.pager__item { text-decoration: none; margin: 0 2px; }
@@ -572,12 +574,13 @@ a.pager__item:hover { background: var(--orange-bg); }
           <th>결제예정(₩)</th>
 <% } %>
           <th>상태</th>
+          <th>결제</th>
           <th>접수일시</th>
         </tr>
       </thead>
       <tbody>
 <% if (orders.isEmpty()) { %>
-        <tr><td class="data-table__empty" colspan="<%= ship ? 7 : 8 %>"><%= ship ? "등록한 배송대행 신청이 없습니다." : "등록한 주문이 없습니다." %></td></tr>
+        <tr><td class="data-table__empty" colspan="<%= ship ? 8 : 9 %>"><%= ship ? "등록한 배송대행 신청이 없습니다." : "등록한 주문이 없습니다." %></td></tr>
 <% } %>
 <% for (int i = 0; i < orders.size(); i++) {
        BuyOrderDTO o = orders.get(i);
@@ -593,7 +596,8 @@ a.pager__item:hover { background: var(--orange-bg); }
 <% if (!ship) { %>
           <td class="is-right"><%= o.getAppliedRate() == null ? "-" : df.format(o.getTotalKrw()) %></td>
 <% } %>
-          <td class="is-center"><span class="state <%= wait ? "state--wait" : "state--submit" %>"><%= wait ? "접수대기" : "접수신청" %></span></td>
+          <td class="is-center"><span class="state <%= OrderStatus.css(o.getStatus()) %>"><%= OrderStatus.label(o.getStatus()) %></span></td>
+          <td class="is-center"><%= OrderStatus.payLabel(o.getStatus(), o.getPayStatus()) %></td>
           <td class="is-center"><%= Html.esc(o.getCreatedAt()) %></td>
         </tr>
 <% } %>
