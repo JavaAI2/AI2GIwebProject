@@ -590,10 +590,10 @@ a.admin-stat:hover { border-color: var(--orange); }
         <p class="admin-stat__label">자주묻는 질문</p>
         <p class="admin-stat__value"><%= Html.num(stats.getOrDefault("FAQ_CNT", 0)) %></p>
       </a>
-      <div class="admin-stat">
+      <a class="admin-stat" href="<%= ctx %>/admin/community/message">
         <p class="admin-stat__label">발송된 알림(누적)</p>
         <p class="admin-stat__value"><%= Html.num(stats.getOrDefault("MSG_CNT", 0)) %></p>
-      </div>
+      </a>
     </div>
 
     <div class="btn-row">

@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.service.AdminHome;
+import jp.kurologi.service.AdminMessageList;
+import jp.kurologi.service.AdminMessageSend;
 import jp.kurologi.service.AdminFaqDelete;
 import jp.kurologi.service.AdminFaqList;
 import jp.kurologi.service.AdminFaqUpdate;
@@ -39,7 +41,9 @@ import jp.kurologi.service.Command;
  *   /admin/community/faq/update    FAQ 수정 (GET 폼 / POST 저장)
  *   /admin/community/faq/visible   FAQ 노출 / 숨김 바꾸기 (POST)
  *   /admin/community/faq/delete    FAQ 삭제 (POST)
- *   (이후 단계에서 특가, 알림 발송 주소를 이 switch 에 하나씩 추가한다)
+ *   /admin/community/message       알림 발송 이력 (전체 회원)
+ *   /admin/community/message/send  알림 발송 (GET 폼 / POST 발송)
+ *   (기능을 더 만들면 주소를 이 switch 에 하나씩 추가한다)
  *
  * 흐름은 CommunityController 와 같다 : 컨트롤러 -> Command(서비스) -> DAO,
  * Command 가 true 를 돌려주면 JSP 로 forward, false 면 이미 응답(redirect 등)을 끝낸 것.
@@ -130,6 +134,15 @@ public class AdminCommunityController extends HttpServlet {
 		case "/admin/community/faq/delete":
 			command = new AdminFaqDelete();
 			postOnly = true;
+			break;
+
+		case "/admin/community/message":
+			command = new AdminMessageList();
+			page = "message_list.jsp";
+			break;
+		case "/admin/community/message/send":
+			command = new AdminMessageSend();
+			page = "message_send.jsp";
 			break;
 
 		default:
