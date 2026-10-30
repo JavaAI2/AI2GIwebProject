@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.mindrot.jbcrypt.BCrypt;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -95,7 +93,7 @@ public class MemberInsert implements Command {
 
 		MemberDTO dto = new MemberDTO();
 		dto.setLoginId(loginId);
-		dto.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt()));
+		dto.setPasswordHash(PasswordHasher.hash(password));
 		dto.setPwQuizAnswerHash(PwQuiz.hash(pwQuizAnswer));
 		dto.setName(name);
 		dto.setEnglishName(englishName.isEmpty() ? null : englishName);

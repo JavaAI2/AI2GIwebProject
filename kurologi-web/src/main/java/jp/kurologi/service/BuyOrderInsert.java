@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -15,29 +14,36 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.model.BuyOrderDTO;
-import jp.kurologi.model.Charge;
-import jp.kurologi.model.ExchangeRate;
-import jp.kurologi.model.Member;
-import jp.kurologi.model.Payment;
 import jp.kurologi.model.BuyOrderItemDTO;
+import jp.kurologi.model.ExchangeRate;
 import jp.kurologi.repository.BuyOrderDAO;
+import jp.kurologi.service.UploadStore;
 import jp.kurologi.web.App;
 import jp.kurologi.web.Session;
 
 /**
- * 구매대행 주문서 저장 서비스 (POST /buyorder/save) — 새 주문 저장 + 접수대기 주문 수정을 함께 처리한다.
+ * 구매대행 · 배송대행 주문서 저장 서비스 (POST /buyorder/save, /shiporder/save)
+ * 새 주문 저장 + 접수대기 주문 수정을 함께 처리한다.
  *   mode=wait   : 접수대기 — 받는 사람 이름과 상품명만 있으면 저장 (트래킹번호 등은 나중에 입력)
  *   mode=submit : 접수신청 — 주소 · 휴대전화 · 트래킹번호 · 25개 동의를 모두 확인
+ *                 저장이 끝나면 비용결제 목록에 결제 대기건을 올리고, 마이페이지 > 결제방법으로 이동한다.
  *   orderId 가 같이 넘어오면 "수정"이다 (내 주문 + 접수대기 상태일 때만).
  *
  * 검증에 실패하면 입력한 값을 그대로 담아(formOrder) 주문서 화면으로 되돌려 보낸다.
  * (브라우저의 JavaScript 검사는 우회할 수 있으므로 서버에서 다시 검사한다)
+ *
+ * (수정) 새 주문을 DB 에 저장하다 실패했을 때 formOrder 에 새로 받은 주문 번호가 남아 있으면,
+ *        화면이 그것을 "수정 중인 주문"으로 착각해 다시 저장할 때 "존재하지 않는 주문입니다" 가 나왔다.
+ *        그래서 실패하면 주문 번호를 비워서 돌려보낸다.
  */
 public class BuyOrderInsert implements Command {
 
 	private static final int MAX_ITEMS = 20;        // 제품품목수 20건 제한 (동의 3번)
 	private static final int AGREE_COUNT = 25;      // 해외배송규정 동의 항목 수
 	private static final String CENTER = "위해 / LCL 사업자(월/수/금)";
+
+	/** [시험용] 배송대행은 아직 배송비를 계산하지 않으므로, 접수신청하면 이 금액(원)의 결제 대기건을 만든다. 필요하면 고치세요. */
+	private static final long SHIP_DEMO_FEE_KRW = 15_000L;
 
 	private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9\\-+() ]{7,30}$");
 	private static final Pattern BIZNO_PATTERN = Pattern.compile("^[0-9]{10}$");
@@ -74,6 +80,11 @@ public class BuyOrderInsert implements Command {
 			existing = dao.findById(editId);
 			if (existing == null || existing.getMemberId() != memberId.longValue()
 					|| !svc.equals(ServiceType.normalize(existing.getServiceType()))) {
+				// 어느 조건 때문에 막혔는지 콘솔에 남긴다 (원인 찾기용)
+				System.out.println("[주문수정 거부] editId=" + editId
+						+ ", 주문있음=" + (existing != null)
+						+ (existing == null ? "" : ", 주문회원=" + existing.getMemberId() + ", 로그인회원=" + memberId
+								+ ", 주문서비스=" + existing.getServiceType() + ", 요청서비스=" + svc));
 				Session.flash(request, "error", "존재하지 않는 주문입니다.");
 				response.sendRedirect(ctx + base + "/list");
 				return false;
@@ -117,42 +128,61 @@ public class BuyOrderInsert implements Command {
 		} else {
 			long orderId = dao.nextOrderId();
 			if (orderId < 0) {
-				return fail(request, order, "주문서 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+				return fail(request, order, "주문서 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요. (주문 번호 발급 실패)");
 			}
 			order.setOrderId(orderId);
 			order.setOrderNo((ServiceType.SHIP.equals(svc) ? "D" : "B") + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE)
 					+ "-" + String.format("%05d", orderId));
 			ok = dao.insert(order);
+			if (!ok) {
+				// 저장에 실패했으면 새로 받은 번호를 버린다 (남겨 두면 다음 저장이 "수정"으로 오해되어 존재하지 않는 주문이 된다)
+				order.setOrderId(0);
+				order.setOrderNo(null);
+			}
 		}
 		if (!ok) {
-			return fail(request, order, "주문서 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+			return fail(request, order, "주문서 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요. (자세한 원인은 서버 콘솔의 ORA- 오류를 확인하세요)");
 		}
 
-		// 접수신청이면 상품대금(원화)을 마이페이지 > 결제관리 > 비용결제 목록에 결제 대기건으로 올린다.
-		// 금액은 위에서 계산한 "접수 시점 고시환율" 기준이라, 이후 환율이 바뀌어도 이 주문의 결제 금액은 변하지 않는다.
+		// ---- 접수신청이면 결제 대기건을 비용결제 목록에 올린다 ----
+		// 구매대행 : 접수 시점 고시환율로 계산한 상품대금(원)   (이후 환율이 바뀌어도 이 주문의 결제 금액은 변하지 않는다)
+		// 배송대행 : [시험용] 고정 배송비
 		boolean charged = false;
-		String payNote = "";
-		if (submit && order.getAppliedRate() != null && order.getTotalKrw() > 0) {
+		long chargeAmount = 0;
+		String chargeTitle = null;
+		if (submit) {
+			if (ServiceType.BUY.equals(svc) && order.getAppliedRate() != null && order.getTotalKrw() > 0) {
+				chargeAmount = order.getTotalKrw();
+				chargeTitle = ServiceType.label(svc) + " 상품대금 (고시환율 100엔=" + order.getAppliedRate().toPlainString() + "원)";
+			} else if (ServiceType.SHIP.equals(svc)) {
+				chargeAmount = SHIP_DEMO_FEE_KRW;
+				chargeTitle = ServiceType.label(svc) + " 배송비 (시험용)";
+			}
+		}
+		if (chargeTitle != null) {
 			App app = App.of(request.getServletContext());
 			if (app != null) {
-				String title = ServiceType.label(svc) + " 상품대금 (고시환율 100엔=" + order.getAppliedRate().toPlainString() + "원 적용)";
-				Charge charge = app.payments.addCharge(memberId, title, order.getOrderNo(), order.getTotalKrw());
-				charged = true;
-
-				// 예치금 자동결제를 선택했으면 방금 만든 결제 대기건을 예치금으로 바로 결제한다.
-				// 예치금이 모자라면 결제하지 않고(부분 결제 없음) 마이페이지 > 결제관리에서 직접 결제하도록 안내한다.
-				if (order.isAutoPay()) {
-					if (tryAutoPay(app, memberId, charge, dao, order.getOrderId())) {
-						payNote = " 예치금으로 자동결제했습니다.";
-					} else {
-						payNote = " 예치금이 부족해 자동결제하지 못했습니다. 마이페이지 > 결제관리에서 직접 결제해 주세요.";
-					}
+				try {
+					app.payments.addCharge(memberId, chargeTitle, order.getOrderNo(), chargeAmount);
+					charged = true;
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+					Session.flash(request, "error", "주문은 접수되었지만 결제 대기건을 만들지 못했습니다. (CHARGE 테이블 · 시퀀스를 확인하세요) 주문번호 : " + order.getOrderNo());
+					response.sendRedirect(ctx + base + "/view?id=" + order.getOrderId());
+					return false;
 				}
 			}
 		}
 
-		Session.flash(request, "info", (submit ? "접수신청" : "접수대기") + "으로 저장했습니다. 주문번호 : " + order.getOrderNo()
-				+ (charged ? " (결제 금액 ₩" + String.format("%,d", order.getTotalKrw()) + ")" + payNote : ""));
+		if (charged) {
+			// 접수신청 완료 -> 바로 마이페이지 > 결제방법(비용결제)으로 이동
+			Session.flash(request, "info", "접수신청으로 저장했습니다. 주문번호 : " + order.getOrderNo()
+					+ " / 결제 금액 ₩" + String.format("%,d", chargeAmount) + " 을(를) 아래 비용결제 목록에서 결제해 주세요.");
+			response.sendRedirect(ctx + "/mypage/payment");
+			return false;
+		}
+
+		Session.flash(request, "info", (submit ? "접수신청" : "접수대기") + "으로 저장했습니다. 주문번호 : " + order.getOrderNo());
 		response.sendRedirect(ctx + base + "/view?id=" + order.getOrderId());
 		return false;
 	}
@@ -229,9 +259,7 @@ public class BuyOrderInsert implements Command {
 			item.setColor(cut(at(color, i), 100));
 			item.setItemSize(cut(at(size, i), 100));
 			item.setProductUrl(cut(at(productUrl, i), 1000));
-			// 옛 이미지 업로드 기능으로 저장된 /uploads/... 경로는 더 이상 쓰지 않으므로 비운다 (이미지는 http(s) 주소만 사용)
-			String img = cut(at(imageUrl, i), 1000);
-			item.setImageUrl(img.startsWith("/uploads/") ? "" : img);
+			item.setImageUrl(cut(at(imageUrl, i), 1000));
 			item.setMarketName(cut(at(marketName, i), 100));
 			item.setMarketOrderNo(cut(at(marketOrder, i), 100));
 			item.setHsCode(cut(at(hsCode, i), 30));
@@ -309,13 +337,13 @@ public class BuyOrderInsert implements Command {
 			if (item.getItemNameEn().isEmpty()) {
 				return label + "상품명(영문)을 입력해 주세요.";
 			}
-			// 상품URL · 이미지URL 은 나중에 링크/이미지로 화면에 출력되므로 http(s) 주소만 허용
+			// 상품URL · 이미지URL 은 나중에 링크/이미지로 화면에 출력되므로 http(s) 또는 우리 업로드 주소만 허용
 			// (javascript: 같은 주소를 막기 위해)
-			if (!isSafeUrl(item.getProductUrl())) {
+			if (!isSafeUrl(item.getProductUrl(), false)) {
 				return label + "상품URL은 http:// 또는 https:// 로 시작해야 합니다.";
 			}
-			if (!isSafeUrl(item.getImageUrl())) {
-				return label + "이미지URL은 http:// 또는 https:// 로 시작해야 합니다.";
+			if (!isSafeUrl(item.getImageUrl(), true)) {
+				return label + "이미지URL은 http:// 또는 https:// 로 시작하거나, 이미지 업로드 버튼으로 올려 주세요.";
 			}
 			if (submit && item.getTrackingNo().isEmpty()) {
 				return label + "트래킹번호를 입력해 주세요. (없으면 '접수대기'로 저장하세요)";
@@ -332,25 +360,6 @@ public class BuyOrderInsert implements Command {
 	}
 
 	/**
-	 * 예치금으로 결제 대기건을 결제한다. 성공하면 주문을 "결제완료" 로 표시하고 true.
-	 * 결제 계산은 기존 PaymentService.pay 가 한다. (예치금이 모자라면 pay 가 무통장 입금 절차로 넘어가 버리므로 미리 확인한다)
-	 */
-	private boolean tryAutoPay(App app, long memberId, Charge charge, BuyOrderDAO dao, long orderId) {
-		try {
-			Member m = app.members.findById(memberId).orElse(null);
-			if (m == null || m.getDeposit() < charge.getAmount()) {
-				return false;
-			}
-			app.payments.pay(memberId, new PaymentService.PayRequest(List.of(charge.getId()), Payment.Method.DEPOSIT, charge.getAmount(), null));
-			dao.markPaid(orderId);
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	/**
 	 * 검사에 실패했을 때 : 입력한 값을 formOrder 에 담고 오류 메시지를 띄운 채 주문서 화면으로 forward 한다.
 	 * (redirect 가 아니라 forward 라서 사용자가 쓴 내용이 지워지지 않는다)
 	 * true 를 돌려주면 컨트롤러가 order_form.jsp 로 forward 한다.
@@ -361,13 +370,17 @@ public class BuyOrderInsert implements Command {
 		return true;
 	}
 
-	/** 빈 값이거나 http:// , https:// 로 시작하는 주소인지 (javascript: 같은 주소를 막는다) */
-	private static boolean isSafeUrl(String url) {
+	/** 빈 값이거나 http(s) 주소이거나, (allowUpload 일 때) 우리가 만든 업로드 주소인지 */
+	private static boolean isSafeUrl(String url, boolean allowUpload) {
 		if (url.isEmpty()) {
 			return true;
 		}
 		String lower = url.toLowerCase();
-		return lower.startsWith("http://") || lower.startsWith("https://");
+		if (lower.startsWith("http://") || lower.startsWith("https://")) {
+			return true;
+		}
+		return allowUpload && url.startsWith(UploadStore.URL_PREFIX)
+				&& UploadStore.FILE_NAME.matcher(url.substring(UploadStore.URL_PREFIX.length())).matches();
 	}
 
 	/** 동의 체크박스(name="agree", value=1~25) 25개가 모두 넘어왔는지 */

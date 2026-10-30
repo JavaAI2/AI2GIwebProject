@@ -9,8 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.mindrot.jbcrypt.BCrypt;
-
 import jp.kurologi.repository.MemberFindDAO;
 
 /**
@@ -81,7 +79,7 @@ public class ResetPwCommand implements Command {
 		}
 
 		// 3. 암호화해서 저장
-		int result = new MemberFindDAO().updatePassword(memberId, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+		int result = new MemberFindDAO().updatePassword(memberId, PasswordHasher.hash(newPassword));
 
 		if (result == 0) {
 			errors.put("find", "비밀번호 변경 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");

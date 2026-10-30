@@ -10,8 +10,16 @@
 
     Member member = (Member) request.getAttribute("member");
     String tab = (String) request.getAttribute("tab");                         // pending | history
-    List<Charge> charges = (List<Charge>) request.getAttribute("charges");     // 비용결제 탭
+    List<Charge> charges = (List<Charge>) request.getAttribute("charges");     // 비용결제 탭 (결제 대기건)
     List<Payment> payments = (List<Payment>) request.getAttribute("payments"); // 결제내역 탭
+
+    // 결제내역 탭에는 결제가 끝난 건만 보여준다 (취소 · 대기 건은 제외)
+    List<Payment> paidList = new ArrayList<>();
+    if (payments != null) {
+        for (Payment p : payments) {
+            if (p.getStatus() == Payment.Status.PAID) paidList.add(p);
+        }
+    }
 %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -379,14 +387,7 @@ a:hover { color: var(--teal); }
 }
 
 .pay-bottom__left { padding: 20px; }
-.pay-bottom__hint { margin: 10px 0 14px; font-size: 13px; color: var(--red); }
-
-.pay-bottom__fields {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr auto;
-  gap: 6px;
-  align-items: center;
-}
+.pay-bottom__hint { margin: 10px 0 0; font-size: 13px; line-height: 1.7; color: var(--red); }
 
 .pay-bottom__right {
   padding: 20px;
@@ -438,6 +439,8 @@ a:hover { color: var(--teal); }
 .btn:hover { background: #5c5c5c; }
 .btn--navy { background: var(--navy); }
 .btn--navy:hover { background: #16263f; }
+.btn--orange { background: var(--orange); }
+.btn--orange:hover { background: #e06400; }
 .btn--sm { padding: 10px 14px; font-size: 13px; }
 
 .btn-row {
@@ -533,6 +536,22 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
 .pay-status--canceled { color: var(--muted); }
 
 .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* 예치금 충전 줄 (시험용) */
+.deposit-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 14px 18px;
+  background: var(--orange-bg);
+  border: 1px solid #f3dcc0;
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--ink);
+}
+.deposit-bar strong { margin-left: 6px; font-size: 20px; color: var(--orange); }
 </style>
 </head>
 <body>
@@ -564,8 +583,8 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
     </div>
 
 <%  if ("history".equals(tab)) { %>
-    <%-- ============ 결제내역 ============ --%>
-    <p class="pay-total">Total : <%= payments.size() %>건</p>
+    <%-- ============ 결제내역 (결제 완료 건만) ============ --%>
+    <p class="pay-total">Total : <%= paidList.size() %>건</p>
     <table class="pay-table">
       <thead>
         <tr>
@@ -578,24 +597,34 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
         </tr>
       </thead>
       <tbody>
-<%      for (Payment p : payments) { %>
+<%      for (Payment p : paidList) { %>
         <tr>
           <td class="is-center"><%= p.getCreatedAtText() %></td>
           <td><%= Html.esc(p.getSummary()) %></td>
-          <td class="is-center"><%= p.getMethod().getLabel() %><% if (p.getDepositorName() != null) { %> (<%= Html.esc(p.getDepositorName()) %>)<% } %></td>
-          <td class="is-right">₩<%= Html.num(p.getPayAmount()) %></td>
+          <td class="is-center"><%= p.getMethod().getLabel() %></td>
+          <td class="is-right">₩<%= Html.num(p.getTotalAmount()) %></td>
           <td class="is-right">₩<%= Html.num(p.getDepositUsed()) %></td>
           <td class="is-center"><span class="pay-status pay-status--<%= p.getStatus().name().toLowerCase() %>"><%= p.getStatus().getLabel() %></span></td>
         </tr>
 <%      } %>
-<%      if (payments.isEmpty()) { %>
+<%      if (paidList.isEmpty()) { %>
         <tr><td class="pay-table__empty" colspan="6">결제 내역이 존재하지 않습니다.</td></tr>
 <%      } %>
       </tbody>
     </table>
 
 <%  } else { %>
-    <%-- ============ 비용결제 ============ --%>
+    <%-- ============ 비용결제 (결제 대기건) ============ --%>
+
+    <%-- 예치금 충전 (시험용) : 누를 때마다 30,000원 충전. 아래 결제 폼과 겹치지 않도록 따로 둔 폼 --%>
+    <form id="chargeForm" method="post" action="<%= ctx %>/mypage/payment/charge-deposit">
+      <input type="hidden" name="_csrf" value="<%= Html.esc(session.getAttribute(Session.CSRF)) %>">
+    </form>
+    <div class="deposit-bar">
+      <span>보유 예치금<strong>₩<%= Html.num(member.getDeposit()) %></strong></span>
+      <button class="btn btn--orange btn--sm" type="submit" form="chargeForm">예치금 충전하기 (+₩30,000)</button>
+    </div>
+
     <form id="payForm" method="post" action="<%= ctx %>/mypage/payment" data-deposit="<%= member.getDeposit() %>">
       <input type="hidden" name="_csrf" value="<%= Html.esc(session.getAttribute(Session.CSRF)) %>">
 
@@ -612,13 +641,30 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
           </tr>
         </thead>
         <tbody>
-<%      for (Charge ch : charges) { %>
+<%      for (Charge ch : charges) {
+            // 상세 링크 : 주문번호(B20261029-00012 / D...)의 뒷부분이 주문 번호(ORDER_ID)와 같다
+            String chNo = ch.getOrderNo();
+            String href = "#";
+            try {
+                if (chNo != null && chNo.indexOf('-') > 0) {
+                    long oid = Long.parseLong(chNo.substring(chNo.indexOf('-') + 1));
+                    if (chNo.startsWith("B")) href = ctx + "/buyorder/view?id=" + oid;
+                    else if (chNo.startsWith("D")) href = ctx + "/shiporder/view?id=" + oid;
+                }
+            } catch (NumberFormatException e) {
+                href = "#";
+            }
+%>
           <tr>
             <td class="is-center"><input type="checkbox" name="chargeId" value="<%= ch.getId() %>" data-amount="<%= ch.getAmount() %>" aria-label="선택"></td>
-            <td><%= Html.esc(ch.getTitle()) %></td>
+            <td><%= Html.esc(ch.getTitle()) %>
+<%          if (ch.getStatus() == Charge.Status.IN_PAYMENT) { %>
+              <span class="pay-status pay-status--awaiting_deposit">입금확인중</span>
+<%          } %>
+            </td>
             <td class="is-center"><%= ch.getCreatedAtText() %></td>
             <td class="is-right">₩<%= Html.num(ch.getAmount()) %></td>
-            <td class="is-center"><a href="#" title="주문 상세 화면 연결 예정"><%= Html.esc(ch.getOrderNo()) %></a></td>
+            <td class="is-center"><a href="<%= href %>"><%= Html.esc(ch.getOrderNo()) %></a></td>
           </tr>
 <%      } %>
 <%      if (charges.isEmpty()) { %>
@@ -638,19 +684,13 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
             <label><input type="radio" name="method" value="BANK" checked> 무통장입금</label>
             <label><input type="radio" name="method" value="CARD"> 신용카드(토스)</label>
           </span>
-          <p class="pay-bottom__hint">결제 신청 후 확인이 가능합니다. (보유 예치금 ₩<%= Html.num(member.getDeposit()) %>)</p>
-          <div class="pay-bottom__fields">
-            <input class="input" type="number" name="depositToUse" value="0" min="0" max="<%= member.getDeposit() %>" data-deposit-input aria-label="사용할 예치금">
-            <button class="btn btn--sm" type="button" data-use-all-deposit>예치금 전액사용</button>
-            <input class="input" type="text" name="depositorName" placeholder="입금자명" maxlength="30" data-depositor aria-label="입금자명">
-            <button class="btn btn--sm" type="button" data-use-member-name="<%= Html.esc(member.getName()) %>">회원명으로 사용</button>
-          </div>
+          <p class="pay-bottom__hint">시험용 프로그램입니다. 어느 결제수단을 선택해도 보유 예치금으로 바로 결제됩니다.<br>예치금이 부족하면 위의 '예치금 충전하기'를 눌러 충전해 주세요.</p>
         </div>
         <div class="pay-bottom__right">
           <p><span>결제금액</span><strong data-sum-total>₩0</strong></p>
           <p><span>쿠폰할인</span><strong>₩0</strong></p>
           <p><span>예치금 사용</span><strong data-sum-deposit>₩0</strong></p>
-          <p><span>Total</span><strong class="is-red" data-sum-pay>₩0</strong></p>
+          <p><span>결제 후 예치금</span><strong class="is-red" data-sum-left>₩<%= Html.num(member.getDeposit()) %></strong></p>
         </div>
       </div>
 
@@ -664,7 +704,7 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
 </main>
 
 <script>
-/* 결제 관리 — 선택한 대기건 합계 · 예치금 사용 · 입금자명.
+/* 결제 관리 — 선택한 대기건 합계 · 예치금 사용 미리보기.
    화면 계산은 안내용일 뿐, 실제 금액은 서버(PaymentService)에서 다시 계산합니다. */
 (function () {
   'use strict';
@@ -673,7 +713,6 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
   if (!form) return;
 
   var deposit = Number(form.getAttribute('data-deposit')) || 0;
-  var depositInput = form.querySelector('[data-deposit-input]');
   var checks = form.querySelectorAll('input[name="chargeId"]');
   var checkAll = form.querySelector('[data-check-all]');
   var won = function (n) { return '₩' + n.toLocaleString('ko-KR'); };
@@ -686,11 +725,9 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
 
   function refresh() {
     var total = selectedTotal();
-    var use = Math.max(0, Math.min(Number(depositInput.value) || 0, deposit, total));
-    if (String(use) !== depositInput.value) depositInput.value = use;
     form.querySelector('[data-sum-total]').textContent = won(total);
-    form.querySelector('[data-sum-deposit]').textContent = '-' + won(use);
-    form.querySelector('[data-sum-pay]').textContent = won(total - use);
+    form.querySelector('[data-sum-deposit]').textContent = '-' + won(total);
+    form.querySelector('[data-sum-left]').textContent = (deposit - total < 0 ? '-' : '') + won(Math.abs(deposit - total));
     if (checkAll) checkAll.checked = checks.length > 0 && Array.prototype.every.call(checks, function (c) { return c.checked; });
   }
 
@@ -701,16 +738,6 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
     });
   }
   checks.forEach(function (c) { c.addEventListener('change', refresh); });
-  depositInput.addEventListener('input', refresh);
-
-  form.querySelector('[data-use-all-deposit]').addEventListener('click', function () {
-    depositInput.value = deposit;
-    refresh();
-  });
-
-  form.querySelector('[data-use-member-name]').addEventListener('click', function (e) {
-    form.querySelector('[data-depositor]').value = e.currentTarget.getAttribute('data-use-member-name');
-  });
 
   form.addEventListener('submit', function (e) {
     var total = selectedTotal();
@@ -719,14 +746,12 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
       alert('결제할 항목을 선택해 주세요.');
       return;
     }
-    var remaining = total - (Number(depositInput.value) || 0);
-    var method = form.querySelector('input[name="method"]:checked').value;
-    if (remaining > 0 && method === 'BANK' && !form.querySelector('[data-depositor]').value.trim()) {
+    if (total > deposit) {
       e.preventDefault();
-      alert('입금자명을 입력해 주세요.');
+      alert('예치금이 부족합니다. (결제금액 ' + won(total) + ' / 보유 예치금 ' + won(deposit) + ')\n위의 \'예치금 충전하기\' 버튼으로 충전해 주세요.');
       return;
     }
-    if (!confirm(won(remaining) + ' 결제를 진행하시겠습니까?')) e.preventDefault();
+    if (!confirm(won(total) + ' 을(를) 예치금으로 결제하시겠습니까?')) e.preventDefault();
   });
 
   refresh();

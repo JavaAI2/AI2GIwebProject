@@ -2,11 +2,9 @@ package jp.kurologi.service;
 
 import java.util.Locale;
 
-import org.mindrot.jbcrypt.BCrypt;
-
 /**
  * 비밀번호 퀴즈("가장 기억에 남는 장소는?") 답 처리 도우미.
- * 답은 비밀번호처럼 BCrypt 로 암호화해서 저장한다.
+ * 답은 비밀번호와 같은 PasswordHasher 로 암호화해서 저장한다.
  * 사용자가 "제주 도", "제주도 " 처럼 다르게 쳐도 맞도록 공백을 모두 없애고 소문자로 맞춘 뒤 비교한다.
  */
 public final class PwQuiz {
@@ -23,7 +21,7 @@ public final class PwQuiz {
 
 	/** 저장용 해시 */
 	public static String hash(String answer) {
-		return BCrypt.hashpw(normalize(answer), BCrypt.gensalt());
+		return PasswordHasher.hash(normalize(answer));
 	}
 
 	/** 입력한 답이 저장된 해시와 맞는지 */
@@ -31,9 +29,9 @@ public final class PwQuiz {
 		String n = normalize(answer);
 		if (n.isEmpty() || hash == null) return false;
 		try {
-			return BCrypt.checkpw(n, hash);
-		} catch (IllegalArgumentException e) {
-			return false;   // DB 값이 BCrypt 형식이 아닌 경우
+			return PasswordHasher.matches(n, hash);
+		} catch (RuntimeException e) {
+			return false;   // DB 값이 알 수 없는 형식인 경우
 		}
 	}
 }

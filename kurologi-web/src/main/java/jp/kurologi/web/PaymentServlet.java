@@ -1,7 +1,7 @@
 package jp.kurologi.web;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -14,47 +14,79 @@ import jp.kurologi.model.Payment;
 import jp.kurologi.service.PaymentService.PayRequest;
 import jp.kurologi.service.ValidationException;
 
-/** 결제방법 — ?tab=pending(비용결제) | history(결제내역), POST 결제하기. */
-@WebServlet("/mypage/payment")
+/**
+ * 결제 관리 (마이페이지 > 결제방법) — [시험용]
+ *   GET  /mypage/payment                 비용결제 탭 (결제 대기건)   ?tab=history 이면 결제내역 탭
+ *   POST /mypage/payment                 선택한 대기건을 예치금으로 결제 -> 결제내역 탭으로 이동
+ *   POST /mypage/payment/charge-deposit  예치금 30,000원 충전 (시험용)
+ */
+@WebServlet({"/mypage/payment", "/mypage/payment/charge-deposit"})
 public class PaymentServlet extends BaseServlet {
+    private static final long serialVersionUID = 1L;
+
+    /** 한 번 누를 때 충전되는 시험용 금액 */
+    private static final long TEST_CHARGE_AMOUNT = 30_000L;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         Member m = member(req);
-        boolean history = "history".equals(req.getParameter("tab"));
-        req.setAttribute("tab", history ? "history" : "pending");
-        if (history) {
-            req.setAttribute("payments", app().payments.history(m.getId()));
-        } else {
-            req.setAttribute("charges", app().payments.pendingCharges(m.getId()));
-        }
+        String tab = "history".equals(req.getParameter("tab")) ? "history" : "pending";
+
+        req.setAttribute("tab", tab);
+        req.setAttribute("charges", app().payments.pendingCharges(m.getId()));
+        req.setAttribute("payments", app().payments.history(m.getId()));
         render(req, res, "mypage/payment");
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        String[] raw = req.getParameterValues("chargeId");
-        List<Long> ids = raw == null ? List.of()
-                : Arrays.stream(raw).map(s -> parseLong(s, -1)).filter(id -> id > 0).toList();
-        PayRequest pay = new PayRequest(
-                ids,
-                "CARD".equals(req.getParameter("method")) ? Payment.Method.CARD : Payment.Method.BANK,
-                parseLong(req.getParameter("depositToUse"), 0),
-                req.getParameter("depositorName"));
+        if (req.getServletPath().endsWith("/charge-deposit")) {
+            chargeDeposit(req, res);
+        } else {
+            pay(req, res);
+        }
+    }
+
+    /** 예치금 충전 (시험용) */
+    private void chargeDeposit(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        Member m = member(req);
         try {
-            Payment p = app().payments.pay(member(req).getId(), pay);
-            Session.flash(req, "info", switch (p.getStatus()) {
-                case PAID -> "예치금으로 결제가 완료되었습니다.";
-                case AWAITING_DEPOSIT -> String.format("결제 신청이 접수되었습니다. ₩%,d 을(를) 입금자명 '%s'(으)로 입금해 주세요.",
-                        p.getPayAmount(), p.getDepositorName());
-                // TODO 토스페이먼츠 결제창 연동: 여기서 결제창으로 보내고, 승인 콜백에서 payments.markPaid(id)
-                case AWAITING_CARD -> "신용카드(토스) 결제는 PG 연동 후 사용할 수 있습니다. 결제 신청은 결제내역에 저장되었습니다.";
-                default -> "결제 신청이 접수되었습니다.";
-            });
+            long now = app().payments.chargeTestDeposit(m.getId(), TEST_CHARGE_AMOUNT);
+            Session.flash(req, "info", String.format("예치금 ₩%,d 이(가) 충전되었습니다. (시험용) 현재 예치금: ₩%,d",
+                    TEST_CHARGE_AMOUNT, now));
+        } catch (ValidationException e) {
+            Session.flash(req, "error", message(e, "예치금을 충전하지 못했습니다."));
+        }
+        redirect(req, res, "/mypage/payment");
+    }
+
+    /** 선택한 대기건을 예치금으로 결제 */
+    private void pay(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        Member m = member(req);
+
+        List<Long> ids = new ArrayList<>();
+        String[] raw = req.getParameterValues("chargeId");
+        if (raw != null) {
+            for (String s : raw) {
+                long id = parseLong(s, -1);
+                if (id > 0) ids.add(id);
+            }
+        }
+
+        try {
+            // 결제수단(method)을 무엇으로 골랐든 예치금으로 결제한다 (시험용)
+            Payment p = app().payments.pay(m.getId(), new PayRequest(ids, Payment.Method.DEPOSIT, 0, null));
+            long left = member(req).getDeposit();
+            Session.flash(req, "info", String.format("₩%,d 결제가 완료되었습니다. (예치금 사용) 남은 예치금: ₩%,d",
+                    p.getTotalAmount(), left));
             redirect(req, res, "/mypage/payment?tab=history");
         } catch (ValidationException e) {
-            Session.flash(req, "error", e.getMessage());
+            Session.flash(req, "error", message(e, "결제할 수 없습니다."));
             redirect(req, res, "/mypage/payment");
         }
+    }
+
+    private static String message(ValidationException e, String fallback) {
+        return e.getMessage() == null || e.getMessage().isBlank() ? fallback : e.getMessage();
     }
 }
