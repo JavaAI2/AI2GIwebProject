@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-/** BUY_ORDER 테이블 1행 = 구매대행 주문서 1건 (상품 목록 items 포함) */
+/** BUY_ORDER 테이블 1행 = 구매대행 주문서 1건 (상품 목록 items 포함) 11*/
 public class BuyOrderDTO {
 
 	private long orderId;   // ORDER_ID — 주문 고유번호(BUY_ORDER_SEQ)
