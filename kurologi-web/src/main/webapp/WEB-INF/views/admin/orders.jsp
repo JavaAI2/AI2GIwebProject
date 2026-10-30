@@ -553,6 +553,11 @@ a.btn:hover { color: #fff; }
 .state--shipped { color: #fff; background: var(--green); border: 1px solid var(--green); }
 .state--billed { color: #b34700; border: 1px solid #e8a15c; }
 .state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
+/* 테스트용 단계 변경 (01 ~ 05) */
+.step-test { margin-top: 6px; font-size: 11px; }
+.step-test summary { cursor: pointer; color: var(--muted); }
+.step-test__btns { margin-top: 4px; }
+.step-test__btns .btn { margin: 2px; }
 .state--unpaid { color: var(--red); border: 1px solid var(--red); }
 .state--paid { color: var(--teal); border: 1px solid var(--teal); }
 .order-sub { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
@@ -674,6 +679,19 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
 <% if ("SHIPPED".equals(o.getStatus()) || "DELIVERING".equals(o.getStatus())) { %>
             처리 완료
 <% } %>
+<%   int rowStep = OrderStatus.step(o.getStatus()); %>
+            <details class="step-test">
+              <summary>단계 변경(테스트)</summary>
+              <div class="step-test__btns">
+<% for (int k = 1; k <= OrderStatus.STEP_COUNT; k++) { %>
+                <form class="inline-form" action="<%= ctx %>/admin/orders/action" method="post" onsubmit="return confirm('0<%= k %> <%= OrderStatus.stepName(k) %> 단계로 바꿀까요?');">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="id" value="<%= o.getOrderId() %>"><input type="hidden" name="action" value="set"><input type="hidden" name="step" value="<%= k %>">
+                  <input type="hidden" name="svc" value="<%= svc %>"><input type="hidden" name="st" value="<%= st %>"><input type="hidden" name="page" value="<%= curPage %>">
+                  <button class="btn btn--sm<%= k == rowStep ? " btn--navy" : "" %>" type="submit">0<%= k %> <%= OrderStatus.stepName(k) %></button>
+                </form>
+<% } %>
+              </div>
+            </details>
           </td>
         </tr>
 <% } %>
