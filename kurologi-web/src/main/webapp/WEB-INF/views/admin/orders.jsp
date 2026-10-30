@@ -21,7 +21,7 @@
 
     // 필터 탭의 { 값, 이름 }
     String[][] SVC_TABS = { { "all", "전체" }, { "BUY", "구매대행" }, { "SHIP", "배송대행" } };
-    String[][] ST_TABS = { { "all", "전체" }, { "submit", "접수신청" }, { "received", "입고완료" }, { "shipped", "출고완료" }, { "unpaid", "미결제" } };
+    String[][] ST_TABS = { { "all", "전체" }, { "submit", "접수신청" }, { "received", "입고완료" }, { "billed", "배송비 대기" }, { "shipped", "출고완료" }, { "delivering", "국내 배송 중" }, { "unpaid", "미결제" } };
 %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -551,6 +551,8 @@ a.btn:hover { color: #fff; }
 .state--submit { color: var(--teal); border: 1px solid var(--teal); }
 .state--received { color: #8a5a00; border: 1px solid #d9a441; }
 .state--shipped { color: #fff; background: var(--green); border: 1px solid var(--green); }
+.state--billed { color: #b34700; border: 1px solid #e8a15c; }
+.state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
 .state--unpaid { color: var(--red); border: 1px solid var(--red); }
 .state--paid { color: var(--teal); border: 1px solid var(--teal); }
 .order-sub { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
@@ -586,7 +588,7 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
     <h1 class="sub-title"><span class="sub-title__dash"></span>주문 관리</h1>
 
     <div class="info-box">
-      <p>접수신청된 구매대행 · 배송대행 주문을 처리합니다. <strong>입고 처리 → 결제 확인 → 출고 처리</strong> 순서이며, 출고는 입고완료 + 결제완료 주문만 할 수 있습니다. (접수대기 주문은 표시되지 않습니다)</p>
+      <p>접수신청된 구매대행 · 배송대행 주문을 처리합니다. <strong>입고 처리 → 결제 확인 → 출고 처리</strong> 순서이며, 출고는 입고완료(또는 배송비 대기) + 결제완료 주문만 할 수 있습니다. (접수대기 주문은 표시되지 않습니다)</p>
     </div>
 
     <div class="filter-row">
@@ -625,7 +627,7 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
        int n = (its == null) ? 0 : its.size();
        boolean unpaid = !"PAID".equals(o.getPayStatus());
        boolean canReceive = "SUBMIT".equals(o.getStatus());
-       boolean canShip = "RECEIVED".equals(o.getStatus()) && !unpaid;
+       boolean canShip = ("RECEIVED".equals(o.getStatus()) || "BILLED".equals(o.getStatus())) && !unpaid;
 %>
         <tr>
           <td class="is-center"><%= Html.esc(o.getOrderNo()) %><span class="order-sub"><%= Html.esc(o.getCreatedAt()) %></span></td>
@@ -669,7 +671,7 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
               <button class="btn btn--navy btn--sm" type="submit">출고 처리</button>
             </form>
 <% } %>
-<% if ("SHIPPED".equals(o.getStatus())) { %>
+<% if ("SHIPPED".equals(o.getStatus()) || "DELIVERING".equals(o.getStatus())) { %>
             처리 완료
 <% } %>
           </td>

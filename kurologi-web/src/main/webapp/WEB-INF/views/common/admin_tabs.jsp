@@ -13,7 +13,6 @@
         { "notice", "공지사항", "/admin/community/notice" },
         { "faq", "자주묻는 질문", "/admin/community/faq" },
         { "message", "알림 발송", "/admin/community/message" },
-        { "orders", "주문관리", "/admin/orders" },
     };
 %>
 <ul class="admin-tabs">

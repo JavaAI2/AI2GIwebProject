@@ -28,13 +28,15 @@ public class AdminOrderDAO {
 		switch (st) {
 		case "submit":   return "o.STATUS = 'SUBMIT'";
 		case "received": return "o.STATUS = 'RECEIVED'";
+		case "billed":     return "o.STATUS = 'BILLED'";
 		case "shipped":  return "o.STATUS = 'SHIPPED'";
+		case "delivering": return "o.STATUS = 'DELIVERING'";
 		case "unpaid":   return "o.STATUS <> 'WAIT' AND o.PAY_STATUS = 'UNPAID'";
 		default:         return "o.STATUS <> 'WAIT'";
 		}
 	}
 
-	/** 탭에 보여 줄 건수 : all, submit, received, shipped, unpaid (svc 가 BUY / SHIP 이면 그 서비스만) */
+	/** 탭에 보여 줄 건수 : all, submit, received, billed, shipped, delivering, unpaid (svc 가 BUY / SHIP 이면 그 서비스만) */
 	public Map<String, Integer> counts(String svc) {
 
 		boolean bySvc = "BUY".equals(svc) || "SHIP".equals(svc);
@@ -42,12 +44,14 @@ public class AdminOrderDAO {
 		String sql = "SELECT COUNT(*) AS ALL_CNT, "
 				+ "NVL(SUM(CASE WHEN o.STATUS = 'SUBMIT' THEN 1 ELSE 0 END), 0) AS SUBMIT_CNT, "
 				+ "NVL(SUM(CASE WHEN o.STATUS = 'RECEIVED' THEN 1 ELSE 0 END), 0) AS RECEIVED_CNT, "
+				+ "NVL(SUM(CASE WHEN o.STATUS = 'BILLED' THEN 1 ELSE 0 END), 0) AS BILLED_CNT, "
 				+ "NVL(SUM(CASE WHEN o.STATUS = 'SHIPPED' THEN 1 ELSE 0 END), 0) AS SHIPPED_CNT, "
+				+ "NVL(SUM(CASE WHEN o.STATUS = 'DELIVERING' THEN 1 ELSE 0 END), 0) AS DELIVERING_CNT, "
 				+ "NVL(SUM(CASE WHEN o.PAY_STATUS = 'UNPAID' THEN 1 ELSE 0 END), 0) AS UNPAID_CNT "
 				+ "FROM BUY_ORDER o WHERE o.STATUS <> 'WAIT'" + (bySvc ? " AND o.SERVICE_TYPE = ?" : "");
 
 		Map<String, Integer> map = new LinkedHashMap<>();
-		for (String k : new String[] { "all", "submit", "received", "shipped", "unpaid" }) {
+		for (String k : new String[] { "all", "submit", "received", "billed", "shipped", "delivering", "unpaid" }) {
 			map.put(k, 0);
 		}
 
@@ -61,7 +65,9 @@ public class AdminOrderDAO {
 					map.put("all", rs.getInt("ALL_CNT"));
 					map.put("submit", rs.getInt("SUBMIT_CNT"));
 					map.put("received", rs.getInt("RECEIVED_CNT"));
+					map.put("billed", rs.getInt("BILLED_CNT"));
 					map.put("shipped", rs.getInt("SHIPPED_CNT"));
+					map.put("delivering", rs.getInt("DELIVERING_CNT"));
 					map.put("unpaid", rs.getInt("UNPAID_CNT"));
 				}
 			}
@@ -168,7 +174,7 @@ public class AdminOrderDAO {
 	 * (같은 버튼을 두 번 눌러도, 두 관리자가 동시에 눌러도 단계가 꼬이지 않는다)
 	 *   receive : 접수신청 -> 입고완료
 	 *   pay     : 미결제 -> 결제완료 (입금 확인)
-	 *   ship    : 입고완료 + 결제완료 -> 출고완료
+	 *   ship    : (입고완료 또는 배송비 대기) + 결제완료 -> 출고완료
 	 */
 	public boolean advance(long orderId, String action) {
 
@@ -184,7 +190,7 @@ public class AdminOrderDAO {
 			break;
 		case "ship":
 			sql = "UPDATE BUY_ORDER SET STATUS = 'SHIPPED', STATUS_UPDATED_AT = SYSTIMESTAMP "
-					+ "WHERE ORDER_ID = ? AND STATUS = 'RECEIVED' AND PAY_STATUS = 'PAID'";
+					+ "WHERE ORDER_ID = ? AND STATUS IN ('RECEIVED', 'BILLED') AND PAY_STATUS = 'PAID'";
 			break;
 		default:
 			return false;
@@ -193,6 +199,36 @@ public class AdminOrderDAO {
 		try (Connection conn = DBmanager.getInstance();
 				PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setLong(1, orderId);
+			return pstmt.executeUpdate() == 1;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	/**
+	 * [테스트용] 주문의 진행 단계를 순서와 상관없이 직접 지정한다. 성공하면 true.
+	 * 접수대기(WAIT, 신청 전 임시 저장) 주문은 바꾸지 않는다.
+	 * status · payStatus 는 아래 정해진 값만 받는다. (그 밖의 값이면 SQL 을 실행하지 않고 false)
+	 * 예치금을 쓰거나 돌려주는 처리는 하지 않는다. (상태 표시만 바꾼다)
+	 */
+	public boolean setStatus(long orderId, String status, String payStatus) {
+
+		boolean okStatus = "SUBMIT".equals(status) || "RECEIVED".equals(status) || "BILLED".equals(status)
+				|| "SHIPPED".equals(status) || "DELIVERING".equals(status);
+		boolean okPay = "UNPAID".equals(payStatus) || "PAID".equals(payStatus);
+		if (orderId <= 0 || !okStatus || !okPay) {
+			return false;
+		}
+
+		String sql = "UPDATE BUY_ORDER SET STATUS = ?, PAY_STATUS = ?, STATUS_UPDATED_AT = SYSTIMESTAMP "
+				+ "WHERE ORDER_ID = ? AND STATUS <> 'WAIT'";
+
+		try (Connection conn = DBmanager.getInstance();
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, status);
+			pstmt.setString(2, payStatus);
+			pstmt.setLong(3, orderId);
 			return pstmt.executeUpdate() == 1;
 		} catch (Exception e) {
 			e.printStackTrace();

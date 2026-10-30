@@ -13,7 +13,7 @@ import jp.kurologi.model.BuyOrderItemDTO;
 import jp.kurologi.repository.AdminOrderDAO;
 
 /**
- * 관리자 주문 목록 (GET /admin/orders?svc=all|BUY|SHIP&st=all|submit|received|shipped|unpaid&page=1)
+ * 관리자 주문 목록 (GET /admin/orders?svc=all|BUY|SHIP&st=all|submit|received|billed|shipped|delivering|unpaid&page=1)
  * 관리자 확인은 AdminFilter 가 이미 했다.
  */
 public class AdminOrderList implements Command {
@@ -23,7 +23,7 @@ public class AdminOrderList implements Command {
 			throws ServletException, IOException {
 
 		String svc = whitelist(request.getParameter("svc"), "all", "BUY", "SHIP");
-		String st = whitelist(request.getParameter("st"), "all", "submit", "received", "shipped", "unpaid");
+		String st = whitelist(request.getParameter("st"), "all", "submit", "received", "billed", "shipped", "delivering", "unpaid");
 
 		AdminOrderDAO dao = new AdminOrderDAO();
 

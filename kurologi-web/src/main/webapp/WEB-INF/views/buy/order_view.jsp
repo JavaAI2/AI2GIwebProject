@@ -512,6 +512,24 @@ a:hover { color: var(--teal); }
 .state--submit { color: var(--teal); border: 1px solid var(--teal); }
 .state--received { color: #8a5a00; border: 1px solid #d9a441; }
 .state--shipped { color: #fff; background: #37b149; border: 1px solid #37b149; }
+.state--billed { color: #b34700; border: 1px solid #e8a15c; }
+.state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
+/* 진행 단계 표시줄 (01 신청 완료 ~ 05 국내 배송 중) */
+.step-bar { display: flex; margin: 22px 0 8px; padding: 0; list-style: none; }
+.step-bar li { flex: 1; position: relative; padding-top: 32px; font-size: 13px; text-align: center; color: var(--muted); }
+.step-bar li::before { content: attr(data-n); position: absolute; top: 0; left: 50%; z-index: 1; width: 24px; height: 24px; margin-left: -12px; line-height: 24px; font-size: 12px; font-weight: 700; color: #fff; background: #d6d6d6; border-radius: 50%; }
+.step-bar li::after { content: ""; position: absolute; top: 11px; left: -50%; width: 100%; height: 2px; background: #d6d6d6; }
+.step-bar li:first-child::after { display: none; }
+.step-bar li.is-done::before, .step-bar li.is-current::before { background: var(--teal); }
+.step-bar li.is-done::after, .step-bar li.is-current::after { background: var(--teal); }
+.step-bar li.is-current { font-weight: 700; color: #222; }
+.step-desc { margin: 0 0 20px; font-size: 13px; text-align: center; color: var(--body); }
+/* 개발용 : 테스트용 상태 변경 (관리자 계정에만 보인다) */
+.dev-box { margin-top: 28px; font-size: 11px; text-align: right; color: #aaa; }
+.dev-box summary { display: inline-block; cursor: pointer; }
+.dev-box__body { margin-top: 8px; padding: 10px; text-align: left; background: #fafafa; border: 1px dashed #ccc; border-radius: 4px; }
+.dev-box__body p { margin: 0 0 6px; color: var(--muted); }
+.dev-box__body .btn { margin: 2px 2px 2px 0; }
 .list-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--body); }
 .list-top strong { color: var(--orange); }
 a.pager__item { text-decoration: none; margin: 0 2px; }
@@ -558,6 +576,22 @@ a.pager__item:hover { background: var(--orange-bg); }
       <span>접수일시 <%= Html.esc(o.getCreatedAt()) %></span>
       <span>물류센터 <%= Html.esc(o.getCenter()) %></span>
     </div>
+
+<%
+    // 진행 단계 표시줄 : 접수대기(신청 전)는 단계가 없으므로 보이지 않는다
+    int curStep = OrderStatus.step(o.getStatus());
+    String[] STEP_DESC = { "신청서가 접수되었습니다.", "일본 물류센터에 물건이 도착했습니다.",
+            "무게를 측정했고, 배송비 결제를 기다리고 있습니다.", "결제가 완료되어 한국으로 발송했습니다.",
+            "통관이 끝나 한국 택배사로 인계되어 배송 중입니다." };
+    if (curStep > 0) {
+%>
+    <ol class="step-bar">
+<%     for (int i = 1; i <= OrderStatus.STEP_COUNT; i++) { %>
+      <li data-n="<%= i %>" class="<%= i < curStep ? "is-done" : (i == curStep ? "is-current" : "") %>"><%= OrderStatus.stepName(i) %></li>
+<%     } %>
+    </ol>
+    <p class="step-desc"><%= STEP_DESC[curStep - 1] %></p>
+<% } %>
 
     <h2 class="pane-title">받는 사람 정보</h2>
     <table class="form-table">
@@ -675,6 +709,25 @@ a.pager__item:hover { background: var(--orange-bg); }
       </form>
 <% } %>
     </div>
+
+<% if (Boolean.TRUE.equals(request.getAttribute("isAdmin")) && !wait) { %>
+    <details class="dev-box">
+      <summary>개발용</summary>
+      <div class="dev-box__body">
+        <p>[테스트용 상태 변경] 순서와 상관없이 단계를 바꿉니다. 관리자 계정에만 보입니다. (예치금은 변하지 않습니다)</p>
+<%     for (int i = 1; i <= OrderStatus.STEP_COUNT; i++) { %>
+        <form class="inline-form" action="<%= ctx %>/admin/orders/action" method="post">
+          <input type="hidden" name="_csrf" value="<%= jp.kurologi.web.Session.csrfToken(request) %>">
+          <input type="hidden" name="id" value="<%= o.getOrderId() %>">
+          <input type="hidden" name="action" value="set">
+          <input type="hidden" name="step" value="<%= i %>">
+          <input type="hidden" name="from" value="view">
+          <button class="btn btn--sm<%= i == curStep ? " btn--navy" : "" %>" type="submit">0<%= i %> <%= OrderStatus.stepName(i) %></button>
+        </form>
+<%     } %>
+      </div>
+    </details>
+<% } %>
 
   </div>
 </main>

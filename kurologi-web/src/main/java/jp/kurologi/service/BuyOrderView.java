@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.model.BuyOrderDTO;
+import jp.kurologi.repository.AdminDAO;
 import jp.kurologi.repository.BuyOrderDAO;
 import jp.kurologi.web.Session;
 
@@ -51,6 +52,8 @@ public class BuyOrderView implements Command {
 
 		request.setAttribute("svc", svc);
 		request.setAttribute("order", order);
+		// 관리자 계정이면 화면에 [테스트용 상태 변경] 버튼을 보여 준다 (처리 자체는 AdminFilter 가 다시 확인한다)
+		request.setAttribute("isAdmin", new AdminDAO().isAdmin(memberId));
 		return true;   // order_view.jsp 로 forward
 	}
 }
