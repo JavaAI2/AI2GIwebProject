@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import jp.kurologi.model.Charge;
 import jp.kurologi.model.Member;
 import jp.kurologi.model.Payment;
+import jp.kurologi.model.Waybill;
+import jp.kurologi.repository.BuyOrderDAO;
 import jp.kurologi.repository.MemberRepository;
 import jp.kurologi.repository.PaymentRepository;
 
@@ -21,6 +23,10 @@ import jp.kurologi.repository.PaymentRepository;
  *  - 결제수단(무통장입금 / 신용카드)을 무엇으로 고르든 똑같이 예치금으로 결제됩니다. (결제 프로그램 연동 없음)
  *  - 예치금이 모자라면 결제하지 않고 안내만 합니다. 대기건은 그대로 비용결제 목록에 남습니다.
  *  - 예치금이 충분하면 바로 결제완료(PAID)가 되어 결제내역으로 옮겨집니다.
+ *  - 결제가 완료되면 한국 운송장(도쿄에어 / 후쿠오카 고속해상 중 랜덤)과 일본 운송장(야마토 ~ 메이테츠 중 랜덤)이
+ *    함께 만들어져 결제내역에 보이고, 인덱스 페이지의 운송장 조회로 찾을 수 있습니다. (Waybill)
+ *  - 결제가 완료되면 그 청구건의 주문(BUY_ORDER)도 PAY_STATUS = 'PAID' 로 바뀌어,
+ *    구매대행 · 배송대행 주문내역의 "결제" 칸이 "결제완료"로 보입니다.
  *  - 예치금 충전은 chargeTestDeposit() 으로 임의의 금액을 더합니다. (시험용)
  *
  * 금액은 화면에서 넘어온 값을 믿지 않고 항상 서버에서 대기건 합계로 다시 계산합니다.
@@ -60,6 +66,12 @@ public class PaymentService {
                 || p.getStatus() == Payment.Status.AWAITING_CARD;
     }
 
+    /** 이 결제에 묶여 있는 청구건 목록 (마이페이지의 운송품 현황에서 주문번호를 찾는 데 쓴다) */
+    public List<Charge> chargesOf(Payment p) {
+        if (p.getChargeIds() == null || p.getChargeIds().isEmpty()) return new ArrayList<>();
+        return payments.findCharges(p.getMemberId(), p.getChargeIds());
+    }
+
     /**
      * 결제 대기건을 하나 만든다. 구매대행 · 배송대행 주문이 "접수신청" 될 때 비용결제 목록에 올리는 데 쓴다.
      */
@@ -78,8 +90,22 @@ public class PaymentService {
         return pendingCharges(memberId).stream().mapToLong(Charge::getAmount).sum();
     }
 
+    /**
+     * 결제내역. 결제가 끝났는데 운송장이 아직 없는 건(운송장 기능을 넣기 전에 결제한 건)은
+     * 이때 운송장을 배정해서 저장한다.
+     */
     public List<Payment> history(long memberId) {
-        return payments.findPayments(memberId);
+        List<Payment> list = payments.findPayments(memberId);
+        synchronized (lockFor(memberId)) {
+            for (Payment p : list) {
+                if (p.getStatus() == Payment.Status.PAID
+                        && (p.getKrWaybillNo() == null || p.getJpWaybillNo() == null)) {
+                    Waybill.assign(p);
+                    payments.savePayment(p);
+                }
+            }
+        }
+        return list;
     }
 
     /** [시험용] 예치금을 임의로 충전한다. 충전 뒤 예치금을 돌려준다. */
@@ -146,6 +172,7 @@ public class PaymentService {
             payment.setStatus(Payment.Status.PAID);
             payment.setCreatedAt(LocalDateTime.now());
             payment.setPaidAt(LocalDateTime.now());
+            Waybill.assign(payment);   // 결제 완료 -> 한국 / 일본 운송장을 무작위로 배정
 
             payments.savePayment(payment);
             for (Charge c : charges) {
@@ -155,6 +182,8 @@ public class PaymentService {
             }
             member.setDeposit(member.getDeposit() - payable);
             members.save(member);
+
+            markOrdersPaid(charges);   // 주문내역의 "결제" 칸이 결제완료로 보이도록 주문도 갱신
             return payment;
         }
     }
@@ -167,8 +196,10 @@ public class PaymentService {
             if (p.getStatus() == Payment.Status.CANCELED) throw new IllegalStateException("취소된 결제입니다.");
             p.setStatus(Payment.Status.PAID);
             p.setPaidAt(LocalDateTime.now());
+            Waybill.assign(p);   // 결제가 완료되었으니 운송장을 배정
             payments.savePayment(p);
             updateCharges(p, Charge.Status.PAID);
+            markOrdersPaid(payments.findCharges(p.getMemberId(), p.getChargeIds()));
         }
     }
 
@@ -194,6 +225,32 @@ public class PaymentService {
             c.setStatus(status);
             if (status == Charge.Status.PENDING) c.setPaymentId(null);
             payments.saveCharge(c);
+        }
+    }
+
+    /**
+     * 결제가 끝난 청구건의 주문(BUY_ORDER)을 결제완료(PAY_STATUS = 'PAID')로 바꾼다.
+     * 주문 번호는 주문번호(B20261031-00002 / D...)의 뒷부분이다. (ORDER_ID 와 같다)
+     * 이미 결제완료이거나 접수대기(WAIT)인 주문은 DAO 가 알아서 건너뛴다.
+     */
+    private void markOrdersPaid(List<Charge> charges) {
+        BuyOrderDAO orders = new BuyOrderDAO();
+        for (Charge c : charges) {
+            long orderId = orderIdOf(c.getOrderNo());
+            if (orderId > 0) {
+                orders.markPaid(orderId);
+            }
+        }
+    }
+
+    private static long orderIdOf(String orderNo) {
+        if (orderNo == null) return 0;
+        int dash = orderNo.indexOf('-');
+        if (dash < 0) return 0;
+        try {
+            return Long.parseLong(orderNo.substring(dash + 1));
+        } catch (NumberFormatException e) {
+            return 0;
         }
     }
 

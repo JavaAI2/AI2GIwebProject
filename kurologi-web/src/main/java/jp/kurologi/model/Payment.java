@@ -38,7 +38,19 @@ public class Payment {
     private LocalDateTime createdAt;
     private LocalDateTime paidAt;
 
+    // ---- 운송장 (결제가 완료될 때 무작위로 배정된다. 모델 : Waybill) ----
+    private String krMethod;       // AIR / SEA
+    private String krWaybillNo;    // 한국 운송장번호
+    private String jpCarrier;      // YAMATO ... MEITETSU
+    private String jpWaybillNo;    // 일본 운송장번호
+
     public String getCreatedAtText() { return Formats.dateTime(createdAt); }
+
+    /** 결제내역에 보일 한국 운송 방법 이름 (도쿄에어 / 후쿠오카 고속해상) */
+    public String getKrMethodLabel() { return Waybill.krLabel(krMethod); }
+
+    /** 결제내역에 보일 일본 택배사 이름 */
+    public String getJpCarrierLabel() { return Waybill.jpLabel(jpCarrier); }
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
@@ -66,4 +78,12 @@ public class Payment {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getPaidAt() { return paidAt; }
     public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
+    public String getKrMethod() { return krMethod; }
+    public void setKrMethod(String krMethod) { this.krMethod = krMethod; }
+    public String getKrWaybillNo() { return krWaybillNo; }
+    public void setKrWaybillNo(String krWaybillNo) { this.krWaybillNo = krWaybillNo; }
+    public String getJpCarrier() { return jpCarrier; }
+    public void setJpCarrier(String jpCarrier) { this.jpCarrier = jpCarrier; }
+    public String getJpWaybillNo() { return jpWaybillNo; }
+    public void setJpWaybillNo(String jpWaybillNo) { this.jpWaybillNo = jpWaybillNo; }
 }

@@ -287,6 +287,9 @@ a:hover { color: var(--teal); }
 .summary-tabs a.summary-tabs--green     { background: var(--green); }
 .summary-tabs a.summary-tabs--blue      { background: var(--blue); }
 
+/* 탭은 링크이므로 마우스를 올리면 살짝 어둡게 */
+.summary-tabs a:hover { color: #fff; filter: brightness(.92); }
+
 .summary-links {
   display: flex;
   gap: 18px;
@@ -757,9 +760,9 @@ a:hover { color: var(--teal); }
     <!-- ============ 1. 요약 탭 ============ -->
     <div class="summary-bar">
       <div class="summary-tabs">
-        <a class="is-active" href="#">배송대행 조회</a>
-        <a class="summary-tabs--teal" href="#">구매대행 조회</a>
-        <a class="summary-tabs--blue" href="#">입고내역조회</a>
+        <a class="is-active" href="<%= ctx %>/shiporder/list">배송대행 조회</a>
+        <a class="summary-tabs--teal" href="<%= ctx %>/buyorder/list">구매대행 조회</a>
+        <a class="summary-tabs--blue" href="<%= ctx %>/mypage/payment">입고내역조회</a>
       </div>
       <ul class="summary-links">
         <li><a href="#">배송요금표 보기</a></li>

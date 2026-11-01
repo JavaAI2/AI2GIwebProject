@@ -807,6 +807,12 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
 .login-welcome { margin: 0 0 14px; font-size: 14px; line-height: 1.8; color: #333; }
 .topbar__welcome { display: block; padding: 0 12px 0 20px; height: 44px; line-height: 44px; font-size: 13px; color: #444; white-space: nowrap; }
 .topbar__welcome strong { color: #159692; font-weight: 700; }
+
+/* JSP — 운송장 조회 결과 (시험용) */
+.track-result { margin: 10px 0 0; font-size: 14px; line-height: 1.8; color: var(--ink); white-space: pre-line; }
+.track-result:empty { display: none; }
+.track-result--error { color: var(--red); }
+.track-result--ok strong { color: var(--blue); }
 </style>
 </head>
 <body>
@@ -1084,8 +1090,10 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
 
   <!-- ================================================================
        2) 운송장 조회
+          결제가 완료되면 마이페이지 > 결제방법 > 결제내역에 한국 · 일본 운송장이 만들어지고,
+          여기서 그 번호로 조회할 수 있다. (시험용)
        ================================================================ -->
-  <section class="section">
+  <section class="section" id="tracking">
     <div class="container">
       <div class="row">
 
@@ -1094,14 +1102,15 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
           <div class="card card--blue">
             <div class="card__body">
               <div class="search-bar">
-                <a class="btn btn--dark btn--lg" href="#">한국</a>
-                <select class="field field--lg" aria-label="배송방법">
+                <span class="btn btn--dark btn--lg">한국</span>
+                <select class="field field--lg" id="krType" aria-label="배송방법">
                   <option value="AIR">도쿄에어</option>
                   <option value="SEA">후쿠오카 고속해상</option>
                 </select>
-                <input class="field field--lg" type="text" placeholder="운송장번호 입력" aria-label="운송장번호">
-                <a class="btn btn--dark btn--lg" href="#">검색</a>
+                <input class="field field--lg" id="krNo" type="text" placeholder="운송장번호 입력" aria-label="운송장번호" maxlength="30" autocomplete="off">
+                <button class="btn btn--dark btn--lg" type="button" id="krBtn">검색</button>
               </div>
+              <p class="track-result" id="krResult" role="status"></p>
             </div>
           </div>
         </div>
@@ -1111,8 +1120,8 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
           <div class="card card--yellow">
             <div class="card__body">
               <div class="search-bar">
-                <a class="btn btn--dark btn--lg" href="#">일본</a>
-                <select class="field field--lg" aria-label="택배사">
+                <span class="btn btn--dark btn--lg">일본</span>
+                <select class="field field--lg" id="jpType" aria-label="택배사">
                   <option value="YAMATO" selected>야마토</option>
                   <option value="SAGAWA">사가와</option>
                   <option value="AMAZON">Amazon</option>
@@ -1122,9 +1131,10 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
                   <option value="LASTONE">라스트원</option>
                   <option value="MEITETSU">메이테츠</option>
                 </select>
-                <input class="field field--lg" type="text" placeholder="트레킹넘버 입력" aria-label="운송장번호">
-                <a class="btn btn--dark btn--lg" href="#">검색</a>
+                <input class="field field--lg" id="jpNo" type="text" placeholder="트레킹넘버 입력" aria-label="운송장번호" maxlength="30" autocomplete="off">
+                <button class="btn btn--dark btn--lg" type="button" id="jpBtn">검색</button>
               </div>
+              <p class="track-result" id="jpResult" role="status"></p>
             </div>
           </div>
         </div>
@@ -1347,6 +1357,70 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
   }
   sync();
   setInterval(sync, 1000);
+})();
+</script>
+<script>
+/* ---- 운송장 조회 (시험용) ----
+   결제가 완료되면 결제내역에 만들어지는 한국 · 일본 운송장을 /track/kr, /track/jp 에서 찾아 아래에 보여 준다.
+   결제내역의 "조회" 링크로 들어오면 (?krMethod=..&krNo=.. / ?jpCarrier=..&jpNo=..) 칸을 채우고 바로 조회한다. */
+(function () {
+  var CTX = '<%= ctx %>';
+
+  function show(out, ok, text) {
+    out.className = 'track-result ' + (ok ? 'track-result--ok' : 'track-result--error');
+    out.textContent = text;
+  }
+
+  function track(kind, typeId, noId, resultId) {
+    var type = document.getElementById(typeId).value;
+    var no = document.getElementById(noId).value.trim();
+    var out = document.getElementById(resultId);
+
+    if (!no) { show(out, false, '운송장번호를 입력해 주세요.'); return; }
+    out.className = 'track-result';
+    out.textContent = '조회 중...';
+
+    fetch(CTX + '/track/' + kind + '?type=' + encodeURIComponent(type) + '&no=' + encodeURIComponent(no),
+          { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok) { show(out, false, j.message); return; }
+        show(out, true, '[' + j.type + '] ' + j.number + '\n상태 : ' + j.status + '\n접수일시 : ' + j.date);
+      })
+      .catch(function () {
+        show(out, false, '조회하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      });
+  }
+
+  function bind(kind, typeId, noId, btnId, resultId) {
+    document.getElementById(btnId).addEventListener('click', function () { track(kind, typeId, noId, resultId); });
+    document.getElementById(noId).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); track(kind, typeId, noId, resultId); }
+    });
+  }
+
+  bind('kr', 'krType', 'krNo', 'krBtn', 'krResult');
+  bind('jp', 'jpType', 'jpNo', 'jpBtn', 'jpResult');
+
+  // 결제내역의 "조회" 링크로 들어온 경우 : 값을 채우고 바로 조회
+  var q = new URLSearchParams(location.search);
+
+  function fill(typeId, noId, type, no) {
+    var sel = document.getElementById(typeId);
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === type) { sel.selectedIndex = i; break; }
+    }
+    document.getElementById(noId).value = no;
+  }
+
+  if (q.get('krNo')) {
+    fill('krType', 'krNo', q.get('krMethod') || '', q.get('krNo'));
+    track('kr', 'krType', 'krNo', 'krResult');
+  }
+  if (q.get('jpNo')) {
+    fill('jpType', 'jpNo', q.get('jpCarrier') || '', q.get('jpNo'));
+    track('jp', 'jpType', 'jpNo', 'jpResult');
+  }
 })();
 </script>
 <%@ include file="common/translate.jspf" %>
