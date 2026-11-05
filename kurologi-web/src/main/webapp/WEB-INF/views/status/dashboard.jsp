@@ -1,7 +1,22 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.*" %>
+<%@ page import="jp.kurologi.service.DashboardBoard" %>
+<%@ page import="jp.kurologi.service.DashboardBoard.NoticeRow" %>
+<%@ page import="jp.kurologi.service.DashboardBoard.QnaRow" %>
+<%@ page import="jp.kurologi.service.DashboardBoard.FaqGroup" %>
+<%@ page import="jp.kurologi.service.DashboardBoard.FaqRow" %>
+<%@ page import="jp.kurologi.web.Html" %>
+<%@ page import="jp.kurologi.web.Session" %>
 <%
     String ctx = request.getContextPath();
     request.setAttribute("menu", "status");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
+
+    // 공지사항 · 나의 1:1 질문 · 자주하는 질문은 커뮤니티 DB(COMMUNITY_POST, COMMUNITY_FAQ)에서 읽는다.
+    Long memberId = Session.memberId(request);
+    List<NoticeRow> notices = DashboardBoard.notices(4);
+    List<QnaRow> myQuestions = (memberId == null) ? new ArrayList<QnaRow>() : DashboardBoard.myQuestions(memberId, 4);
+    List<FaqGroup> faqGroups = DashboardBoard.faqGroups(5);
+    int shippingCount = (memberId == null) ? 0 : DashboardBoard.shippingCount(memberId);   // 현지 반품신청 버튼의 숫자
 %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -366,11 +381,14 @@ a:hover { color: var(--teal); }
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 700;
   color: #fff;
   background: var(--orange);
+  border: 0;
   border-radius: var(--radius);
+  cursor: pointer;
 }
 .action-btn:hover { color: #fff; background: #d96f10; }
 .action-btn__badge {
@@ -385,49 +403,56 @@ a:hover { color: var(--teal); }
   border-radius: 9px;
 }
 
-/* --------------------------------------------------- AI 신청서 자동 생성 */
+/* ------------------------------------------------------ 현지 반품신청 팝업 */
 
-.ai-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ai-cards { display: flex; gap: 20px; }
-
-.ai-card {
-  flex: 1 1 0;
-  padding: 24px 20px;
-  text-align: center;
-  background: var(--fill);
+.return-dialog {
+  width: min(680px, 92vw);
+  padding: 22px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  box-shadow: 0 13px 42px 11px rgba(0, 0, 0, .12);
 }
+.return-dialog::backdrop { background: rgba(0, 0, 0, .4); }
 
-.ai-card__title {
-  margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--orange);
-}
+.return-dialog__title { margin: 0 0 6px; font-size: 19px; font-weight: 700; color: var(--ink); }
+.return-dialog__msg { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
 
-.ai-card__desc {
-  margin: 0 0 18px;
+.return-list { max-height: 46vh; overflow-y: auto; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.return-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px;
   font-size: 13px;
-  line-height: 1.8;
-  color: var(--body);
+  color: var(--ink);
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
 }
+.return-item:hover { background: var(--orange-bg); }
+.return-item input { flex: 0 0 auto; }
+.return-item__main { flex: 1 1 auto; min-width: 0; }
+.return-item__no { display: block; font-weight: 700; }
+.return-item__sub { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.return-item__amount { flex: 0 0 auto; font-weight: 700; color: var(--orange); }
 
-.ai-card__btn {
-  display: inline-block;
+.return-note { margin: 12px 0 0; font-size: 12px; line-height: 1.7; color: var(--body); }
+
+.return-dialog__foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.return-btn {
   padding: 10px 22px;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 700;
   color: #fff;
-  background: var(--green);
+  background: #6f6f6f;
+  border: 0;
   border-radius: var(--radius);
+  cursor: pointer;
 }
-.ai-card__btn:hover { color: #fff; background: #218838; }
+.return-btn:hover { background: #5c5c5c; }
+.return-btn--danger { background: var(--red); }
+.return-btn--danger:hover { background: #c23a2a; }
+.return-btn:disabled { opacity: .5; cursor: not-allowed; }
 
 /* ------------------------------------------------------------ 나의 정보 */
 
@@ -472,101 +497,7 @@ a:hover { color: var(--teal); }
   border-radius: 999px;
 }
 
-/* ---------------------------------------------------- 마이페이지 관리 */
-
-.manage-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-}
-
-.manage-item {
-  display: flex;
-  gap: 12px;
-  padding: 20px 16px;
-  border-right: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.manage-item:nth-child(4n) { border-right: 0; }
-.manage-item:nth-last-child(-n+4) { border-bottom: 0; }
-
-.manage-item__icon {
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-  color: #666;
-  background: var(--fill);
-  border-radius: 50%;
-}
-
-.manage-item__name {
-  display: block;
-  margin-bottom: 2px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--orange);
-}
-
-.manage-item__desc {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--body);
-}
-
-/* --------------------------------------------------------- 사서함 주소 */
-
-.addr-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-}
-
-.addr-card {
-  padding: 16px;
-  background: var(--fill);
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.addr-card:nth-child(3n) { border-right: 0; }
-.addr-card:nth-last-child(-n+3) { border-bottom: 0; }
-
-.addr-card__name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 12px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.addr-card__flag { width: 24px; height: auto; }
-
-.addr-field { margin-bottom: 8px; }
-.addr-field__label { display: block; font-size: 11px; color: var(--muted); }
-.addr-field__value { display: block; font-size: 13px; color: var(--ink); word-break: break-all; }
-
-.addr-copy {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 8px 20px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--blue);
-  border: 0;
-  border-radius: var(--radius);
-  cursor: pointer;
-}
-.addr-copy:hover { background: #0d659b; }
-
-/* --------------------------------------------------- 하단 3단 (공지 등) */
+/* --------------------------------------------------- 하단 (공지 · 1:1 질문) */
 
 .bottom-grid {
   display: grid;
@@ -623,6 +554,8 @@ a:hover { color: var(--teal); }
   white-space: nowrap;
   color: var(--body);
 }
+.notice-item__text a { color: var(--body); }
+.notice-item__text a:hover { color: var(--teal); }
 .notice-item__date { flex: 0 0 auto; font-size: 12px; color: #aaa; }
 
 .badge-new {
@@ -636,27 +569,6 @@ a:hover { color: var(--teal); }
   border-radius: 2px;
 }
 
-/* 환율 */
-.fx-table { width: 100%; border-collapse: collapse; }
-.fx-table td {
-  padding: 8px 6px;
-  font-size: 13px;
-  border-bottom: 1px solid var(--line-soft);
-}
-.fx-table tr:last-child td { border-bottom: 0; }
-.fx-table .fx-country { color: var(--body); white-space: nowrap; }
-.fx-table .fx-rate    { text-align: right; font-weight: 700; color: var(--orange); white-space: nowrap; }
-
-.fx-date {
-  padding: 8px 6px;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--ink);
-  text-align: center;
-  vertical-align: middle;
-}
-.fx-date small { display: block; font-size: 12px; font-weight: 400; color: var(--body); }
-
 /* 1:1 질문 */
 .q-item {
   display: flex;
@@ -668,7 +580,9 @@ a:hover { color: var(--teal); }
   border-bottom: 1px dashed var(--line);
 }
 .q-item:last-child { border-bottom: 0; }
-.q-item__text { color: var(--body); }
+.q-item__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--body); }
+.q-item__text a { color: var(--body); }
+.q-item__text a:hover { color: var(--teal); }
 
 .q-state {
   flex: 0 0 auto;
@@ -678,32 +592,47 @@ a:hover { color: var(--teal); }
   border: 1px solid var(--orange);
   border-radius: 999px;
 }
+.q-state--wait { color: var(--muted); border-color: #cfcfcf; }
 
-/* --------------------------------------------------------------- FAQ 표 */
+.empty-msg { margin: 0; padding: 18px 0; font-size: 13px; text-align: center; color: var(--muted); }
 
-.faq-table { width: 100%; border-collapse: collapse; }
+/* --------------------------------------------------------------- FAQ (DB) */
 
-.faq-table th {
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0;
+}
+
+.faq-col { padding: 0; border-right: 1px solid var(--line); }
+.faq-col:last-child { border-right: 0; }
+
+.faq-col__head {
+  margin: 0;
   padding: 10px 12px;
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
-  text-align: left;
   background: #f2f2f2;
-  border: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
-.faq-table td {
-  padding: 12px;
+.faq-col ul { margin: 0; padding: 8px 12px 12px; list-style: none; }
+.faq-col li { padding: 5px 0; font-size: 13px; color: var(--body); }
+.faq-col summary { cursor: pointer; list-style: none; color: var(--body); }
+.faq-col summary::-webkit-details-marker { display: none; }
+.faq-col summary::before { content: '› '; color: var(--orange); }
+.faq-col summary:hover { color: var(--teal); }
+.faq-a {
+  margin: 8px 0 4px 12px;
+  padding: 12px 14px;
   font-size: 13px;
-  text-align: left;
-  vertical-align: top;
-  border: 1px solid var(--line);
+  line-height: 1.8;
+  color: var(--ink);
+  white-space: pre-line;
+  background: var(--fill);
+  border-radius: var(--radius);
 }
-
-.faq-table ul { margin: 0; padding: 0; list-style: none; }
-.faq-table li { padding: 4px 0 4px 12px; text-indent: -12px; color: var(--body); }
-.faq-table li::before { content: '› '; }
 
 /* --------------------------------------------------------------- 푸터 */
 
@@ -765,10 +694,8 @@ a:hover { color: var(--teal); }
         <a class="summary-tabs--blue" href="<%= ctx %>/mypage/payment">입고내역조회</a>
       </div>
       <ul class="summary-links">
-        <li><a href="#">배송요금표 보기</a></li>
-        <li><a href="#">나의 송장주기</a></li>
-        <li><a href="#">나의 주소록</a></li>
-        <li><a href="#">나의 정보</a></li>
+        <li><a href="<%= ctx %>/mypage/address">나의 주소록</a></li>
+        <li><a href="<%= ctx %>/mypage">나의 정보</a></li>
       </ul>
     </div>
 
@@ -820,13 +747,11 @@ a:hover { color: var(--teal); }
       </div>
 
       <div class="status-actions">
-        <a class="action-btn" href="#">묶음배송 관리 <span class="action-btn__badge">2</span></a>
-        <a class="action-btn" href="#">상품포함 <span class="action-btn__badge">2</span></a>
-        <a class="action-btn" href="#">현지 반품신청 <span class="action-btn__badge">2</span></a>
+        <button class="action-btn" type="button" id="btnReturn">현지 반품신청 <span class="action-btn__badge"><%= shippingCount %></span></button>
       </div>
     </div>
 
-    <!-- ============ 3. 공지 / 1:1 ============ -->
+    <!-- ============ 3. 공지 / 1:1 (커뮤니티 DB) ============ -->
     <div class="box">
       <div class="box__body">
         <div class="bottom-grid">
@@ -835,109 +760,193 @@ a:hover { color: var(--teal); }
           <div class="bottom-col">
             <div class="bottom-col__head">
               <p class="bottom-col__title">공지사항</p>
-              <a class="bottom-col__more" href="#">더보기</a>
+              <a class="bottom-col__more" href="<%= ctx %>/community/notice">더보기</a>
             </div>
+<%  for (NoticeRow n : notices) { %>
             <div class="notice-item">
-              <span class="notice-item__text"><span class="badge-new">N</span>[공지] 클릭 2번으로 끝나는 배송대행신청서.</span>
-              <span class="notice-item__date">2026-10-01</span>
+              <span class="notice-item__text"><% if (n.fresh()) { %><span class="badge-new">N</span><% } %><a href="<%= ctx %>/community/notice/view?id=<%= n.postId() %>"><%= Html.esc(n.title()) %></a></span>
+              <span class="notice-item__date"><%= Html.esc(n.date()) %></span>
             </div>
-            <div class="notice-item">
-              <span class="notice-item__text"><span class="badge-new">N</span>[공지] 10월 한국세터 개천절 대체휴무 안내</span>
-              <span class="notice-item__date">2026-10-01</span>
-            </div>
-            <div class="notice-item">
-              <span class="notice-item__text">[공지] 일본 현지 반품 관련 안내</span>
-              <span class="notice-item__date">2026-09-23</span>
-            </div>
-            <div class="notice-item">
-              <span class="notice-item__text">[공지] 일본 야마토 주소 및 휴일 설정 관련</span>
-              <span class="notice-item__date">2026-09-23</span>
-            </div>
+<%  } %>
+<%  if (notices.isEmpty()) { %>
+            <p class="empty-msg">등록된 공지사항이 없습니다.</p>
+<%  } %>
           </div>
 
           <!-- 나의 1:1 질문 -->
           <div class="bottom-col">
             <div class="bottom-col__head">
               <p class="bottom-col__title">나의 1:1 질문</p>
-              <a class="bottom-col__more" href="#">1:1 문의하기 ›</a>
+              <a class="bottom-col__more" href="<%= ctx %>/community/qna/write">1:1 문의하기 ›</a>
             </div>
+<%  for (QnaRow qa : myQuestions) { %>
             <div class="q-item">
-              <span class="q-item__text">· 발송 보류해주세요. 어이가 없어서..</span>
-              <span class="q-state">완료</span>
+              <span class="q-item__text">· <a href="<%= ctx %>/community/qna/view?id=<%= qa.postId() %>"><%= Html.esc(qa.title()) %></a></span>
+<%      if (qa.answered()) { %>
+              <span class="q-state">답변완료</span>
+<%      } else { %>
+              <span class="q-state q-state--wait">답변대기</span>
+<%      } %>
             </div>
-            <div class="q-item">
-              <span class="q-item__text">· 찾아보니 까 0.5lb 가 들수 있다고 하는데..</span>
-              <span class="q-state">완료</span>
-            </div>
-            <div class="q-item">
-              <span class="q-item__text">· 똑같은 물건 다른 가격 측정</span>
-              <span class="q-state">완료</span>
-            </div>
-            <div class="q-item">
-              <span class="q-item__text">· P0000000000 오배송 단일출고로 변경</span>
-              <span class="q-state">완료</span>
-            </div>
+<%  } %>
+<%  if (memberId == null) { %>
+            <p class="empty-msg">로그인 후 확인할 수 있습니다.</p>
+<%  } else if (myQuestions.isEmpty()) { %>
+            <p class="empty-msg">등록하신 1:1 문의가 없습니다.</p>
+<%  } %>
           </div>
 
         </div>
       </div>
     </div>
 
-    <!-- ============ 4. 자주하는 질문 ============ -->
+    <!-- ============ 4. 자주하는 질문 (커뮤니티 DB) ============ -->
     <div class="box">
       <div class="box__head">
         <p class="box__title">자주하는 질문</p>
-        <p class="box__note">★ 클릭을 하시면 하단에 자세한 설명을 보실 수 있습니다.</p>
+        <p class="box__note">★ 질문을 클릭하시면 아래에 답변이 펼쳐집니다. &nbsp;<a href="<%= ctx %>/community/faq">전체보기 ›</a></p>
       </div>
       <div class="box__body" style="padding:0">
-        <table class="faq-table">
-          <thead>
-            <tr>
-              <th>회원/기타</th>
-              <th>배송신청서</th>
-              <th>입고/출고</th>
-              <th>배송비</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <ul>
-                  <li>나의 정보</li>
-                  <li>정보변경</li>
-                  <li>회원탈퇴</li>
-                </ul>
-              </td>
-              <td>
-                <ul>
-                  <li>배송신청서</li>
-                  <li>개인통관부호</li>
-                  <li>트래킹번호 추가</li>
-                </ul>
-              </td>
-              <td>
-                <ul>
-                  <li>입고</li>
-                  <li>미도착건</li>
-                  <li>현재내 배송</li>
-                </ul>
-              </td>
-              <td>
-                <ul>
-                  <li>배송비</li>
-                  <li>무게 측정</li>
-                  <li>상품 묶음 / 분할</li>
-                </ul>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+<%  if (faqGroups.isEmpty()) { %>
+        <p class="empty-msg">등록된 질문이 없습니다.</p>
+<%  } else { %>
+        <div class="faq-grid">
+<%      for (FaqGroup g : faqGroups) { %>
+          <div class="faq-col">
+            <p class="faq-col__head"><%= Html.esc(g.category()) %></p>
+            <ul>
+<%          for (FaqRow f : g.items()) { %>
+              <li>
+                <details>
+                  <summary><%= Html.esc(f.question()) %></summary>
+                  <div class="faq-a"><%= Html.esc(f.answer()) %></div>
+                </details>
+              </li>
+<%          } %>
+            </ul>
+          </div>
+<%      } %>
+        </div>
+<%  } %>
       </div>
     </div>
 
   </div>
 </main>
 
-<!-- ===================== 푸터 ===================== -->
+<!-- ============ 현지 반품신청 팝업 : 배송 중인 물품을 골라 취소하면 예치금으로 환불 ============ -->
+<dialog class="return-dialog" id="returnDialog">
+  <h2 class="return-dialog__title">현지 반품신청 (배송 취소 · 환불)</h2>
+  <p class="return-dialog__msg" id="returnMsg"></p>
+  <ul class="return-list" id="returnList"></ul>
+  <p class="return-note">※ 취소하면 결제하신 금액이 예치금으로 환불됩니다. 취소한 주문은 되돌릴 수 없습니다.</p>
+  <div class="return-dialog__foot">
+    <button class="return-btn" type="button" id="returnClose">닫기</button>
+    <button class="return-btn return-btn--danger" type="button" id="returnCancel" disabled>취소하기</button>
+  </div>
+</dialog>
 
+<script>
+/* 현지 반품신청 : 배송 중인 물품 목록을 받아 팝업에 보여 주고, 고른 물품을 취소 · 환불한다. */
+(function () {
+  var CTX = '<%= ctx %>';
+  var CSRF = '<%= Html.esc(Session.csrfToken(request)) %>';
+
+  var dlg = document.getElementById('returnDialog');
+  var list = document.getElementById('returnList');
+  var msg = document.getElementById('returnMsg');
+  var btnCancel = document.getElementById('returnCancel');
+  if (!dlg || typeof dlg.showModal !== 'function') return;
+
+  function won(n) { return '₩' + Number(n).toLocaleString('ko-KR'); }
+
+  function checkedIds() {
+    var ids = [];
+    var boxes = list.querySelectorAll('input[type="checkbox"]:checked');
+    for (var i = 0; i < boxes.length; i++) ids.push(boxes[i].value);
+    return ids;
+  }
+
+  function refreshButton() { btnCancel.disabled = checkedIds().length === 0; }
+
+  function line(cls, text) {
+    var s = document.createElement('span');
+    s.className = cls;
+    s.textContent = text;
+    return s;
+  }
+
+  // 팝업 열기 : 배송 중인 물품 목록 불러오기
+  document.getElementById('btnReturn').addEventListener('click', function () {
+    list.innerHTML = '';
+    msg.textContent = '불러오는 중...';
+    btnCancel.disabled = true;
+    dlg.showModal();
+
+    fetch(CTX + '/status/return', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok) { msg.textContent = j.message; return; }
+        if (!j.items.length) { msg.textContent = '현재 배송 중인 물품이 없습니다.'; return; }
+        msg.textContent = '취소할 물품을 선택해 주세요. (보유 예치금 ' + won(j.deposit) + ')';
+        j.items.forEach(function (it) {
+          var li = document.createElement('li');
+          var label = document.createElement('label');
+          label.className = 'return-item';
+
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = it.id;
+          cb.addEventListener('change', refreshButton);
+
+          var main = document.createElement('span');
+          main.className = 'return-item__main';
+          main.appendChild(line('return-item__no', it.orderNo + ' · ' + it.service));
+          main.appendChild(line('return-item__sub', it.summary + ' · ' + it.status));
+
+          label.appendChild(cb);
+          label.appendChild(main);
+          label.appendChild(line('return-item__amount', '환불 ' + won(it.amount)));
+          li.appendChild(label);
+          list.appendChild(li);
+        });
+      })
+      .catch(function () {
+        msg.textContent = '불러오지 못했습니다. 로그인 상태를 확인해 주세요.';
+      });
+  });
+
+  document.getElementById('returnClose').addEventListener('click', function () { dlg.close(); });
+
+  // 취소하기 : 고른 물품의 배송을 취소하고 예치금으로 환불
+  btnCancel.addEventListener('click', function () {
+    var ids = checkedIds();
+    if (!ids.length) return;
+    if (!confirm(ids.length + '건의 배송을 취소하고 결제 금액을 예치금으로 환불받으시겠습니까?')) return;
+
+    btnCancel.disabled = true;
+    var body = '_csrf=' + encodeURIComponent(CSRF);
+    for (var i = 0; i < ids.length; i++) body += '&id=' + encodeURIComponent(ids[i]);
+
+    fetch(CTX + '/status/return/cancel', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        alert(j.message);
+        if (j.ok) location.reload();   // 목록 · 숫자를 새로 불러온다
+        else refreshButton();
+      })
+      .catch(function () {
+        alert('취소하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        refreshButton();
+      });
+  });
+})();
+</script>
+
+<!-- ===================== 푸터 (+ </body></html>) ===================== -->
 <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="bottom" /></jsp:include>

@@ -13,11 +13,11 @@
     List<Charge> charges = (List<Charge>) request.getAttribute("charges");     // 비용결제 탭 (결제 대기건)
     List<Payment> payments = (List<Payment>) request.getAttribute("payments"); // 결제내역 탭
 
-    // 결제내역 탭에는 결제가 끝난 건만 보여준다 (취소 · 대기 건은 제외)
+    // 결제내역 탭에는 결제가 끝난 건과 환불된 건만 보여준다 (취소 · 대기 건은 제외)
     List<Payment> paidList = new ArrayList<>();
     if (payments != null) {
         for (Payment p : payments) {
-            if (p.getStatus() == Payment.Status.PAID) paidList.add(p);
+            if (p.getStatus() == Payment.Status.PAID || p.getStatus() == Payment.Status.REFUNDED) paidList.add(p);
         }
     }
 %>
@@ -534,6 +534,7 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
 .pay-status--awaiting_deposit,
 .pay-status--awaiting_card { color: #fff; background: var(--orange); }
 .pay-status--canceled { color: var(--muted); }
+.pay-status--refunded { color: #b34700; background: #fdf3e7; border: 1px solid #e8a15c; }
 
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 
@@ -552,6 +553,11 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
   color: var(--ink);
 }
 .deposit-bar strong { margin-left: 6px; font-size: 20px; color: var(--orange); }
+
+/* 결제내역의 운송장 칸 */
+.pay-table td.wb { font-size: 13px; line-height: 1.7; }
+.pay-table td.wb .wb__no { display: block; font-weight: 700; letter-spacing: .3px; }
+.pay-table td.wb a { font-size: 12px; }
 </style>
 </head>
 <body>
@@ -593,6 +599,8 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
           <th>결제수단</th>
           <th>결제금액</th>
           <th>예치금 사용</th>
+          <th>한국 운송장</th>
+          <th>일본 운송장</th>
           <th>상태</th>
         </tr>
       </thead>
@@ -604,11 +612,25 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
           <td class="is-center"><%= p.getMethod().getLabel() %></td>
           <td class="is-right">₩<%= Html.num(p.getTotalAmount()) %></td>
           <td class="is-right">₩<%= Html.num(p.getDepositUsed()) %></td>
+          <td class="is-center wb">
+<%          if (p.getKrWaybillNo() != null) { %>
+            <%= Html.esc(p.getKrMethodLabel()) %>
+            <span class="wb__no"><%= Html.esc(p.getKrWaybillNo()) %></span>
+            <a href="<%= ctx %>/?krMethod=<%= Html.esc(p.getKrMethod()) %>&amp;krNo=<%= Html.esc(p.getKrWaybillNo()) %>#tracking">조회</a>
+<%          } else { %>-<%          } %>
+          </td>
+          <td class="is-center wb">
+<%          if (p.getJpWaybillNo() != null) { %>
+            <%= Html.esc(p.getJpCarrierLabel()) %>
+            <span class="wb__no"><%= Html.esc(p.getJpWaybillNo()) %></span>
+            <a href="<%= ctx %>/?jpCarrier=<%= Html.esc(p.getJpCarrier()) %>&amp;jpNo=<%= Html.esc(p.getJpWaybillNo()) %>#tracking">조회</a>
+<%          } else { %>-<%          } %>
+          </td>
           <td class="is-center"><span class="pay-status pay-status--<%= p.getStatus().name().toLowerCase() %>"><%= p.getStatus().getLabel() %></span></td>
         </tr>
 <%      } %>
 <%      if (paidList.isEmpty()) { %>
-        <tr><td class="pay-table__empty" colspan="6">결제 내역이 존재하지 않습니다.</td></tr>
+        <tr><td class="pay-table__empty" colspan="8">결제 내역이 존재하지 않습니다.</td></tr>
 <%      } %>
       </tbody>
     </table>
@@ -675,6 +697,7 @@ a.pay-tabs__item.is-active:hover { color: #fff; }
 
       <ul class="pay-notes">
         <li>여러 건을 한꺼번에 결제하실 경우에는 해당 건을 모두 클릭해주시면 됩니다.</li>
+        <li>결제가 완료되면 결제내역에 한국 · 일본 운송장이 만들어지고, 메인 화면의 운송장조회에서 조회할 수 있습니다.</li>
         <li>결제대기건의 경우 모두 포장, 배송비 계측이 마무리 된 것임으로 재포장이나 합배송/묶음배송이 불가능합니다. 계좌로 입금된 시간=결제관리에서 결제신청일, 입금자명, 입금된 금액이 다를경우 빠른처리를 위해서 반드시 1:1 고객센터에 문의부탁드립니다.</li>
       </ul>
 

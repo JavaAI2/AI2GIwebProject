@@ -16,6 +16,7 @@ import jp.kurologi.model.Waybill;
 import jp.kurologi.repository.BuyOrderDAO;
 import jp.kurologi.repository.MemberRepository;
 import jp.kurologi.repository.PaymentRepository;
+import jp.kurologi.repository.RefundDAO;
 
 /**
  * 결제 관리 — [시험용] 결제 대기건을 골라 "예치금"으로 결제합니다.
@@ -185,6 +186,21 @@ public class PaymentService {
 
             markOrdersPaid(charges);   // 주문내역의 "결제" 칸이 결제완료로 보이도록 주문도 갱신
             return payment;
+        }
+    }
+
+    /** 현지 반품신청 화면에 보일 배송 중(출고완료 · 국내 배송 중) 주문 목록 */
+    public List<RefundDAO.ShippingOrder> shippingOrders(long memberId) {
+        return new RefundDAO().listShipping(memberId);
+    }
+
+    /**
+     * 현지 반품신청 : 배송 중인 주문 1건을 취소하고, 결제한 금액을 예치금으로 환불한다.
+     * 결제 · 충전과 같은 회원별 락 안에서 처리해서 예치금이 어긋나지 않게 한다.
+     */
+    public RefundDAO.RefundResult refundShipping(long memberId, long orderId) {
+        synchronized (lockFor(memberId)) {
+            return new RefundDAO().refund(memberId, orderId);
         }
     }
 
