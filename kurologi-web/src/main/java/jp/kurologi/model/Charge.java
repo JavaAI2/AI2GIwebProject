@@ -3,11 +3,12 @@ package jp.kurologi.model;
 import java.time.LocalDateTime;
 
 import jp.kurologi.web.Formats;
-/**마후유*/
+
 /** 결제 대기건 1개 (배송비 · 관부가세 · 추가 결제 · 보관료 …). */
 public class Charge {
 
-    public enum Status { PENDING, IN_PAYMENT, PAID }
+    /** PENDING 결제 대기 / IN_PAYMENT 입금확인중 / PAID 결제완료 / REFUNDED 환불됨(배송 취소) */
+    public enum Status { PENDING, IN_PAYMENT, PAID, REFUNDED }
 
     private long id;
     private long memberId;

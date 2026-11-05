@@ -17,7 +17,8 @@ public class Payment {
     }
 
     public enum Status {
-        AWAITING_DEPOSIT("입금확인중"), AWAITING_CARD("카드결제 진행중"), PAID("결제완료"), CANCELED("취소");
+        AWAITING_DEPOSIT("입금확인중"), AWAITING_CARD("카드결제 진행중"), PAID("결제완료"), CANCELED("취소"),
+        REFUNDED("환불완료");   // 현지 반품신청(배송 취소)으로 환불된 결제
 
         private final String label;
         Status(String label) { this.label = label; }
