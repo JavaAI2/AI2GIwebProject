@@ -16,14 +16,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>로그인 | KURO Logi</title>
+<title>로그인 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from login.css */
 /* ==========================================================================
-   KURO Logi — 회원 (stock_order.css 와 동일한 공통 스타일)
+   NIPPON BUY — 회원 (stock_order.css 와 동일한 공통 스타일)
 
    바꾸고 싶은 값은 :root 한 곳만 고치면 됩니다.
    순수 CSS · Bootstrap 클래스 없음 · 데스크톱 고정폭
@@ -496,7 +496,7 @@ a:hover { color: var(--teal); }
     <h1 class="sub-title"><span class="sub-title__dash"></span>로그인</h1>
 
     <div class="login-box">
-      <h2 class="login-box__title">KURO Logi 회원 로그인</h2>
+      <h2 class="login-box__title">NIPPON BUY 회원 로그인</h2>
 
       <% if (joined) { %>
       <p class="login-notice">회원가입이 완료되었습니다. 로그인해 주세요.</p>

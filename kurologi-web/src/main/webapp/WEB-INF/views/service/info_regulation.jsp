@@ -8,14 +8,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KURO 검수규정, 보상규정 | KURO Logi</title>
+<title>NIPPON BUY 검수규정, 보상규정 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from info-regulation.css */
 /* ==========================================================================
-   KURO Logi — 내부 페이지 공통 기본 스타일
+   NIPPON BUY — 내부 페이지 공통 기본 스타일
 
    이 파일은 5개 페이지의 CSS 맨 위에 그대로 복사해서 씁니다.
    (페이지마다 CSS를 따로 두기로 했기 때문에 @import 대신 복사합니다)
@@ -423,7 +423,7 @@ a:hover { color: var(--teal); }
 }
 
 /* ==========================================================================
-   KURO Logi — 검수규정, 보상규정 페이지
+   NIPPON BUY — 검수규정, 보상규정 페이지
    이 파일만 고치면 이 페이지 디자인이 바뀝니다.
    ========================================================================== */
 
@@ -485,11 +485,11 @@ a:hover { color: var(--teal); }
 <!-- 페이지 제목 + 현재 위치 -->
 <section class="page-head">
   <div class="container page-head__inner">
-    <h1 class="page-head__title">KURO 검수규정, 보상규정</h1>
+    <h1 class="page-head__title">NIPPON BUY 검수규정, 보상규정</h1>
     <ol class="breadcrumb">
       <li class="breadcrumb__item"><a href="<%= ctx %>/">홈</a></li>
       <li class="breadcrumb__item"><a href="<%= ctx %>/service/info_company">서비스안내</a></li>
-      <li class="breadcrumb__item is-current">KURO 검수규정, 보상규정</li>
+      <li class="breadcrumb__item is-current">NIPPON BUY 검수규정, 보상규정</li>
     </ol>
   </div>
 </section>
@@ -497,13 +497,13 @@ a:hover { color: var(--teal); }
 <main class="page-body">
   <div class="container">
 <div>
-	<p>본 규정은 KURO Logi 이용약관의 일부를 구성하며, 서비스 이용 시 본 규정에 동의한 것으로 간주됩니다.</p>
+	<p>본 규정은 NIPPON BUY 이용약관의 일부를 구성하며, 서비스 이용 시 본 규정에 동의한 것으로 간주됩니다.</p>
 	<br>
 	
-	<p><a href='#info_a'>A. KURO 검수규정 안내</a></p>
-	<p><a href='#info_b'>B. KURO 보상 규정 안내</a></p>
+	<p><a href='#info_a'>A. NIPPON BUY 검수규정 안내</a></p>
+	<p><a href='#info_b'>B. NIPPON BUY 보상 규정 안내</a></p>
 	<div class="line"></div>
-	<h3 id='info_a level-1'>A. KURO 검수규정 안내</h3>
+	<h3 id='info_a level-1'>A. NIPPON BUY 검수규정 안내</h3>
 
 	<p class="fontsize-bold22 level-2">1. 기본 검수 (무료)</p>
     <p class="level-3" ><span class="is-red">기본 검수는 무료 서비스</span>이며, 아래 항목에 한하여 육안으로 간단하게 확인합니다.</p>
@@ -546,7 +546,7 @@ a:hover { color: var(--teal); }
 	</table>
 	<br>
 	<p class="level-2 fontsize-bold22">2. 상세 사진 검수 (유료)</p>
-    <p class="level-3">상세 사진 검수를 신청한 상품은 작업자가 다각도에서 약 5~10장의 사진을 촬영하여 카카오톡 채널을 통해 전달드립니다.</p>
+    <p class="level-3">상세 사진 검수를 신청한 상품은 작업자가 다각도에서 약 5~10장의 사진을 촬영하여 1:1 문의를 통해 전달드립니다.</p>
 	<p class="level-3">회원사에서 직접 사진을 확인한 후.</p>
 	<p class="level-4">· 출고</p>
 	<p class="level-4">· 보류</p>
@@ -612,10 +612,10 @@ a:hover { color: var(--teal); }
 	<p class="level-3" >이 경우 <span class="is-red">회원사의 주문서 작성 누락으로 간주되며 보상이 어렵습니다.</span></p>
 
 	<div class="line" id='info_b'></div>
-	<h3 class="level-1">B. KURO 보상 규정 안내</h3>
+	<h3 class="level-1">B. NIPPON BUY 보상 규정 안내</h3>
 	
-	<p class="level-2">KURO Logi에서 출고된 화물은 일본 내 운송, 수출 통관, 국제운송, 한국 수입 통관 및 국내배송 등 여러 협력업체를 거쳐 최종 구매자에게 배송됩니다.</p>
-	<p class="level-2">운송 과정 중 발생할 수 있는 예기치 못한 사고에 대비하여 KURO Logi는 <span class="is-red fontsize-bold18">배송보험 서비스</span>를 제공하고 있으며, 회원사는 주문서별로 보험 가입 여부를 선택할 수 있습니다.</p>
+	<p class="level-2">NIPPON BUY에서 출고된 화물은 일본 내 운송, 수출 통관, 국제운송, 한국 수입 통관 및 국내배송 등 여러 협력업체를 거쳐 최종 구매자에게 배송됩니다.</p>
+	<p class="level-2">운송 과정 중 발생할 수 있는 예기치 못한 사고에 대비하여 NIPPON BUY는 <span class="is-red fontsize-bold18">배송보험 서비스</span>를 제공하고 있으며, 회원사는 주문서별로 보험 가입 여부를 선택할 수 있습니다.</p>
 	<p class="level-2">보상 범위는 <span class="fontsize-bold18">보험 가입 여부에 따라 아래와 같이 적용됩니다.</span></p>
 
 	<table class="data-table regulation-table">
@@ -661,7 +661,7 @@ a:hover { color: var(--teal); }
 	
 	<p class="level-2 fontsize-bold22">1. 보험 가입 화물 (추천)</p>	
 	<p class="level-3" >고가 상품 또는 파손 위험이 높은 상품은 배송보험 가입을 권장드립니다.<p>
-	<p class="level-3" ><span class="fontcolor_blue">쿠로안심케어 상세보기=></span><a class="btn btn--info btn--sm" href='https://detailed-bubbler-ad0.notion.site/18055852ca8f80efa1d0d89b3d0f9785?pvs=74' target='_blank'>클릭!</a></p>
+	<p class="level-3" ><span class="fontcolor_blue">니폰바이 안심케어 상세보기=></span><a class="btn btn--info btn--sm" href='https://nipponbuy.jp/service/insurance' target='_blank'>클릭!</a></p>
 	<p class="level-3 fontsize-bold22">①보상범위</p>
 	<p class="level-4" ><span class="is-red">·보험 가입 화물은 보험약관에 따라 최대 500만원까지 보상</span>이 가능합니다.</p>
 	<p class="level-4"  class="fontsize-bold18">·파손, 도난, 분실, 오발송(주문한제품과 다른제품 수령)  발생시</p>
@@ -688,13 +688,13 @@ a:hover { color: var(--teal); }
 	<p class="level-3" >보험 미가입 화물은 아래 기준에 따라 보상이 진행됩니다.</p> 
 	<br> 
 	<p class="level-3 fontsize-bold22">① 보상 대상</p> 
-	<p class="level-3">다음의 경우 KURO Logi의 명백한 과실이 확인되면 보상 대상이 됩니다.</p> 
+	<p class="level-3">다음의 경우 NIPPON BUY의 명백한 과실이 확인되면 보상 대상이 됩니다.</p> 
 	<p class="level-4" >· 상세 검수 미스 (<span class="is-red">※기본검수 제외</span>)</p> 
 	<p class="level-4" >· 타 회원사 상품 오배송</p> 
 	<p class="level-4" >· 수량 오출고</p> 
 	<p class="level-4" >· 회원사 승인 없이 오출고</p> 
 	<p class="level-4" >· 작업 중 발생한 명백한 파손</p> 
-	<p class="level-4" >· KURO Logi 과실로 인한 분실</p> 
+	<p class="level-4" >· NIPPON BUY 과실로 인한 분실</p> 
 	<br> 
 	<p class="level-3 fontsize-bold22">②보상 제외</p> 
 	<p class="level-3" >다음의 경우는 보상이 어렵습니다.</p> 
@@ -710,7 +710,7 @@ a:hover { color: var(--teal); }
 	<p class="level-4" >· 간접 손해</p> 
 	<p class="level-4" >· 영업 손실</p> 
 	<p class="level-4" >· 예상 이익</p> 
-	<p class="level-4" >· 운송사 조사 결과 KURO Logi 책임이 아닌 경우</p> 
+	<p class="level-4" >· 운송사 조사 결과 NIPPON BUY 책임이 아닌 경우</p> 
 	<p class="level-4 fontsize-bold18">· 배송중 사고시 이하 보상제외 제품 품목</p> 
 	<br>
 	<p class="level-3 fontsize-bold18">※ 보상제외 제품 품목</p> 
@@ -773,7 +773,7 @@ a:hover { color: var(--teal); }
 	</table>
 	
 	<p class="level-3">※위 품목은 특성상 파손 위험이 높아 택배사 및 통관사의 보상 대상에서 제외될 수 있으며
- KURO Logi 역시 동일 기준을 적용합니다.</p>
+ NIPPON BUY 역시 동일 기준을 적용합니다.</p>
 <br> 
 <p class="level-3 fontsize-bold22">③ 보상 한도</p> 
 <p class="level-3" >보험 미가입 화물의 보상은</p> 
@@ -784,22 +784,22 @@ a:hover { color: var(--teal); }
 <p class="level-2 fontsize-bold22">3. 분실 보상 기준</p>
 <p class="level-3" >분실은 발생 시점에 따라 아래 기준으로 처리됩니다.</p> 
 
-<p class="level-3 fontsize-bold22">① KURO Logi 입고 전 분실</p> 
-<p class="level-3 fontsize-bold18">(일본 판매처 → KURO Logi 입고 전)</p> 
+<p class="level-3 fontsize-bold22">① NIPPON BUY 입고 전 분실</p> 
+<p class="level-3 fontsize-bold18">(일본 판매처 → NIPPON BUY 입고 전)</p> 
 <p class="level-4" >예)  일본 택배사 배송 중 분실,</p> 
-<p class="level-4" >   배송완료로 표시되었으나 KURO Logi에서 입고 확인이 되지 않는 경우</p> 
+<p class="level-4" >   배송완료로 표시되었으나 NIPPON BUY에서 입고 확인이 되지 않는 경우</p> 
 <p class="level-4" >  → 일본 운송사의 조사 결과를 기준으로 처리됩니다.</p> 
-<p class="level-4" >  → KURO Logi 책임이 확인되지 않는 경우 보상 대상이 아닙니다.</p> 
+<p class="level-4" >  → NIPPON BUY 책임이 확인되지 않는 경우 보상 대상이 아닙니다.</p> 
 
 <br> 
-<p class="level-3 fontsize-bold22">② KURO Logi 입고 후 분실</p> 
-<p class="level-3 fontsize-bold18">(KURO Logi 입고 스캔 완료 이후 출고 전)</p> 
+<p class="level-3 fontsize-bold22">② NIPPON BUY 입고 후 분실</p> 
+<p class="level-3 fontsize-bold18">(NIPPON BUY 입고 스캔 완료 이후 출고 전)</p> 
 <p class="level-4" >  예) 입고 스캔 이력이 있으나 화물이 분실된 경우</p> 
-<p class="level-4" >  → KURO Logi 책임으로 처리됩니다.</p> 
+<p class="level-4" >  → NIPPON BUY 책임으로 처리됩니다.</p> 
 
 <br> 
-<p class="level-3 fontsize-bold22">③ KURO Logi 출고 후 분실</p> 
-<p class="level-3" >(KURO Logi 출고 이후 고객 수령 전)</p> 
+<p class="level-3 fontsize-bold22">③ NIPPON BUY 출고 후 분실</p> 
+<p class="level-3" >(NIPPON BUY 출고 이후 고객 수령 전)</p> 
 <br>
 <p class="level-4">  예) 국제배송 중 분실</p> 
 <p class="level-4">  → 통관사, 택배사 사고조사 후 처리됩니다.</p> 
@@ -834,7 +834,7 @@ a:hover { color: var(--teal); }
 <p class="level-4" >· 운송사 조사 결과</p>	
 <p class="level-4" >· 보험사 심사 결과(보험 가입 시)</p>	
 <br>
-<p class="level-3">    KURO Logi는 회원사와의 장기적인 신뢰를 가장 중요한 가치로 생각합니다. </p>	
+<p class="level-3">    NIPPON BUY는 회원사와의 장기적인 신뢰를 가장 중요한 가치로 생각합니다. </p>	
 <p class="level-3">본 규정을 기준으로 보상을 진행하되, 규정으로 판단하기 어려운 사례는 사실관계와 사고 경위를 종합적으로 검토하여 회원사와 함께 합리적인 해결방안을 찾을 수 있도록 노력하겠습니다.</p>	
 
 <p style='float: right;'>개정 2026. 7. 1</p>	

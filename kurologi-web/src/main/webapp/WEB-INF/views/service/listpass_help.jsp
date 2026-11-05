@@ -8,14 +8,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>목록통관 품목안내 | KURO Logi</title>
+<title>목록통관 품목안내 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from listpass-help.css */
 /* ==========================================================================
-   KURO Logi — 내부 페이지 공통 기본 스타일
+   NIPPON BUY — 내부 페이지 공통 기본 스타일
 
    이 파일은 5개 페이지의 CSS 맨 위에 그대로 복사해서 씁니다.
    (페이지마다 CSS를 따로 두기로 했기 때문에 @import 대신 복사합니다)
@@ -423,7 +423,7 @@ a:hover { color: var(--teal); }
 }
 
 /* ==========================================================================
-   KURO Logi — 목록통관 품목안내 페이지
+   NIPPON BUY — 목록통관 품목안내 페이지
    이 파일만 고치면 이 페이지 디자인이 바뀝니다.
    ========================================================================== */
 
