@@ -8,14 +8,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>회원등급, 수수료 안내 | KURO Logi</title>
+<title>회원등급, 수수료 안내 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from info-grade.css */
 /* ==========================================================================
-   KURO Logi — 내부 페이지 공통 기본 스타일
+   NIPPON BUY — 내부 페이지 공통 기본 스타일
 
    이 파일은 5개 페이지의 CSS 맨 위에 그대로 복사해서 씁니다.
    (페이지마다 CSS를 따로 두기로 했기 때문에 @import 대신 복사합니다)
@@ -423,7 +423,7 @@ a:hover { color: var(--teal); }
 }
 
 /* ==========================================================================
-   KURO Logi — 회원등급, 수수료 안내 페이지
+   NIPPON BUY — 회원등급, 수수료 안내 페이지
    이 파일만 고치면 이 페이지 디자인이 바뀌니다.
    ========================================================================== */
 
@@ -597,7 +597,7 @@ a:hover { color: var(--teal); }
 		<td class="is-bold text-h3">상세사진검수<span class="is-red">(※보상가능)</span></td>
 		<td class="is-bold text-h3" style=''><img src="<%= ctx %>/images/common/air_icon_red.png" style="width:30px"><img src="<%= ctx %>/images/common/ship_icon_red.png" style="width:30px"></td>
 		<td  colspan='4'>330엔/제품당(100사이즈 이하만 가능, 대형사이즈 불가) <br>
-		<span class="fontcolor_blue">※ 제품 상세사진 카톡채널로 제공</span><br>
+		<span class="fontcolor_blue">※ 제품 상세사진은 1:1 문의로 제공</span><br>
 		<span class="is-bold is-red">※검품 오배송 걱정되시는 건은 상세사진검수 이용요망</span>
 
 		</td>
@@ -618,8 +618,8 @@ a:hover { color: var(--teal); }
         - 선반 1대 (4단/ 사이즈:150x45cmx180Cm) : <span class="fontcolor_blue">9,900엔/월</span><br>
 		※ 계약선반은 계약후에는 사용유무와 관계없이 매월(1일) 예치금에서 차감됩니다.<br>
 		1개월단위 계약으로 해약월은 월말까지 과금됩니다.<br>
-		※ 신청방법 : 반드시 아래 메일로 계약 희망 내용을 보내주시기 바랍니다.  (※카톡 연락으로는 적용되지 않습니다)<br>
-		메일주소 : support@kurologi.jp <br><br>
+		※ 신청방법 : 반드시 아래 메일로 계약 희망 내용을 보내주시기 바랍니다.  (※1:1 문의로는 적용되지 않습니다)<br>
+		메일주소 : support@nipponbuy.jp <br><br>
 		※ 재고보관은 160사이즈 이하만 가능
 	 </td>
 	</tr>
@@ -642,7 +642,7 @@ a:hover { color: var(--teal); }
 	<p>・각 등급별 월 이용료는 매월 1일 12시(정오)에 예치금에서 자동 차감됩니다.</p>
 	<p>・경우에 따라 각종 수수료 등은 변경 될 수 있으며, 변경 되는 경우에는 사전에 공지하도록 하겠습니다.</p>
 	<p>・수수료는 세금포함(税込) 금액입니다.</p>
-	<p>・문의사항은 카톡체널, 1:1게시판으로 연락 바랍니다.</p>
+	<p>・문의사항은 1:1게시판으로 연락 바랍니다.</p>
 	<br>
 	<h4>추가 수수료 안내</h4>
 
@@ -663,12 +663,12 @@ a:hover { color: var(--teal); }
 		
 			<tr>
 				<td >1)적정 박스 재포장비 (박스비 포함)</td>
-				<td><span class="fontcolor_blue">적정 박스로 재포장 (※파손방지, 송료절감 위해 KURO Logi 판단후 필요시 실시) </span><br>
+				<td><span class="fontcolor_blue">적정 박스로 재포장 (※파손방지, 송료절감 위해 NIPPON BUY 판단후 필요시 실시) </span><br>
 				ㅇ 80사이즈 이하 : <span class="fontcolor_blue">80엔</span><br>
 				ㅇ 81~100사이즈 이하 : <span class="fontcolor_blue">180엔</span><br>
 				ㅇ 101사이즈 이상 : <span class="fontcolor_blue">330엔</span><br>
 				ㅇ 161이상 사이즈 : <span class="fontcolor_blue">별도견적</span><br>				
-				※ 적정 박스 재포장 ☑ 체크를 삭제하면 추가없음. 단, 불가피할시 KURO Logi가 체크후 실시.<br>
+				※ 적정 박스 재포장 ☑ 체크를 삭제하면 추가없음. 단, 불가피할시 NIPPON BUY가 체크후 실시.<br>
 				※ 파손가능성 있는 봉투입고시, 나눔배송시 ☑ 체크 상관없이 무조건 실시(필수)<br>
 				※ 신발류 등 일부제품은 부피무게를 줄이기 위해 전용 크래프트 택배봉투로 재포장.<br>
 				※ 환경을 위해 깨끗한 재활용 박스를 사용하는 경우도 있습니다.
@@ -694,7 +694,7 @@ a:hover { color: var(--teal); }
 
 			<tr>
 			<td >4)관부가세 대납 수수료</td>
-				<td><span class="fontcolor_blue">220엔</span>(※ 관부가세는 쿠로가 대납하고 예치금 차감)
+				<td><span class="fontcolor_blue">220엔</span>(※ 관부가세는 니폰바이가 대납하고 예치금 차감)
 
 			</td>
 			</tr>
@@ -710,7 +710,7 @@ a:hover { color: var(--teal); }
 			</tr>
 			<tr>
 			<td >7)사업자통관 수수료</td>
-				<td><span class="fontcolor_blue">1,100엔</span> <span style='color:red;font-weight:bold;'> (사업자 통관 신청방법 >>> <a href='https://detailed-bubbler-ad0.notion.site/9189af3da61f44538b942e3731196286
+				<td><span class="fontcolor_blue">1,100엔</span> <span style='color:red;font-weight:bold;'> (사업자 통관 신청방법 >>> <a href='https://nipponbuy.jp/service/business-customs
 ' target='_blank'> 확인</a>)</span>	
 			</td>
 			</tr>
@@ -730,7 +730,7 @@ a:hover { color: var(--teal); }
 					 (※ 전화 -일본 현지 구매숍, 매장 등 전화연락이 필요한 경우)<br><br>
 					 
 				<span class="fontcolor_blue">ㅇ 대리 계좌이체</span><br>
-				<span class="fontcolor_blue">400엔 / 한건</span>  (쿠로 수수료 220엔 + 은행 이제 수수료 180엔)<br>
+				<span class="fontcolor_blue">400엔 / 한건</span>  (니폰바이 수수료 220엔 + 은행 이제 수수료 180엔)<br>
 				(배송대행 물품 구매 후 추가 금액이 발생하는 경우 이용가능)<br>
 				<span class="is-red">(※ 주의 : 물품 구매 목적으로 계좌이체 서비스 이용 불가!!)</span>
 				

@@ -8,14 +8,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>국제배송비 안내 | KURO Logi</title>
+<title>국제배송비 안내 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from weightchart2.css */
 /* ==========================================================================
-   KURO Logi — 내부 페이지 공통 기본 스타일
+   NIPPON BUY — 내부 페이지 공통 기본 스타일
 
    이 파일은 5개 페이지의 CSS 맨 위에 그대로 복사해서 씁니다.
    (페이지마다 CSS를 따로 두기로 했기 때문에 @import 대신 복사합니다)
@@ -423,7 +423,7 @@ a:hover { color: var(--teal); }
 }
 
 /* ==========================================================================
-   KURO Logi — 국제배송비 안내 페이지
+   NIPPON BUY — 국제배송비 안내 페이지
    이 파일만 고치면 이 페이지 디자인이 바뀌니다.
    ========================================================================== */
 
@@ -510,7 +510,7 @@ a:hover { color: var(--teal); }
 	
 	2.	항공-도쿄(JP)화물의 무게 단위는 Kg입니다.   1kg= 2.204623lbs<br/>
 	
-	3.	요율표의 배송비는 항공운송비용과 “Kuro Logi 물류시스템”의 서비스 비용이 포함된 금액입니다.<br/>
+	3.	요율표의 배송비는 항공운송비용과 “NIPPON BUY 물류시스템”의 서비스 비용이 포함된 금액입니다.<br/>
 	4.	수입시 발생되는 관세, 부가세는 고객님이 납부하셔야 통관이 완료되고, 국내 배송이 진행됩니다.<br/>
 	5.	최소중량은 
 	0.5 kg 이며, 0.5단위로 절상합니다 (예: 2.1 kg 는 2.5 kg로 청구됩니다)

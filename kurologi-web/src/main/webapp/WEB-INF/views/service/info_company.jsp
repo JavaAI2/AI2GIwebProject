@@ -8,14 +8,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KURO Logi 소개 | KURO Logi</title>
+<title>NIPPON BUY 소개 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from info-company.css */
 /* ==========================================================================
-   KURO Logi — 내부 페이지 공통 기본 스타일
+   NIPPON BUY — 내부 페이지 공통 기본 스타일
 
    이 파일은 5개 페이지의 CSS 맨 위에 그대로 복사해서 씁니다.
    (페이지마다 CSS를 따로 두기로 했기 때문에 @import 대신 복사합니다)
@@ -423,7 +423,7 @@ a:hover { color: var(--teal); }
 }
 
 /* ==========================================================================
-   KURO Logi — KURO Logi 소개 페이지
+   NIPPON BUY — NIPPON BUY 소개 페이지
    이 파일만 고치면 이 페이지 디자인이 바뀝니다.
    ========================================================================== */
 
@@ -459,11 +459,11 @@ a:hover { color: var(--teal); }
 <!-- 페이지 제목 + 현재 위치 -->
 <section class="page-head">
   <div class="container page-head__inner">
-    <h1 class="page-head__title">KURO logi 소개</h1>
+    <h1 class="page-head__title">NIPPON BUY 소개</h1>
     <ol class="breadcrumb">
       <li class="breadcrumb__item"><a href="<%= ctx %>/">홈</a></li>
       <li class="breadcrumb__item"><a href="<%= ctx %>/service/info_company">서비스안내</a></li>
-      <li class="breadcrumb__item is-current">KURO logi 소개</li>
+      <li class="breadcrumb__item is-current">NIPPON BUY 소개</li>
     </ol>
   </div>
 </section>
@@ -471,23 +471,23 @@ a:hover { color: var(--teal); }
 <main class="page-body">
   <div class="container">
 <p class="text-center"><img src="<%= ctx %>/images/help/kuro_info.jpg"  /></p>
-	<p class="text-center">안녕하세요. 방문해 주셔서 감사합니다. <br> KURO Logi(쿠로로지)를 소개합니다. </p> 
+	<p class="text-center">안녕하세요. 방문해 주셔서 감사합니다. <br> NIPPON BUY(니폰바이)를 소개합니다. </p> 
 
-	<h4>KURO Logi 란?</h4>
+	<h4>NIPPON BUY 란?</h4>
 	<p>경쟁력 있는 가격의  E-commerce 글로벌 종합 물류서비스 입니다.</p> 
 
-	<h4>KURO Logi 의미?</h4>
-	<p>일본에서 KUROJI(黒字, 쿠로지)는 기업의 흑자를 의미합니다.</p> 
-	<p> [우리의 물류서비스를 이용하시는 고객사 모두가 「계속 흑자 기업」이되도록 </p> 
-	<p> 최고의 서포트를 한다.] 라는 미션을 배경으로 KURO Logi가 탄생 하였습니다.</p> 
+	<h4>NIPPON BUY 의미?</h4>
+	<p>NIPPON(日本)은 일본, BUY는 구매를 뜻합니다.</p> 
+	<p> [일본의 좋은 상품을 한국 고객에게 가장 안전하고 빠르게 전달한다] </p> 
+	<p> 라는 미션을 배경으로 NIPPON BUY가 탄생 하였습니다.</p> 
 
-	<h4 class="spaced-top">KURO Logi  물류 서비스</h4>
+	<h4 class="spaced-top">NIPPON BUY  물류 서비스</h4>
 
     <table class="data-table company-table">
 			
 			<tr class ='fontcolor-mint1 text-center' style='font-weight:bold;font-size:16px'>
 				<td >
-					KURO Express 
+					NIPPON BUY Express 
 					(글로벌 항공, 해상 운송 서비스)
 				</td>
 				<td>구매, 배송대행 서비스 (일본 배대지)</td>
@@ -498,7 +498,7 @@ a:hover { color: var(--teal); }
 					일본에서 한국, 동남아국가 등에 B2C, B2B 항공 및 해상운송 서비스를 경쟁력 있는 가격에 제공합니다. <br>일본 수,출입 운송건은 부담 없이 문의 바랍니다. 
 					(글로벌 항공, 해상 운송 서비스)<br>
 				</td>
-				<td>KURO Logi 배대지 시스템을 이용하여, 손쉽게 일본구매대행 서비스를 시작할 수 있습니다.<br>
+				<td>NIPPON BUY 배대지 시스템을 이용하여, 손쉽게 일본구매대행 서비스를 시작할 수 있습니다.<br>
 					경쟁력있는 국제송료와 서비스 비용으로 빠르게 빅셀러가 되도록 서포트 합니다. <br>
 				</td>
 				<td>구매대행에서 인기있는 제품들을 쉽게 구매 할 수 있도록 다양하게 제안합니다.   일본 수퍼딜리버리, 넷씨, 타지마야 등의 다양한 제품을 제안드리며 예치금으로 쉽게 구매 가능합니다.  </td>
@@ -523,14 +523,14 @@ a:hover { color: var(--teal); }
 			</tr>
 			<tr>
 				<td>
-					일본 온라인사이트 판매제품을 KURO창고에 재고를 놓고 일본국내 택배 배송을 의뢰하세요!<br><br>
+					일본 온라인사이트 판매제품을 NIPPON BUY 창고에 재고를 놓고 일본국내 택배 배송을 의뢰하세요!<br><br>
 
 WMS(창고관리시스템), OMS(주문관리시스템)을 이용한 3PL(풀필먼트) 서비스를 제공합니다.<br>
 API를 통해 발송의뢰, 발송메일이 자동으로 처리됩니다.<br>
 				</td>
 				<td>일본 Amazon FBA에 납품하고 싶은데 수입자가 없어 못하고 계신가요?<br><br>
-KURO Logi가 수입자가 되어 FBA라벨링과 Amazon창고 납품까지 원스톱으로 해결해 드립니다.<br>
-Amazon FBA보관료가 부담이면 KURO Logi창고에 일시 보관후 필요시 납품도 가능합니다. <br>
+NIPPON BUY가 수입자가 되어 FBA라벨링과 Amazon창고 납품까지 원스톱으로 해결해 드립니다.<br>
+Amazon FBA보관료가 부담이면 NIPPON BUY 창고에 일시 보관후 필요시 납품도 가능합니다. <br>
 
 				</td>
 				<td>항공, 해상운송시 필요한 일본 통관 대행서비스 입니다.<br><br>

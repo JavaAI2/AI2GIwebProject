@@ -33,14 +33,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><%= ship ? "배송대행 신청" : "구매대행 주문서등록" %> | KURO Logi</title>
+<title><%= ship ? "배송대행 신청" : "구매대행 주문서등록" %> | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from order-form.css */
 /* ==========================================================================
-   KURO Logi — 공통 뼈대 (상단 바 · 헤더 · 페이지 제목 · 푸터)
+   NIPPON BUY — 공통 뼈대 (상단 바 · 헤더 · 페이지 제목 · 푸터)
 
    바꾸고 싶은 값은 :root 한 곳만 고치면 됩니다.
    순수 CSS · Bootstrap 클래스 없음 · 데스크톱 고정폭
