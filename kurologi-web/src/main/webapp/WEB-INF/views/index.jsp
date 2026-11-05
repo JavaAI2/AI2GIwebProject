@@ -4,12 +4,22 @@
 <%@ page import="jp.kurologi.web.Session" %>
 <%@ page import="jp.kurologi.model.ExchangeRate" %>
 <%@ page import="jp.kurologi.service.ExchangeRateService" %>
+<%@ page import="jp.kurologi.model.PostDTO" %>
+<%@ page import="jp.kurologi.repository.PostDAO" %>
 <%
     String ctx = request.getContextPath();
 
     // 오늘의 환율 (DB 에 저장된 가장 최근 값. 서버가 하루 한 번 자동으로 갱신한다)
     ExchangeRate rate = ExchangeRateService.current();
     java.text.DecimalFormat rateFmt = new java.text.DecimalFormat("#,##0.00");
+
+    // 공지사항 : 커뮤니티 > 공지사항의 최신 5건. (DB 에 테이블이 없거나 오류가 나도 메인 화면은 열리도록 try/catch)
+    java.util.List<PostDTO> homeNotices = new java.util.ArrayList<PostDTO>();
+    try {
+        homeNotices = new PostDAO().selectList(PostDAO.TYPE_NOTICE, "title", "", null, 1, 5);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
 
     // 홈은 자기만의 헤더 · 푸터를 가진 독립 페이지입니다 (layout.jsp 를 쓰지 않음).
     // PageServlet 이 로그인한 회원이면 member 를, 아이디저장 쿠키가 있으면 savedId 를 넣어 줍니다.
@@ -28,14 +38,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>일본 배대지 쿠로로지 (KURO Logi)</title>
+<title>일본 배대지 니폰바이 (NIPPON BUY)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from index.css */
 /* ==========================================================================
-   KURO Logi — 홈페이지 스타일 (순수 CSS)
+   NIPPON BUY — 홈페이지 스타일 (순수 CSS)
 
    구조:  reset → 공통 요소 → 레이아웃 → 헤더 → 본문 섹션 → 푸터 → 팝업
    레이아웃: 데스크톱 전용 고정폭 (미디어쿼리 없음)   단위:  rem (1rem = 16px). 14px = 0.875rem, 14.4px = 0.9rem
@@ -554,7 +564,6 @@ button { font: inherit; cursor: pointer; }
   background: url('<%= ctx %>/images/banner1.png') center / 100% 100% no-repeat;
 }
 
-.hero__link { position: absolute; inset: 0; z-index: 1; }
 
 /* 언어별 배너 : images/banner1_ja.png , banner1_en.png 를 넣으면 언어를 바꿀 때 자동으로 바뀝니다.
    (배너 속 글자는 그림이라 번역되지 않기 때문입니다) 파일이 없으면 한국어 배너가 그대로 보입니다. */
@@ -579,23 +588,28 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
    10. 공지사항
    ========================================================================== */
 
+.search-bar button.btn { font: inherit; border: 0; cursor: pointer; }
+
 .notice-list { margin: 0; padding: 0; list-style: none; }
 
 .notice-list__item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
   padding: 12px 0;
 }
 
 .notice-list__title {
-  width: 80%;
-  margin: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    line-height: 1.5;
+    word-break: keep-all;      /* 단어 중간에서 끊지 않고 줄바꿈 : 글자가 잘리지 않는다 */
+    overflow-wrap: anywhere;
+  }
+
+.notice-list .badge--date { flex-shrink: 0; white-space: nowrap; }
 
 .notice-list__title a { color: var(--body); }
 
@@ -807,6 +821,12 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
 .login-welcome { margin: 0 0 14px; font-size: 14px; line-height: 1.8; color: #333; }
 .topbar__welcome { display: block; padding: 0 12px 0 20px; height: 44px; line-height: 44px; font-size: 13px; color: #444; white-space: nowrap; }
 .topbar__welcome strong { color: #159692; font-weight: 700; }
+
+/* JSP — 운송장 조회 결과 (시험용) */
+.track-result { margin: 10px 0 0; font-size: 14px; line-height: 1.8; color: var(--ink); white-space: pre-line; }
+.track-result:empty { display: none; }
+.track-result--error { color: var(--red); }
+.track-result--ok strong { color: var(--blue); }
 </style>
 </head>
 <body>
@@ -818,33 +838,33 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
   <div class="popup__backdrop" data-close-popup></div>
   <div class="popup__panel" role="dialog" aria-label="긴급 안내">
     <div class="popup__body">
-      <p class="popup__label">! 긴급 ㅅㅅ</p>
-      <h2 class="popup__title">-
-        스마트스토어<br><span class="text-red">택배사 설정 변경</span> 부탁드립니다!
+      <p class="popup__label">! 안내</p>
+      <h2 class="popup__title">
+        NIPPON BUY<br><span class="text-red">오픈 안내</span>를 드립니다!
       </h2>
       <p class="popup__lead">
-        최근 통관사 변경후, <strong>스마트스토어의 트래킹이 되지 않은</strong><br>문제가 발생하고 있습니다.
+        일본 쇼핑몰의 상품을 <strong>구매대행 · 배송대행</strong>으로<br>한국까지 안전하게 받아 보세요.
       </p>
 
       <div class="compare">
         <div class="compare__item compare__item--before">
-          <span class="compare__head">변경 전 (현재 설정)</span>
-          <span class="compare__name">롯데글로벌로지스</span>
+          <span class="compare__head">STEP 1</span>
+          <span class="compare__name">일본 쇼핑몰 주문</span>
         </div>
         <span class="compare__arrow" aria-hidden="true">➜</span>
         <div class="compare__item compare__item--after">
-          <span class="compare__head">변경 후 (설정 부탁)</span>
-          <span class="compare__name">CJ대한통운</span>
+          <span class="compare__head">STEP 2</span>
+          <span class="compare__name">한국 배송</span>
         </div>
       </div>
 
       <p class="popup__note">
         <span class="popup__note-mark">!</span>
-        금일부터 연휴로 스마트스토어 측에서 대응이 안되고 있는 상황입니다.<br>
-        <strong class="text-red">연휴 끝나는 대로 빠르게 개선하겠습니다.</strong>
+        회원가입 후 주문서를 등록하면 바로 이용할 수 있습니다.<br>
+        <strong class="text-red">문의는 1:1게시판을 이용해 주세요.</strong>
       </p>
 
-      <a class="btn btn--primary" href="#">자세히 보기 ›</a>
+      <a class="btn btn--primary" href="<%= ctx %>/service/manual">자세히 보기 ›</a>
     </div>
     <div class="popup__foot">
       <label class="popup__mute"><input type="checkbox"> 일주일동안 보이지 않음</label>
@@ -859,7 +879,7 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
   <div class="container topbar__inner">
 
     <ul class="topbar__links topbar__links--left">
-      <li><a href="#">즐겨찾기추가</a></li>
+      <li><a href="#" data-favorite>즐겨찾기추가</a></li>
       <li><a href="<%= ctx %>/community/qna">1:1게시판</a></li>
       <li class="has-menu">
         <a href="#">나의 일본주소 <i class="caret">▾</i></a>
@@ -871,17 +891,17 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
               <tr>
                 <th>배송센터</th>
                 <td>
-                  <select class="field field--sm" aria-label="배송센터">
-                    <option>항공-도쿄(JP)</option>
-                    <option>해상-후쿠오카 제1센터(JP)</option>
-                    <option>해상-후쿠오카 제2센터(JP)</option>
+                  <select class="field field--sm" id="addrCenter" aria-label="배송센터">
+                    <option value="air">항공-도쿄(JP)</option>
+                    <option value="sea1">해상-후쿠오카 제1센터(JP)</option>
+                    <option value="sea2">해상-후쿠오카 제2센터(JP)</option>
                   </select>
                 </td>
               </tr>
-              <tr><th>우편번호</th><td>187-0011</td></tr>
-              <tr><th>주소</th><td>東京都小平市鈴木町1-466-19-3F</td></tr>
+              <tr><th>우편번호</th><td id="addrZip">100-0000</td></tr>
+              <tr><th>주소</th><td id="addrText">東京都千代田区サンプル町1-2-3 NIPPON BUY 3F</td></tr>
               <tr><th>나의 사서함번호</th><td class="text-blue text-bold"><%= Html.esc(mailboxNo) %></td></tr>
-              <tr><th>Telephone</th><td>042-401-0754</td></tr>
+              <tr><th>Telephone</th><td id="addrTel">03-1234-5678</td></tr>
               <tr><th>수취인</th><td>회원님 영문 성함(또는 회원사명)</td></tr>
             </tbody>
           </table>
@@ -920,7 +940,7 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
   <div class="container site-header__inner">
 
     <a class="site-header__logo" href="<%= ctx %>/">
-      <img src="<%= ctx %>/images/logo.png" alt="Kuro Logi 물류시스템">
+      <img src="<%= ctx %>/images/logo.png" alt="NIPPON BUY 물류시스템">
     </a>
 
     <nav class="main-nav">
@@ -928,13 +948,13 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
         <li class="main-nav__item">
           <a href="<%= ctx %>/service/info_company">서비스 안내</a>
           <ul class="main-nav__submenu">
-            <li><a href="<%= ctx %>/service/info_company">KURO Logi 소개</a></li>
+            <li><a href="<%= ctx %>/service/info_company">NIPPON BUY 소개</a></li>
             <li><a href="<%= ctx %>/service/info_grade">회원등급, 수수료 안내</a></li>
             <li><a href="<%= ctx %>/service/weightchart2">국제배송비 안내</a></li>
             <li><a href="<%= ctx %>/service/info_regulation">검수규정,보상규정</a></li>
             <li><a href="<%= ctx %>/service/clearance_policy">통관불가 품목</a></li>
             <li><a href="<%= ctx %>/service/listpass_help">목록통관 품목안내</a></li>
-            <li><a href="<%= ctx %>/service/manual">KURO 사용메뉴얼</a></li>
+            <li><a href="<%= ctx %>/service/manual">NIPPON BUY 사용메뉴얼</a></li>
           </ul>
         </li>
         <li class="main-nav__item">
@@ -994,7 +1014,6 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
 
         <div class="col col--two-thirds">
           <div class="hero">
-            <a class="hero__link" href="#" aria-label="배너 자세히 보기"></a>
           </div>
         </div>
 
@@ -1041,10 +1060,10 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
             <div class="tabs__pane is-active" id="center-air">
               <table class="table">
                 <tbody>
-                  <tr><th>주소</th><td>東京都小平市鈴木町1-466-19-3F</td></tr>
+                  <tr><th>주소</th><td>東京都千代田区サンプル町1-2-3 NIPPON BUY 3F</td></tr>
                   <tr><th>사서함번호</th><td><%= Html.esc(mailboxNo) %></td></tr>
-                  <tr><th>우편번호</th><td>187-0011</td></tr>
-                  <tr><th>전화번호</th><td>042-401-0754</td></tr>
+                  <tr><th>우편번호</th><td>100-0000</td></tr>
+                  <tr><th>전화번호</th><td>03-1234-5678</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1052,10 +1071,10 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
             <div class="tabs__pane" id="center-sea1">
               <table class="table">
                 <tbody>
-                  <tr><th>주소</th><td>福岡県 福岡市 博多区 昭南町 2-3-8-3F</td></tr>
+                  <tr><th>주소</th><td>福岡県福岡市中央区サンプル町4-5-6 NIPPON BUY 3F</td></tr>
                   <tr><th>사서함번호</th><td><%= Html.esc(mailboxNo) %></td></tr>
-                  <tr><th>우편번호</th><td>812-0876</td></tr>
-                  <tr><th>전화번호</th><td>070-9293-9189</td></tr>
+                  <tr><th>우편번호</th><td>810-0000</td></tr>
+                  <tr><th>전화번호</th><td>092-123-4567</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1063,18 +1082,18 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
             <div class="tabs__pane" id="center-sea2">
               <table class="table">
                 <tbody>
-                  <tr><th>주소</th><td>福岡県糟屋郡粕屋町仲原２７７４−６ KURO</td></tr>
+                  <tr><th>주소</th><td>福岡県糟屋郡サンプル町7-8-9 NIPPON BUY</td></tr>
                   <tr><th>사서함번호</th><td><%= Html.esc(mailboxNo) %></td></tr>
-                  <tr><th>우편번호</th><td>811-2304</td></tr>
-                  <tr><th>전화번호</th><td>070-9285-4145</td></tr>
+                  <tr><th>우편번호</th><td>811-0000</td></tr>
+                  <tr><th>전화번호</th><td>092-234-5678</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
 
           <div class="btn-row btn-row--split btn-row--spaced">
-            <a class="btn btn--dark" href="#">배송대행 신청</a>
-            <a class="btn btn--dark" href="#">구매대행 신청</a>
+            <a class="btn btn--dark" href="<%= ctx %>/shiporder/form">배송대행 신청</a>
+            <a class="btn btn--dark" href="<%= ctx %>/buyorder/form">구매대행 신청</a>
           </div>
 
         </div>
@@ -1084,8 +1103,10 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
 
   <!-- ================================================================
        2) 운송장 조회
+          결제가 완료되면 마이페이지 > 결제방법 > 결제내역에 한국 · 일본 운송장이 만들어지고,
+          여기서 그 번호로 조회할 수 있다. (시험용)
        ================================================================ -->
-  <section class="section">
+  <section class="section" id="tracking">
     <div class="container">
       <div class="row">
 
@@ -1094,14 +1115,15 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
           <div class="card card--blue">
             <div class="card__body">
               <div class="search-bar">
-                <a class="btn btn--dark btn--lg" href="#">한국</a>
-                <select class="field field--lg" aria-label="배송방법">
+                <span class="btn btn--dark btn--lg">한국</span>
+                <select class="field field--lg" id="krType" aria-label="배송방법">
                   <option value="AIR">도쿄에어</option>
                   <option value="SEA">후쿠오카 고속해상</option>
                 </select>
-                <input class="field field--lg" type="text" placeholder="운송장번호 입력" aria-label="운송장번호">
-                <a class="btn btn--dark btn--lg" href="#">검색</a>
+                <input class="field field--lg" id="krNo" type="text" placeholder="운송장번호 입력" aria-label="운송장번호" maxlength="30" autocomplete="off">
+                <button class="btn btn--dark btn--lg" type="button" id="krBtn">검색</button>
               </div>
+              <p class="track-result" id="krResult" role="status"></p>
             </div>
           </div>
         </div>
@@ -1111,8 +1133,8 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
           <div class="card card--yellow">
             <div class="card__body">
               <div class="search-bar">
-                <a class="btn btn--dark btn--lg" href="#">일본</a>
-                <select class="field field--lg" aria-label="택배사">
+                <span class="btn btn--dark btn--lg">일본</span>
+                <select class="field field--lg" id="jpType" aria-label="택배사">
                   <option value="YAMATO" selected>야마토</option>
                   <option value="SAGAWA">사가와</option>
                   <option value="AMAZON">Amazon</option>
@@ -1122,9 +1144,10 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
                   <option value="LASTONE">라스트원</option>
                   <option value="MEITETSU">메이테츠</option>
                 </select>
-                <input class="field field--lg" type="text" placeholder="트레킹넘버 입력" aria-label="운송장번호">
-                <a class="btn btn--dark btn--lg" href="#">검색</a>
+                <input class="field field--lg" id="jpNo" type="text" placeholder="트레킹넘버 입력" aria-label="운송장번호" maxlength="30" autocomplete="off">
+                <button class="btn btn--dark btn--lg" type="button" id="jpBtn">검색</button>
               </div>
+              <p class="track-result" id="jpResult" role="status"></p>
             </div>
           </div>
         </div>
@@ -1143,28 +1166,20 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
         <div class="col col--one-third">
           <h4 class="panel-title panel-title--line">
             공지사항
-            <a class="panel-title__more" href="#">더보기 +</a>
+            <a class="panel-title__more" href="<%= ctx %>/community/notice">더보기 +</a>
           </h4>
           <div class="card card--pad">
             <ul class="notice-list">
+<% if (homeNotices.isEmpty()) { %>
+              <li class="notice-list__item"><p class="notice-list__title">등록된 공지사항이 없습니다.</p></li>
+<% } else { for (PostDTO n : homeNotices) { %>
               <li class="notice-list__item">
                 <p class="notice-list__title">
-                  <span class="badge badge--info">새글</span>&nbsp;&nbsp;<a href="#">[긴급!] 스마트스토어 발송처리시 -&gt; CJ대한통운 임시 설정 부탁! </a>
+                  <% if (n.isNewPost()) { %><span class="badge badge--info">새글</span>&nbsp;&nbsp;<% } %><a href="<%= ctx %>/community/notice/view?id=<%= n.getPostId() %>"><%= Html.esc(n.getTitle()) %></a>
                 </p>
-                <span class="badge badge--date">2026-10-03</span>
+                <span class="badge badge--date"><%= Html.esc(n.getCreatedAt()) %></span>
               </li>
-              <li class="notice-list__item">
-                <p class="notice-list__title"><a href="#">[중요!!] 해상 대형화물 옵션 수수료 차감 안내</a></p>
-                <span class="badge badge--date">2026-10-01</span>
-              </li>
-              <li class="notice-list__item">
-                <p class="notice-list__title"><a href="#">[중요!] 항공 통관시스템 변경에 따른 오픈마켓 택배사 선택 변경요</a></p>
-                <span class="badge badge--date">2026-09-24</span>
-              </li>
-              <li class="notice-list__item">
-                <p class="notice-list__title"><a href="#">[중요!] 해상 리드타임 단축 &amp; 재고 보관비무료 이벤트!</a></p>
-                <span class="badge badge--date">2026-09-21</span>
-              </li>
+<% } } %>
             </ul>
           </div>
         </div>
@@ -1205,8 +1220,9 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
             <div class="card__body">
               <p class="text-16 bank-logo"><img src="<%= ctx %>/images/img_bank.png" alt="SBI SUMISHIN NET BANK"></p>
               <p class="text-16">SBI SUMISHIN NET BANK, LTD.</p>
-              <p class="text-16">예금주명: USPbrain Co., Ltd</p>
-              <p class="text-20 text-blue">1537388 (JAPANESE YEN)/NTSSJPJT</p>
+              <p class="text-16">예금주명: NIPPON BUY Co., Ltd</p>
+              <%-- 연습용 임의 계좌번호입니다 (실제 계좌 아님) --%>
+              <p class="text-20 text-blue">1234567 (JAPANESE YEN)/NTSSJPJT</p>
             </div>
           </div>
         </div>
@@ -1226,14 +1242,14 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
           <h4 class="panel-title panel-title--line">고객센터</h4>
           <div class="card card--pad">
             <div class="card__body">
-              <p class="text-18">Tel : <span class="text-blue text-18">(+81) 042-401-0754 / 일본</span></p>
+              <p class="text-18">Tel : <span class="text-blue text-18">(+81) 03-1234-5678 / 일본</span></p>
               <p class="text-16">평일 9:30~17:30</p>
               <p class="text-16 text-red text-semibold">일요일휴무, 토요일/공휴일 정상근무(일본기준)</p>
-              <p class="text-16">email : support@kurologi.jp</p>
+              <p class="text-16">email : support@nipponbuy.jp</p>
 
               <div class="stack">
-                <a class="btn btn--dark" href="#">자주묻는질문</a>
-                <a class="btn btn--dark" href="#">사용메뉴얼</a>
+                <a class="btn btn--dark" href="<%= ctx %>/community/faq">자주묻는질문</a>
+                <a class="btn btn--dark" href="<%= ctx %>/service/manual">사용메뉴얼</a>
               </div>
             </div>
           </div>
@@ -1275,7 +1291,7 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
     <div class="row">
 
       <div class="col col--footer-logo">
-        <img class="site-footer__logo" src="<%= ctx %>/images/logo.png" alt="Kuro Logi 물류시스템">
+        <img class="site-footer__logo" src="<%= ctx %>/images/logo.png" alt="NIPPON BUY 물류시스템">
       </div>
 
       <div class="col col--footer-info">
@@ -1283,14 +1299,14 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
           <a href="#">이용약관</a>
           <a href="#">개인정보처리방침</a>
           <a href="#">이메일무단수집거부</a>
-          <a href="#">特定商取引法に基づく表示</a>
-          <a href="#">個人情報保護方針</a>
+          <a href="#">특정상거래법에 따른 표기</a>
+          <a href="#">개인정보 보호방침(일본)</a>
         </div>
         <p class="site-footer__text">
-          KURO Logi ( USPbrain Co., Ltd ) / WTKOREA <br>
-          3F, 1-466-19,  Suzukicho, Kodaira Shi, Tokyo To, 187-0011, Japan<br>
-          Tel(일본) : (+81) 042-401-0754<br><br>
-          Kuro Logi 물류시스템 에서 운영하는 배송대행은 관세법등 관련규정을 준수합니다.
+          NIPPON BUY Co., Ltd <br>
+          3F, 1-2-3, Sample-cho, Chiyoda-ku, Tokyo To, 100-0000, Japan<br>
+          Tel(일본) : (+81) 03-1234-5678<br><br>
+          NIPPON BUY 물류시스템 에서 운영하는 배송대행은 관세법등 관련규정을 준수합니다.
           불법물건을 취급하지 않으며, 분할배송 및 가격허위신고 등 고객의 불법사항 요청에는<br>
           협조하지 않습니다. 고객님의 허위신고로 인한 불이익에는 책임지지 않습니다.
         </p>
@@ -1298,7 +1314,7 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
 
     </div>
   </div>
-  <p class="copyright">ⓒ 2023 All Rights Reserved by KUROLogi.</p>
+  <p class="copyright">ⓒ 2023 All Rights Reserved by NIPPON BUY.</p>
 </footer>
 
 <script>
@@ -1315,6 +1331,23 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
       });
     });
   });
+
+  /* ---- 나의 일본주소 : 배송센터를 바꾸면 우편번호 · 주소 · 전화번호도 함께 바뀐다 ---- */
+  var CENTERS = {
+    air:  { zip: '100-0000', addr: '東京都千代田区サンプル町1-2-3 NIPPON BUY 3F',                 tel: '03-1234-5678' },
+    sea1: { zip: '810-0000', addr: '福岡県福岡市中央区サンプル町4-5-6 NIPPON BUY 3F',          tel: '092-123-4567' },
+    sea2: { zip: '811-0000', addr: '福岡県糟屋郡サンプル町7-8-9 NIPPON BUY',  tel: '092-234-5678' }
+  };
+  var centerSelect = document.getElementById('addrCenter');
+  if (centerSelect) {
+    centerSelect.addEventListener('change', function () {
+      var c = CENTERS[centerSelect.value];
+      if (!c) return;
+      document.getElementById('addrZip').textContent = c.zip;
+      document.getElementById('addrText').textContent = c.addr;
+      document.getElementById('addrTel').textContent = c.tel;
+    });
+  }
 
   /* ---- 팝업 ---- */
   var popup = document.getElementById('emergencyPopup');
@@ -1349,6 +1382,71 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
   setInterval(sync, 1000);
 })();
 </script>
+<script>
+/* ---- 운송장 조회 (시험용) ----
+   결제가 완료되면 결제내역에 만들어지는 한국 · 일본 운송장을 /track/kr, /track/jp 에서 찾아 아래에 보여 준다.
+   결제내역의 "조회" 링크로 들어오면 (?krMethod=..&krNo=.. / ?jpCarrier=..&jpNo=..) 칸을 채우고 바로 조회한다. */
+(function () {
+  var CTX = '<%= ctx %>';
+
+  function show(out, ok, text) {
+    out.className = 'track-result ' + (ok ? 'track-result--ok' : 'track-result--error');
+    out.textContent = text;
+  }
+
+  function track(kind, typeId, noId, resultId) {
+    var type = document.getElementById(typeId).value;
+    var no = document.getElementById(noId).value.trim();
+    var out = document.getElementById(resultId);
+
+    if (!no) { show(out, false, '운송장번호를 입력해 주세요.'); return; }
+    out.className = 'track-result';
+    out.textContent = '조회 중...';
+
+    fetch(CTX + '/track/' + kind + '?type=' + encodeURIComponent(type) + '&no=' + encodeURIComponent(no),
+          { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok) { show(out, false, j.message); return; }
+        show(out, true, '[' + j.type + '] ' + j.number + '\n상태 : ' + j.status + '\n접수일시 : ' + j.date);
+      })
+      .catch(function () {
+        show(out, false, '조회하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      });
+  }
+
+  function bind(kind, typeId, noId, btnId, resultId) {
+    document.getElementById(btnId).addEventListener('click', function () { track(kind, typeId, noId, resultId); });
+    document.getElementById(noId).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); track(kind, typeId, noId, resultId); }
+    });
+  }
+
+  bind('kr', 'krType', 'krNo', 'krBtn', 'krResult');
+  bind('jp', 'jpType', 'jpNo', 'jpBtn', 'jpResult');
+
+  // 결제내역의 "조회" 링크로 들어온 경우 : 값을 채우고 바로 조회
+  var q = new URLSearchParams(location.search);
+
+  function fill(typeId, noId, type, no) {
+    var sel = document.getElementById(typeId);
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === type) { sel.selectedIndex = i; break; }
+    }
+    document.getElementById(noId).value = no;
+  }
+
+  if (q.get('krNo')) {
+    fill('krType', 'krNo', q.get('krMethod') || '', q.get('krNo'));
+    track('kr', 'krType', 'krNo', 'krResult');
+  }
+  if (q.get('jpNo')) {
+    fill('jpType', 'jpNo', q.get('jpCarrier') || '', q.get('jpNo'));
+    track('jp', 'jpType', 'jpNo', 'jpResult');
+  }
+})();
+</script>
 <%@ include file="common/translate.jspf" %>
+<%@ include file="common/favorite.jspf" %>
 </body>
 </html>

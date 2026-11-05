@@ -8,14 +8,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>종합현황 | KURO Logi</title>
+<title>종합현황 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from dashboard.css */
 /* ==========================================================================
-   KURO Logi — 종합현황 (마이페이지 대시보드)
+   NIPPON BUY — 종합현황 (마이페이지 대시보드)
 
    바꾸고 싶은 값은 :root 한 곳만 고치면 됩니다.
    순수 CSS · Bootstrap 클래스 없음 · 데스크톱 고정폭
@@ -286,6 +286,9 @@ a:hover { color: var(--teal); }
 .summary-tabs a.summary-tabs--teal      { background: var(--teal); }
 .summary-tabs a.summary-tabs--green     { background: var(--green); }
 .summary-tabs a.summary-tabs--blue      { background: var(--blue); }
+
+/* 탭은 링크이므로 마우스를 올리면 살짝 어둡게 */
+.summary-tabs a:hover { color: #fff; filter: brightness(.92); }
 
 .summary-links {
   display: flex;
@@ -757,9 +760,9 @@ a:hover { color: var(--teal); }
     <!-- ============ 1. 요약 탭 ============ -->
     <div class="summary-bar">
       <div class="summary-tabs">
-        <a class="is-active" href="#">배송대행 조회</a>
-        <a class="summary-tabs--teal" href="#">구매대행 조회</a>
-        <a class="summary-tabs--blue" href="#">입고내역조회</a>
+        <a class="is-active" href="<%= ctx %>/shiporder/list">배송대행 조회</a>
+        <a class="summary-tabs--teal" href="<%= ctx %>/buyorder/list">구매대행 조회</a>
+        <a class="summary-tabs--blue" href="<%= ctx %>/mypage/payment">입고내역조회</a>
       </div>
       <ul class="summary-links">
         <li><a href="#">배송요금표 보기</a></li>

@@ -30,14 +30,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>예치금 충전 | KURO Logi</title>
+<title>예치금 충전 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from deposit.css */
 /* ==========================================================================
-   KURO Logi — 회원 (stock_order.css 와 동일한 공통 스타일)
+   NIPPON BUY — 회원 (stock_order.css 와 동일한 공통 스타일)
 
    바꾸고 싶은 값은 :root 한 곳만 고치면 됩니다.
    순수 CSS · Bootstrap 클래스 없음 · 데스크톱 고정폭
@@ -501,7 +501,7 @@ a:hover { color: var(--teal); }
 
       <div class="bank-box">
         <strong>입금 계좌 (시연용)</strong><br>
-        국민은행 123-456-789012 / 예금주: 쿠로로지<br>
+        국민은행 123-456-789012 / 예금주: 니폰바이<br>
         실제 서비스에서는 위 계좌로 입금한 뒤 입금 확인이 되면 예치금이 충전됩니다.
       </div>
 

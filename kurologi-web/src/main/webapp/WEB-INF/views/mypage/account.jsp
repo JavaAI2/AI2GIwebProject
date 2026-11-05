@@ -23,12 +23,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>계정관리 | KURO Logi</title>
+<title>계정관리 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>/* ==========================================================================
-   KURO Logi — 종합현황 (마이페이지 대시보드)
+   NIPPON BUY — 종합현황 (마이페이지 대시보드)
 
    바꾸고 싶은 값은 :root 한 곳만 고치면 됩니다.
    순수 CSS · Bootstrap 클래스 없음 · 데스크톱 고정폭
@@ -527,7 +527,7 @@ a:hover { color: var(--teal); }
             <td class="is-readonly"><%= member.getLastLoginAtText() %> &nbsp;<a href="<%= ctx %>/logout">로그아웃</a></td>
           </tr>
           <tr>
-            <th>SMS/카카오알림톡 수신동의<br>(자동 필수)</th>
+            <th>SMS 수신동의<br>(자동 필수)</th>
             <td colspan="3">
               <p class="form-table__note">지속적인 현황을 알 수 있습니다(견적,입고,출고,배송,오류)</p>
               <label class="check"><input type="checkbox" name="smsRefuse" value="Y"<%= Html.checked(vSmsRefuse) %>> 배송비용 통지 수신 거부</label>

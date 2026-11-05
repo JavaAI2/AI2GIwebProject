@@ -3,6 +3,8 @@
 <%@ page import="jp.kurologi.model.*" %>
 <%@ page import="jp.kurologi.web.Html" %>
 <%@ page import="jp.kurologi.web.Session" %>
+<%@ page import="jp.kurologi.web.App" %>
+<%@ page import="jp.kurologi.service.ShipmentBoard" %>
 <%
     String ctx = request.getContextPath();
 
@@ -15,18 +17,23 @@
     Grade nextGrade = (Grade) request.getAttribute("nextGrade");
     int countToNextGrade = (Integer) request.getAttribute("countToNextGrade");
     String referralUrl = (String) request.getAttribute("referralUrl");
+
+    // 결제가 완료된 운송품 현황 : MyPageMain 이 넣어 준 값을 쓰고,
+    // 값이 없으면(예전 MyPageServlet 이 이 화면을 열었을 때 등) 여기서 직접 만든다.
+    List<ShipmentRow> shipments = (List<ShipmentRow>) request.getAttribute("shipments");
+    if (shipments == null) shipments = ShipmentBoard.load(App.of(application), member);
 %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>마이페이지 | KURO Logi</title>
+<title>마이페이지 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>/* ==========================================================================
-   KURO Logi — 종합현황 (마이페이지 대시보드)
+   NIPPON BUY — 종합현황 (마이페이지 대시보드)
 
    바꾸고 싶은 값은 :root 한 곳만 고치면 됩니다.
    순수 CSS · Bootstrap 클래스 없음 · 데스크톱 고정폭
@@ -486,6 +493,50 @@ a:hover { color: var(--teal); }
 .addr-field[data-copy-field] { cursor: pointer; }
 .addr-field[data-copy-field]:hover .addr-field__value { color: var(--blue); }
 button.info-link { font-family: inherit; background: #fff; cursor: pointer; }
+
+/* ------------------------------------------------- 결제 완료 운송품 현황 */
+
+.ship-table { width: 100%; border-collapse: collapse; }
+
+.ship-table th {
+  padding: 11px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: center;
+  background: #f3f3f3;
+  border-bottom: 1px solid var(--line);
+}
+
+.ship-table td {
+  padding: 13px 8px;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.ship-table tr:last-child td { border-bottom: 0; }
+.ship-table td.is-left { text-align: left; }
+.ship-table__empty { padding: 30px 10px; text-align: center; color: var(--muted); }
+
+.ship-table .wb__no { display: block; font-weight: 700; letter-spacing: .3px; }
+.ship-table .wb__label { color: var(--body); }
+.ship-table .wb a { font-size: 12px; }
+.ship-table .order-no { display: block; margin-top: 3px; font-size: 12px; }
+
+.ship-more { font-size: 13px; font-weight: 700; }
+
+/* 진행 상태 알약 (구매대행 · 배송대행 주문내역과 같은 색) */
+.state { display: inline-block; padding: 2px 10px; font-size: 12px; border-radius: 999px; }
+.state--done { color: var(--orange); border: 1px solid var(--orange); }
+.state--wait { color: var(--muted); border: 1px solid #bbb; }
+.state--submit { color: var(--teal); border: 1px solid var(--teal); }
+.state--received { color: #8a5a00; border: 1px solid #d9a441; }
+.state--shipped { color: #fff; background: #37b149; border: 1px solid #37b149; }
+.state--billed { color: #b34700; border: 1px solid #e8a15c; }
+.state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
 </style>
 </head>
 <body>
@@ -546,6 +597,64 @@ button.info-link { font-family: inherit; background: #fff; cursor: pointer; }
                 총 이용건수 : <%= usage.total() %>건
               </td>
             </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 결제 완료 운송품 현황 (결제내역에서 확인되는 물품의 진행 상황) ============ -->
+    <div class="box">
+      <div class="box__head">
+        <p class="box__title">결제 완료 운송품 현황</p>
+        <p class="box__note">최근 결제한 <%= shipments.size() %>건 &nbsp;<a class="ship-more" href="<%= ctx %>/mypage/payment?tab=history">결제내역 전체보기 ›</a></p>
+      </div>
+      <div class="box__body" style="padding:0">
+        <table class="ship-table">
+          <thead>
+            <tr>
+              <th>결제일</th>
+              <th>내용</th>
+              <th>한국 운송장</th>
+              <th>일본 운송장</th>
+              <th>진행 상태</th>
+            </tr>
+          </thead>
+          <tbody>
+<%  for (ShipmentRow r : shipments) {
+        Payment sp = r.payment();
+%>
+            <tr>
+              <td><%= sp.getCreatedAtText() %></td>
+              <td class="is-left"><%= Html.esc(sp.getSummary()) %></td>
+              <td class="wb">
+<%      if (sp.getKrWaybillNo() != null) { %>
+                <span class="wb__label"><%= Html.esc(sp.getKrMethodLabel()) %></span>
+                <span class="wb__no"><%= Html.esc(sp.getKrWaybillNo()) %></span>
+                <a href="<%= ctx %>/?krMethod=<%= Html.esc(sp.getKrMethod()) %>&amp;krNo=<%= Html.esc(sp.getKrWaybillNo()) %>#tracking">조회</a>
+<%      } else { %>-<%      } %>
+              </td>
+              <td class="wb">
+<%      if (sp.getJpWaybillNo() != null) { %>
+                <span class="wb__label"><%= Html.esc(sp.getJpCarrierLabel()) %></span>
+                <span class="wb__no"><%= Html.esc(sp.getJpWaybillNo()) %></span>
+                <a href="<%= ctx %>/?jpCarrier=<%= Html.esc(sp.getJpCarrier()) %>&amp;jpNo=<%= Html.esc(sp.getJpWaybillNo()) %>#tracking">조회</a>
+<%      } else { %>-<%      } %>
+              </td>
+              <td>
+                <span class="state <%= Html.esc(r.statusCss()) %>"><%= Html.esc(r.statusLabel()) %></span>
+<%      if (r.orderNo() != null) { %>
+<%          if (r.orderUrl() != null) { %>
+                <a class="order-no" href="<%= ctx %><%= r.orderUrl() %>"><%= Html.esc(r.orderNo()) %></a>
+<%          } else { %>
+                <span class="order-no"><%= Html.esc(r.orderNo()) %></span>
+<%          } %>
+<%      } %>
+              </td>
+            </tr>
+<%  } %>
+<%  if (shipments.isEmpty()) { %>
+            <tr><td class="ship-table__empty" colspan="5">결제가 완료된 운송품이 없습니다.</td></tr>
+<%  } %>
           </tbody>
         </table>
       </div>

@@ -37,6 +37,9 @@ public class MyPageMain implements Command {
 		request.setAttribute("countToNextGrade", Math.max(0, Grade.ROYAL_FAMILY_THRESHOLD - usage.thisMonth()));
 		request.setAttribute("referralUrl", baseUrl(request) + "/member/join?ref=" + m.getReferralCode());
 
+		// 결제가 완료된 운송품 현황 (mypage.jsp 도 값이 없으면 같은 방법으로 직접 만든다)
+		request.setAttribute("shipments", ShipmentBoard.load(app, m));
+
 		return true;   // MyPageController 가 mypage.jsp 로 forward 한다
 	}
 

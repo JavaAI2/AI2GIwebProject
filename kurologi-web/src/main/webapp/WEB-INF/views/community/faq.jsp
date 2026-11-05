@@ -9,14 +9,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>자주묻는 질문 | KURO Logi</title>
+<title>자주묻는 질문 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from faq.css */
 /* ==========================================================================
-   KURO Logi — 종합현황 (마이페이지 대시보드)
+   NIPPON BUY — 종합현황 (마이페이지 대시보드)
 
    바꾸고 싶은 값은 :root 한 곳만 고치면 됩니다.
    순수 CSS · Bootstrap 클래스 없음 · 데스크톱 고정폭

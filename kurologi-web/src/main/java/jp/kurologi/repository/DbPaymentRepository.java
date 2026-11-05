@@ -15,13 +15,15 @@ import jp.kurologi.model.Payment;
 /**
  * CHARGE · PAYMENT 테이블을 읽고 쓰는 결제 저장소 (InMemoryPaymentRepository 를 대신한다).
  * 결제에 묶인 청구 번호 목록은 PAYMENT 에 따로 저장하지 않고, CHARGE.PAYMENT_ID 로 찾는다.
- * 먼저 CHARGE, PAYMENT 테이블과 CHARGE_SEQ, PAYMENT_SEQ 시퀀스가 만들어져 있어야 한다.
+ * 먼저 CHARGE, PAYMENT 테이블과 CHARGE_SEQ, PAYMENT_SEQ 시퀀스가 만들어져 있어야 하고,
+ * sql/05_payment_waybill.sql 로 PAYMENT 에 운송장 컬럼 4개를 추가해 두어야 한다.
  */
 public class DbPaymentRepository implements PaymentRepository {
 
 	private static final String CHARGE_COLS = "ID, MEMBER_ID, PAYMENT_ID, TITLE, ORDER_NO, AMOUNT, STATUS, CREATED_AT";
 	private static final String PAYMENT_COLS = "ID, MEMBER_ID, SUMMARY, TOTAL_AMOUNT, COUPON_DISCOUNT, DEPOSIT_USED, "
-			+ "PAY_AMOUNT, METHOD, STATUS, DEPOSITOR_NAME, CREATED_AT, PAID_AT";
+			+ "PAY_AMOUNT, METHOD, STATUS, DEPOSITOR_NAME, CREATED_AT, PAID_AT, "
+			+ "KR_METHOD, KR_WAYBILL_NO, JP_CARRIER, JP_WAYBILL_NO";
 
 	// ------------------------------------------------------------------ 청구
 
@@ -139,8 +141,9 @@ public class DbPaymentRepository implements PaymentRepository {
 			if (p.getId() == 0) {
 				p.setId(nextVal(conn, "PAYMENT_SEQ"));
 				String sql = "INSERT INTO PAYMENT (ID, MEMBER_ID, SUMMARY, TOTAL_AMOUNT, COUPON_DISCOUNT, DEPOSIT_USED, "
-						+ "PAY_AMOUNT, METHOD, STATUS, DEPOSITOR_NAME, CREATED_AT, PAID_AT) "
-						+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+						+ "PAY_AMOUNT, METHOD, STATUS, DEPOSITOR_NAME, CREATED_AT, PAID_AT, "
+						+ "KR_METHOD, KR_WAYBILL_NO, JP_CARRIER, JP_WAYBILL_NO) "
+						+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				try (PreparedStatement ps = conn.prepareStatement(sql)) {
 					ps.setLong(1, p.getId());
 					ps.setLong(2, p.getMemberId());
@@ -154,15 +157,24 @@ public class DbPaymentRepository implements PaymentRepository {
 					ps.setString(10, p.getDepositorName());
 					ps.setTimestamp(11, Timestamp.valueOf(p.getCreatedAt()));
 					ps.setTimestamp(12, p.getPaidAt() == null ? null : Timestamp.valueOf(p.getPaidAt()));
+					ps.setString(13, p.getKrMethod());
+					ps.setString(14, p.getKrWaybillNo());
+					ps.setString(15, p.getJpCarrier());
+					ps.setString(16, p.getJpWaybillNo());
 					ps.executeUpdate();
 				}
 			} else {
-				String sql = "UPDATE PAYMENT SET STATUS = ?, DEPOSITOR_NAME = ?, PAID_AT = ? WHERE ID = ?";
+				String sql = "UPDATE PAYMENT SET STATUS = ?, DEPOSITOR_NAME = ?, PAID_AT = ?, "
+						+ "KR_METHOD = ?, KR_WAYBILL_NO = ?, JP_CARRIER = ?, JP_WAYBILL_NO = ? WHERE ID = ?";
 				try (PreparedStatement ps = conn.prepareStatement(sql)) {
 					ps.setString(1, p.getStatus().name());
 					ps.setString(2, p.getDepositorName());
 					ps.setTimestamp(3, p.getPaidAt() == null ? null : Timestamp.valueOf(p.getPaidAt()));
-					ps.setLong(4, p.getId());
+					ps.setString(4, p.getKrMethod());
+					ps.setString(5, p.getKrWaybillNo());
+					ps.setString(6, p.getJpCarrier());
+					ps.setString(7, p.getJpWaybillNo());
+					ps.setLong(8, p.getId());
 					ps.executeUpdate();
 				}
 			}
@@ -233,6 +245,10 @@ public class DbPaymentRepository implements PaymentRepository {
 		p.setCreatedAt(rs.getTimestamp("CREATED_AT").toLocalDateTime());
 		Timestamp paid = rs.getTimestamp("PAID_AT");
 		p.setPaidAt(paid == null ? null : paid.toLocalDateTime());
+		p.setKrMethod(rs.getString("KR_METHOD"));
+		p.setKrWaybillNo(rs.getString("KR_WAYBILL_NO"));
+		p.setJpCarrier(rs.getString("JP_CARRIER"));
+		p.setJpWaybillNo(rs.getString("JP_WAYBILL_NO"));
 		p.setChargeIds(new ArrayList<>());
 		return p;
 	}

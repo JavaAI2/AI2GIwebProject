@@ -8,14 +8,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KURO 사용메뉴얼 | KURO Logi</title>
+<title>NIPPON BUY 사용메뉴얼 | NIPPON BUY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from manual.css */
 /* ==========================================================================
-   KURO Logi — 종합현황 (마이페이지 대시보드)
+   NIPPON BUY — 종합현황 (마이페이지 대시보드)
 
    바꾸고 싶은 값은 :root 한 곳만 고치면 됩니다.
    순수 CSS · Bootstrap 클래스 없음 · 데스크톱 고정폭
@@ -531,11 +531,11 @@ a:hover { color: var(--teal); }
 <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="top" /></jsp:include>
 <section class="page-head">
   <div class="container page-head__inner">
-    <h1 class="page-head__title">KURO 사용메뉴얼</h1>
+    <h1 class="page-head__title">NIPPON BUY 사용메뉴얼</h1>
     <ol class="breadcrumb">
       <li class="breadcrumb__item"><a href="<%= ctx %>/">홈</a></li>
       <li class="breadcrumb__item"><a href="<%= ctx %>/service/info_company">서비스안내</a></li>
-      <li class="breadcrumb__item is-current">KURO 사용메뉴얼</li>
+      <li class="breadcrumb__item is-current">NIPPON BUY 사용메뉴얼</li>
     </ol>
   </div>
 </section>
@@ -544,10 +544,10 @@ a:hover { color: var(--teal); }
 <main class="page-body">
   <div class="container">
 
-    <h1 class="sub-title"><span class="sub-title__dash"></span>KURO 사용메뉴얼</h1>
+    <h1 class="sub-title"><span class="sub-title__dash"></span>NIPPON BUY 사용메뉴얼</h1>
 
     <div class="info-box">
-      <p>KURO Logi 물류시스템 사용 방법을 단계별로 안내합니다. 각 항목을 눌러 자세한 내용을 확인하세요.</p>
+      <p>NIPPON BUY 물류시스템 사용 방법을 단계별로 안내합니다. 각 항목을 눌러 자세한 내용을 확인하세요.</p>
     </div>
 
     <div class="manual-grid">
@@ -592,7 +592,7 @@ a:hover { color: var(--teal); }
 
     <h2 class="pane-title">자주 쓰는 메뉴</h2>
     <ul class="link-list">
-      <li><a href="<%= ctx %>/service/info_company">KURO Logi 소개</a></li>
+      <li><a href="<%= ctx %>/service/info_company">NIPPON BUY 소개</a></li>
       <li><a href="<%= ctx %>/service/weightchart2">국제배송비 안내</a></li>
       <li><a href="<%= ctx %>/service/info_regulation">검수규정, 보상규정</a></li>
       <li><a href="<%= ctx %>/service/listpass_help">목록통관 품목안내</a></li>
