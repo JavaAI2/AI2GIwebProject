@@ -661,7 +661,6 @@ a:hover { color: var(--teal); }
 	
 	<p class="level-2 fontsize-bold22">1. 보험 가입 화물 (추천)</p>	
 	<p class="level-3" >고가 상품 또는 파손 위험이 높은 상품은 배송보험 가입을 권장드립니다.<p>
-	<p class="level-3" ><span class="fontcolor_blue">쿠로안심케어 상세보기=></span><a class="btn btn--info btn--sm" href='https://detailed-bubbler-ad0.notion.site/18055852ca8f80efa1d0d89b3d0f9785?pvs=74' target='_blank'>클릭!</a></p>
 	<p class="level-3 fontsize-bold22">①보상범위</p>
 	<p class="level-4" ><span class="is-red">·보험 가입 화물은 보험약관에 따라 최대 500만원까지 보상</span>이 가능합니다.</p>
 	<p class="level-4"  class="fontsize-bold18">·파손, 도난, 분실, 오발송(주문한제품과 다른제품 수령)  발생시</p>
@@ -682,7 +681,6 @@ a:hover { color: var(--teal); }
 	<br>
 	<p class="level-3 fontsize-bold22">④ 보험 청구 방법</p>
 	<p class="level-4" >본 청구시 고객정보 등 개인정보 포함 제출이 필요하기 때문에 반드시 <span class="fontsize-bold18"> 회원사께서 접수</span>.</p>
-	<p class="level-4 fontsize-bold18">접수방법 다운로드 => <a class="btn btn--info btn--sm" href='../images/ilnoir.pdf' target='_blank'>클릭!</a></p>
 	<br>
 	<p class="level-2 fontsize-bold22">2. 보험 미가입 화물
 	<p class="level-3" >보험 미가입 화물은 아래 기준에 따라 보상이 진행됩니다.</p> 

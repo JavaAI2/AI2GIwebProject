@@ -377,6 +377,7 @@ a:hover { color: var(--teal); }
 }
 .link-btn:hover { color: var(--ink); background: #cfcfcf; }
 .link-btn--active { color: #fff; background: var(--teal-tab); }
+.center-empty { margin: 14px 0 24px; padding: 48px 16px; text-align: center; font-size: 16px; color: #666; background: #fafafa; border: 1px dashed #bbb; border-radius: 6px; }
 .link-btn--active:hover { color: #fff; background: var(--teal-dark); }
 
 /* 카카오 상담 버튼 이미지 */
@@ -570,13 +571,19 @@ a:hover { color: var(--teal); }
 	
 
 	
-		<a class="link-btn link-btn--active" href="#"><strong>항공-도쿄(JP)</strong></a>
-	
-		<a class="link-btn" href="#"><strong>해상-후쿠오카 제1센터(JP)</strong></a>
-	
-		<a class="link-btn" href="#"><strong>해상-후쿠오카 제2센터(JP)</strong></a>
-	
-
+		<%
+    // 센터 선택 : ?center=air | sea1 | sea2  (그 밖의 값은 항공-도쿄)
+    String center = request.getParameter("center");
+    if (!"sea1".equals(center) && !"sea2".equals(center)) {
+        center = "air";
+    }
+    String centerName = "sea1".equals(center) ? "해상-후쿠오카 제1센터(JP)" : "해상-후쿠오카 제2센터(JP)";
+%>
+	<div id="rate-table"></div>
+		<a class="link-btn<%= "air".equals(center) ? " link-btn--active" : "" %>" href="<%= ctx %>/service/weightchart2?center=air#rate-table"><strong>항공-도쿄(JP)</strong></a>
+		<a class="link-btn<%= "sea1".equals(center) ? " link-btn--active" : "" %>" href="<%= ctx %>/service/weightchart2?center=sea1#rate-table"><strong>해상-후쿠오카 제1센터(JP)</strong></a>
+		<a class="link-btn<%= "sea2".equals(center) ? " link-btn--active" : "" %>" href="<%= ctx %>/service/weightchart2?center=sea2#rate-table"><strong>해상-후쿠오카 제2센터(JP)</strong></a>
+<% if ("air".equals(center)) { %>
 	 <table class="data-table data-table--vertical rate-table">
 		
 		<tr class="hidden-xs" >
@@ -1802,6 +1809,9 @@ a:hover { color: var(--teal); }
 
 		
 		<div  class="is-red">※ 30kg초과시 배송불가</div>
+<% } else { %>
+	<p class="center-empty"><%= centerName %>의 국제배송비 요율표는 준비 중입니다.</p>
+<% } %>
   </div>
 </main>
 

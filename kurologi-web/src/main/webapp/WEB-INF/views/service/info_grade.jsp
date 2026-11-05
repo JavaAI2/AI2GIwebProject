@@ -377,6 +377,7 @@ a:hover { color: var(--teal); }
 }
 .link-btn:hover { color: var(--ink); background: #cfcfcf; }
 .link-btn--active { color: #fff; background: var(--teal-tab); }
+.center-empty { margin: 14px 0 24px; padding: 48px 16px; text-align: center; font-size: 16px; color: #666; background: #fafafa; border: 1px dashed #bbb; border-radius: 6px; }
 .link-btn--active:hover { color: #fff; background: var(--teal-dark); }
 
 /* 카카오 상담 버튼 이미지 */
@@ -644,17 +645,22 @@ a:hover { color: var(--teal); }
 	<p>・수수료는 세금포함(税込) 금액입니다.</p>
 	<p>・문의사항은 카톡체널, 1:1게시판으로 연락 바랍니다.</p>
 	<br>
-	<h4>추가 수수료 안내</h4>
+	<%
+    // 센터 선택 : ?center=air | sea1 | sea2  (그 밖의 값은 항공-도쿄)
+    String center = request.getParameter("center");
+    if (!"sea1".equals(center) && !"sea2".equals(center)) {
+        center = "air";
+    }
+    String centerName = "sea1".equals(center) ? "해상-후쿠오카 제1센터(JP)" : "해상-후쿠오카 제2센터(JP)";
+%>
+	<h4 id="extra-fee">추가 수수료 안내</h4>
 
-	<div >
-		
-			<a class="link-btn link-btn--active" href="<%= ctx %>/service/info_grade"><strong><img src="<%= ctx %>/images/common/air_icon_red.png" style='width:30px'>  항공-도쿄(JP)</strong></a>
-		
-			<a class="link-btn" href="<%= ctx %>/service/info_grade"><strong><img src="<%= ctx %>/images/common/JP_Sea.png" style='width:30px'>  해상-후쿠오카 제1센터(JP)</strong></a>
-		
-			<a class="link-btn" href="<%= ctx %>/service/info_grade"><strong><img src="<%= ctx %>/images/common/JP_Sea2.png" style='width:30px'>  해상-후쿠오카 제2센터(JP)</strong></a>
-		
+	<div>
+		<a class="link-btn<%= "air".equals(center) ? " link-btn--active" : "" %>" href="<%= ctx %>/service/info_grade?center=air#extra-fee"><strong><img src="<%= ctx %>/images/common/air_icon_red.png" style='width:30px'>  항공-도쿄(JP)</strong></a>
+		<a class="link-btn<%= "sea1".equals(center) ? " link-btn--active" : "" %>" href="<%= ctx %>/service/info_grade?center=sea1#extra-fee"><strong><img src="<%= ctx %>/images/common/JP_Sea.png" style='width:30px'>  해상-후쿠오카 제1센터(JP)</strong></a>
+		<a class="link-btn<%= "sea2".equals(center) ? " link-btn--active" : "" %>" href="<%= ctx %>/service/info_grade?center=sea2#extra-fee"><strong><img src="<%= ctx %>/images/common/JP_Sea2.png" style='width:30px'>  해상-후쿠오카 제2센터(JP)</strong></a>
 	</div>
+<% if ("air".equals(center)) { %>
 	<table class="data-table grade-table">
 		<tr>
 			<th >수수료</th>
@@ -778,6 +784,9 @@ a:hover { color: var(--teal); }
 			
 										
 	</table>
+<% } else { %>
+	<p class="center-empty"><%= centerName %>의 추가 수수료 안내는 준비 중입니다.</p>
+<% } %>
   </div>
 </main>
 
