@@ -553,11 +553,35 @@ a.btn:hover { color: #fff; }
 .state--shipped { color: #fff; background: var(--green); border: 1px solid var(--green); }
 .state--billed { color: #b34700; border: 1px solid #e8a15c; }
 .state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
-/* 테스트용 단계 변경 (01 ~ 05) */
-.step-test { margin-top: 6px; font-size: 11px; }
-.step-test summary { cursor: pointer; color: var(--muted); }
-.step-test__btns { margin-top: 4px; }
-.step-test__btns .btn { margin: 2px; }
+/* 배송 추적 (1단계 일본 내 이동 / 2단계 국제 배송 및 국내 이동) */
+.track-toggle { display: block; margin: 6px auto 0; padding: 4px 10px; font-family: inherit; font-size: 12px; color: var(--teal); background: #fff; border: 1px solid var(--teal); border-radius: 12px; cursor: pointer; }
+.track-toggle:hover, .track-toggle.is-open { color: #fff; background: var(--teal); }
+tr.track-row > td { padding: 0; background: #fafcfc; }
+.track-panel { padding: 16px 18px; }
+.track-head { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 12px; color: var(--muted); }
+.track-head strong { color: var(--ink); font-size: 13px; }
+.track-head .btn { margin-left: auto; }
+.track-stages { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.track-stage { padding: 14px 16px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+.track-stage.is-done { border-color: var(--teal); }
+.track-stage.is-active { border-color: var(--orange); background: var(--orange-bg); }
+.track-stage h4 { margin: 0 0 2px; font-size: 14px; font-weight: 700; color: var(--ink); }
+.track-route { margin: 0 0 8px; font-size: 12px; color: var(--muted); }
+.track-wb { margin: 0 0 4px; font-size: 12px; color: var(--ink); word-break: break-all; }
+.track-wb a { margin-left: 6px; font-size: 12px; }
+.track-sum { margin: 8px 0 10px; font-size: 13px; font-weight: 700; color: var(--ink); }
+.track-ev { margin: 0; padding: 0; list-style: none; }
+.track-ev li { position: relative; padding: 0 0 8px 20px; font-size: 12px; color: var(--muted); }
+.track-ev li::before { content: ""; position: absolute; top: 3px; left: 0; width: 10px; height: 10px; background: #d6d6d6; border-radius: 50%; }
+.track-ev li::after { content: ""; position: absolute; top: 14px; left: 4px; width: 2px; bottom: -3px; background: #e0e0e0; }
+.track-ev li:last-child::after { display: none; }
+.track-ev li.is-done { color: var(--ink); }
+.track-ev li.is-done::before { background: var(--teal); }
+.track-ev li.is-active { font-weight: 700; color: var(--ink); }
+.track-ev li.is-active::before { background: var(--orange); }
+.track-ev time { margin-left: 6px; font-size: 11px; font-weight: 400; color: var(--muted); }
+.track-msg { margin: 0; font-size: 13px; color: var(--muted); }
+@media (max-width: 900px) { .track-stages { grid-template-columns: 1fr; } }
 .state--unpaid { color: var(--red); border: 1px solid var(--red); }
 .state--paid { color: var(--teal); border: 1px solid var(--teal); }
 .order-sub { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
@@ -593,7 +617,7 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
     <h1 class="sub-title"><span class="sub-title__dash"></span>주문 관리</h1>
 
     <div class="info-box">
-      <p>접수신청된 구매대행 · 배송대행 주문을 처리합니다. <strong>입고 처리 → 결제 확인 → 출고 처리</strong> 순서이며, 출고는 입고완료(또는 배송비 대기) + 결제완료 주문만 할 수 있습니다. (접수대기 주문은 표시되지 않습니다)</p>
+      <p>접수신청된 구매대행 · 배송대행 주문을 처리합니다. <strong>입고 처리 → 결제 확인 → 출고 처리</strong> 순서이며, 출고는 입고완료(또는 배송비 대기) + 결제완료 주문만 할 수 있습니다. (접수대기 주문은 표시되지 않습니다) 각 주문의 <strong>배송 추적</strong> 버튼으로 일본 내 이동(1단계)과 국제 배송 · 국내 이동(2단계)을 운송장 기준으로 확인할 수 있습니다.</p>
     </div>
 
     <div class="filter-row">
@@ -679,20 +703,11 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
 <% if ("SHIPPED".equals(o.getStatus()) || "DELIVERING".equals(o.getStatus())) { %>
             처리 완료
 <% } %>
-<%   int rowStep = OrderStatus.step(o.getStatus()); %>
-            <details class="step-test">
-              <summary>단계 변경(테스트)</summary>
-              <div class="step-test__btns">
-<% for (int k = 1; k <= OrderStatus.STEP_COUNT; k++) { %>
-                <form class="inline-form" action="<%= ctx %>/admin/orders/action" method="post" onsubmit="return confirm('0<%= k %> <%= OrderStatus.stepName(k) %> 단계로 바꿀까요?');">
-                  <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="id" value="<%= o.getOrderId() %>"><input type="hidden" name="action" value="set"><input type="hidden" name="step" value="<%= k %>">
-                  <input type="hidden" name="svc" value="<%= svc %>"><input type="hidden" name="st" value="<%= st %>"><input type="hidden" name="page" value="<%= curPage %>">
-                  <button class="btn btn--sm<%= k == rowStep ? " btn--navy" : "" %>" type="submit">0<%= k %> <%= OrderStatus.stepName(k) %></button>
-                </form>
-<% } %>
-              </div>
-            </details>
+            <button type="button" class="track-toggle" data-id="<%= o.getOrderId() %>" aria-expanded="false">배송 추적</button>
           </td>
+        </tr>
+        <tr class="track-row" id="track-<%= o.getOrderId() %>" hidden>
+          <td colspan="8"><div class="track-panel"><p class="track-msg">불러오는 중...</p></div></td>
         </tr>
 <% } %>
       </tbody>
@@ -712,5 +727,83 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
 
   </div>
 </main>
+
+<script>
+(function () {
+  var CTX = '<%= ctx %>';
+  var REFRESH_MS = 15000;      // 열려 있는 동안 15초마다 다시 조회
+  var timers = {};
+
+  function esc(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function stageHtml(st) {
+    var h = '<div class="track-stage is-' + esc(st.state) + '">';
+    h += '<h4>' + esc(st.title) + '</h4><p class="track-route">' + esc(st.route) + '</p>';
+    if (st.waybill) {
+      h += '<p class="track-wb">' + (st.carrier ? esc(st.carrier) + ' ' : '') + '<strong>' + esc(st.waybill) + '</strong>';
+      if (st.link) { h += '<a href="' + esc(st.link) + '" target="_blank" rel="noopener">운송장 조회</a>'; }
+      h += '</p>';
+    } else {
+      h += '<p class="track-wb">' + esc(st.waybillText) + '</p>';
+    }
+    if (st.shopNos && st.shopNos.length) {
+      h += '<p class="track-wb">쇼핑몰 트래킹 ' + st.shopNos.map(esc).join(', ') + '</p>';
+    }
+    h += '<p class="track-sum">' + esc(st.summary) + '</p><ul class="track-ev">';
+    st.events.forEach(function (e) {
+      h += '<li class="is-' + esc(e.state) + '">' + esc(e.label) + (e.time ? '<time>' + esc(e.time) + '</time>' : '') + '</li>';
+    });
+    return h + '</ul></div>';
+  }
+
+  function render(id, d) {
+    var box = document.querySelector('#track-' + id + ' .track-panel');
+    if (!box) { return; }
+    if (!d.ok) { box.innerHTML = '<p class="track-msg">' + esc(d.message || '조회하지 못했습니다.') + '</p>'; return; }
+    var now = new Date();
+    var hh = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2) + ':' + ('0' + now.getSeconds()).slice(-2);
+    box.innerHTML = '<div class="track-head"><strong>' + esc(d.orderNo) + '</strong><span>' + esc(d.statusLabel) +
+      '</span><span>마지막 조회 ' + hh + ' (15초마다 자동 갱신)</span>' +
+      '<button type="button" class="btn btn--sm track-refresh" data-id="' + id + '">지금 조회</button></div>' +
+      '<div class="track-stages">' + stageHtml(d.stage1) + stageHtml(d.stage2) + '</div>';
+  }
+
+  function load(id) {
+    fetch(CTX + '/admin/orders/track?id=' + encodeURIComponent(id), { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { render(id, d); })
+      .catch(function () { render(id, { ok: false, message: '조회하지 못했습니다. 네트워크를 확인해 주세요.' }); });
+  }
+
+  function close(id, btn) {
+    document.getElementById('track-' + id).hidden = true;
+    btn.classList.remove('is-open');
+    btn.setAttribute('aria-expanded', 'false');
+    clearInterval(timers[id]);
+    delete timers[id];
+  }
+
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest('.track-toggle, .track-refresh');
+    if (!t) { return; }
+    var id = t.getAttribute('data-id');
+    if (t.classList.contains('track-refresh')) { load(id); return; }
+    var row = document.getElementById('track-' + id);
+    if (!row.hidden) { close(id, t); return; }
+    row.hidden = false;
+    t.classList.add('is-open');
+    t.setAttribute('aria-expanded', 'true');
+    load(id);
+    timers[id] = setInterval(function () {
+      if (document.hidden) { return; }     // 탭이 가려져 있으면 쉰다
+      load(id);
+    }, REFRESH_MS);
+  });
+})();
+</script>
 
 <jsp:include page="../common/layout.jsp"><jsp:param name="part" value="bottom" /></jsp:include>

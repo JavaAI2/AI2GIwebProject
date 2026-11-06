@@ -14,11 +14,10 @@ import jp.kurologi.web.Session;
 /**
  * 주문 처리 (POST /admin/orders/action)
  *   action : receive 입고 / pay 결제 확인 / ship 출고
- *            set     [테스트용] 진행 단계(step 1 ~ 5)를 순서와 상관없이 직접 지정
- * 단계가 앞으로 나아갈 때만 회원에게 알림메세지를 보낸다. (되돌릴 때는 보내지 않는다)
+ * 처리가 끝나면 회원에게 알림메세지를 보낸다.
  *
  * 관리자 확인은 AdminFilter, 위조 요청 방지는 CsrfFilter 가 앞에서 한다.
- * 처리 뒤에는 from=view 이면 그 주문의 상세 화면으로, 아니면 보던 목록으로 돌아간다.
+ * 처리 뒤에는 보던 목록(서비스 · 상태 필터 · 페이지 유지)으로 돌아간다.
  */
 public class AdminOrderAction implements Command {
 
@@ -33,56 +32,24 @@ public class AdminOrderAction implements Command {
 			id = 0;
 		}
 
-		// 처리 뒤에는 보던 화면으로 돌아간다. 돌아갈 주소는 입력값을 그대로 쓰지 않고 서버에서 다시 만든다.
-		//  - from=view : 주문 상세 (/buyorder/view?id=...). 배송대행 주문이면 상세 화면이 알아서 /shiporder/view 로 보낸다.
-		//  - 그 밖     : 서비스 · 상태 필터 · 페이지가 유지된 관리자 목록
-		String back;
-		if ("view".equals(request.getParameter("from")) && id > 0) {
-			back = request.getContextPath() + "/buyorder/view?id=" + id;
-		} else {
-			String svc = AdminOrderList.whitelist(request.getParameter("svc"), "all", "BUY", "SHIP");
-			String st = AdminOrderList.whitelist(request.getParameter("st"), "all", "submit", "received", "billed",
-					"shipped", "delivering", "unpaid");
-			int page = 1;
-			try {
-				page = Math.max(1, Integer.parseInt(request.getParameter("page")));
-			} catch (NumberFormatException e) {
-				page = 1;
-			}
-			back = request.getContextPath() + "/admin/orders?svc=" + svc + "&st=" + st + "&page=" + page;
+		// 처리 뒤에는 보던 목록으로 돌아간다. 돌아갈 주소는 입력값을 그대로 쓰지 않고 서버에서 다시 만든다.
+		String svc = AdminOrderList.whitelist(request.getParameter("svc"), "all", "BUY", "SHIP");
+		String st = AdminOrderList.whitelist(request.getParameter("st"), "all", "submit", "received", "billed",
+				"shipped", "delivering", "unpaid");
+		int page = 1;
+		try {
+			page = Math.max(1, Integer.parseInt(request.getParameter("page")));
+		} catch (NumberFormatException e) {
+			page = 1;
 		}
+		String back = request.getContextPath() + "/admin/orders?svc=" + svc + "&st=" + st + "&page=" + page;
 
-		String action = AdminOrderList.whitelist(request.getParameter("action"), "", "receive", "pay", "ship", "set");
+		String action = AdminOrderList.whitelist(request.getParameter("action"), "", "receive", "pay", "ship");
 
 		AdminOrderDAO dao = new AdminOrderDAO();
 
-		// 알림에 쓸 주문 정보(회원 번호 · 주문번호)와 바뀌기 전 단계를 미리 읽어 둔다
+		// 알림에 쓸 주문 정보(회원 번호 · 주문번호)를 미리 읽어 둔다
 		BuyOrderDTO before = (id > 0 && !action.isEmpty()) ? new BuyOrderDAO().findById(id) : null;
-
-		if ("set".equals(action)) {
-			// [테스트용] 단계 번호(1 ~ 5)를 상태 · 결제 상태로 바꿔서 저장한다
-			int step = 0;
-			try {
-				step = Integer.parseInt(request.getParameter("step"));
-			} catch (NumberFormatException e) {
-				step = 0;
-			}
-			String status = OrderStatus.statusOfStep(step);
-			String payStatus = OrderStatus.isPaidStep(step) ? "PAID" : "UNPAID";
-
-			if (id > 0 && status != null && dao.setStatus(id, status, payStatus)) {
-				boolean notified = false;
-				if (before != null && step > OrderStatus.step(before.getStatus())) {
-					notified = OrderNotifier.sendStep(before, step);
-				}
-				Session.flash(request, "info", "[테스트] 0" + step + " " + OrderStatus.stepName(step) + " 단계로 바꿨습니다."
-						+ (notified ? " (알림메세지 발송)" : ""));
-			} else {
-				Session.flash(request, "error", "단계를 바꿀 수 없습니다. 접수대기(신청 전) 주문이거나 없는 주문입니다.");
-			}
-			response.sendRedirect(back);
-			return false;
-		}
 
 		String name;
 		switch (action) {

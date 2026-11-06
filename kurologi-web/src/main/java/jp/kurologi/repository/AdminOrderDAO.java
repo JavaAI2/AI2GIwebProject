@@ -205,34 +205,4 @@ public class AdminOrderDAO {
 			return false;
 		}
 	}
-
-	/**
-	 * [테스트용] 주문의 진행 단계를 순서와 상관없이 직접 지정한다. 성공하면 true.
-	 * 접수대기(WAIT, 신청 전 임시 저장) 주문은 바꾸지 않는다.
-	 * status · payStatus 는 아래 정해진 값만 받는다. (그 밖의 값이면 SQL 을 실행하지 않고 false)
-	 * 예치금을 쓰거나 돌려주는 처리는 하지 않는다. (상태 표시만 바꾼다)
-	 */
-	public boolean setStatus(long orderId, String status, String payStatus) {
-
-		boolean okStatus = "SUBMIT".equals(status) || "RECEIVED".equals(status) || "BILLED".equals(status)
-				|| "SHIPPED".equals(status) || "DELIVERING".equals(status);
-		boolean okPay = "UNPAID".equals(payStatus) || "PAID".equals(payStatus);
-		if (orderId <= 0 || !okStatus || !okPay) {
-			return false;
-		}
-
-		String sql = "UPDATE BUY_ORDER SET STATUS = ?, PAY_STATUS = ?, STATUS_UPDATED_AT = SYSTIMESTAMP "
-				+ "WHERE ORDER_ID = ? AND STATUS <> 'WAIT'";
-
-		try (Connection conn = DBmanager.getInstance();
-				PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setString(1, status);
-			pstmt.setString(2, payStatus);
-			pstmt.setLong(3, orderId);
-			return pstmt.executeUpdate() == 1;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
 }

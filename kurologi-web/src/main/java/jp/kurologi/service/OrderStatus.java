@@ -64,14 +64,4 @@ public final class OrderStatus {
 	public static String stepName(int step) {
 		return (step >= 1 && step <= STEP_NAME.length) ? STEP_NAME[step - 1] : "";
 	}
-
-	/** 단계 번호 -> STATUS 코드. 범위 밖이면 null */
-	public static String statusOfStep(int step) {
-		return (step >= 1 && step <= STEP_STATUS.length) ? STEP_STATUS[step - 1] : null;
-	}
-
-	/** 그 단계가 결제 완료 상태인지 (04 결제 완료 / 출고, 05 국내 배송 중부터 결제 완료) */
-	public static boolean isPaidStep(int step) {
-		return step >= 4;
-	}
 }

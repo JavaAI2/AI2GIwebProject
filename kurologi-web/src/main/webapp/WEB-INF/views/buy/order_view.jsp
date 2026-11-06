@@ -524,12 +524,6 @@ a:hover { color: var(--teal); }
 .step-bar li.is-done::after, .step-bar li.is-current::after { background: var(--teal); }
 .step-bar li.is-current { font-weight: 700; color: #222; }
 .step-desc { margin: 0 0 20px; font-size: 13px; text-align: center; color: var(--body); }
-/* 개발용 : 테스트용 상태 변경 (관리자 계정에만 보인다) */
-.dev-box { margin-top: 28px; font-size: 11px; text-align: right; color: #aaa; }
-.dev-box summary { display: inline-block; cursor: pointer; }
-.dev-box__body { margin-top: 8px; padding: 10px; text-align: left; background: #fafafa; border: 1px dashed #ccc; border-radius: 4px; }
-.dev-box__body p { margin: 0 0 6px; color: var(--muted); }
-.dev-box__body .btn { margin: 2px 2px 2px 0; }
 .list-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--body); }
 .list-top strong { color: var(--orange); }
 a.pager__item { text-decoration: none; margin: 0 2px; }
@@ -709,25 +703,6 @@ a.pager__item:hover { background: var(--orange-bg); }
       </form>
 <% } %>
     </div>
-
-<% if (Boolean.TRUE.equals(request.getAttribute("isAdmin")) && !wait) { %>
-    <details class="dev-box">
-      <summary>개발용</summary>
-      <div class="dev-box__body">
-        <p>[테스트용 상태 변경] 순서와 상관없이 단계를 바꿉니다. 관리자 계정에만 보입니다. (예치금은 변하지 않습니다)</p>
-<%     for (int i = 1; i <= OrderStatus.STEP_COUNT; i++) { %>
-        <form class="inline-form" action="<%= ctx %>/admin/orders/action" method="post">
-          <input type="hidden" name="_csrf" value="<%= jp.kurologi.web.Session.csrfToken(request) %>">
-          <input type="hidden" name="id" value="<%= o.getOrderId() %>">
-          <input type="hidden" name="action" value="set">
-          <input type="hidden" name="step" value="<%= i %>">
-          <input type="hidden" name="from" value="view">
-          <button class="btn btn--sm<%= i == curStep ? " btn--navy" : "" %>" type="submit">0<%= i %> <%= OrderStatus.stepName(i) %></button>
-        </form>
-<%     } %>
-      </div>
-    </details>
-<% } %>
 
   </div>
 </main>

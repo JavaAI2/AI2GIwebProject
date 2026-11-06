@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.service.AdminOrderAction;
 import jp.kurologi.service.AdminOrderList;
+import jp.kurologi.service.AdminOrderTrack;
 import jp.kurologi.service.Command;
 
 /**
@@ -19,6 +20,7 @@ import jp.kurologi.service.Command;
  *
  *   /admin/orders          구매대행 · 배송대행 주문 목록 (서비스 · 상태 필터)  -> AdminOrderList -> admin/orders.jsp
  *   /admin/orders/action   입고 · 결제 확인 · 출고 처리 (POST)               -> AdminOrderAction
+ *   /admin/orders/track    주문 1건의 배송 추적 (GET, JSON)                 -> AdminOrderTrack
  */
 @WebServlet(urlPatterns = { "/admin/orders/*" })
 public class AdminOrderController extends HttpServlet {
@@ -58,6 +60,9 @@ public class AdminOrderController extends HttpServlet {
 		case "/action":
 			command = new AdminOrderAction();
 			postOnly = true;   // 상태를 바꾸는 동작은 POST 로만 (주소창에 입력해서 처리되지 않게)
+			break;
+		case "/track":
+			command = new AdminOrderTrack();   // JSON 을 직접 써서 응답한다 (forward 없음)
 			break;
 		default:
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
