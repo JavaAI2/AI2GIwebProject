@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import jp.kurologi.model.Waybill;
 import jp.kurologi.repository.TrackingDAO;
 import jp.kurologi.repository.TrackingDAO.TrackingInfo;
+import jp.kurologi.service.OrderTracker;
 
 /**
  * [시험용] 운송장 조회 (인덱스 페이지에서 fetch 로 부른다). 결과는 JSON 으로 돌려준다.
@@ -65,10 +66,15 @@ public class TrackServlet extends HttpServlet {
 			return;
 		}
 
+		// 관리자가 처리 버튼으로 바꾼 주문 단계에 맞춰 문구를 정한다 (단계를 알 수 없으면 기본 문구)
+		int step = OrderTracker.stepOf(info.orderStatuses());
+		String text = kr ? OrderTracker.krStatusText(step, type) : OrderTracker.jpStatusText(step);
+		String status = text != null ? text : info.status();
+
 		PrintWriter out = res.getWriter();
 		out.print("{\"ok\":true,\"type\":" + q(info.typeLabel())
 				+ ",\"number\":" + q(info.number())
-				+ ",\"status\":" + q(info.status())
+				+ ",\"status\":" + q(status)
 				+ ",\"date\":" + q(info.paidAt()) + "}");
 	}
 

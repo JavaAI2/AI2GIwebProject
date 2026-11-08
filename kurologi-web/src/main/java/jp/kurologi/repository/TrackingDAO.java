@@ -14,34 +14,56 @@ import jp.kurologi.model.Waybill;
  */
 public class TrackingDAO {
 
-	/** 조회 결과 : 화면에 보여 줄 값만 담는다 */
-	public record TrackingInfo(String typeLabel, String number, String status, String paidAt) { }
+	/**
+	 * 조회 결과 : 화면에 보여 줄 값만 담는다.
+	 * orderStatuses 는 그 운송장의 결제에 묶인 주문들의 진행 상태(BUY_ORDER.STATUS) — 관리자가 처리 버튼으로 바꾼 값이다.
+	 */
+	public record TrackingInfo(String typeLabel, String number, String status, String paidAt,
+			List<String> orderStatuses) { }
 
-	/** 한국 운송장 조회. method = AIR / SEA. 없으면 null */
+	/** 한국 운송장 조회. method = AIR / SEA. 없으면 null. status 는 기본 문구이고, 단계별 문구는 호출한 쪽에서 orderStatuses 로 정한다 */
 	public TrackingInfo findKorean(String method, String number) {
-		String sql = "SELECT TO_CHAR(PAID_AT, 'YYYY-MM-DD HH24:MI') AS PAID_TXT FROM PAYMENT "
-				+ "WHERE KR_WAYBILL_NO = ? AND KR_METHOD = ? AND STATUS = 'PAID'";
-		String paidAt = findOne(sql, number, method);
-		return paidAt == null ? null : new TrackingInfo(Waybill.krLabel(method), number, "결제 완료 · 출고 준비중 (시험용)", paidAt);
+		String sql = baseSql("p.KR_WAYBILL_NO = ? AND p.KR_METHOD = ?");
+		return find(sql, number, method, Waybill.krLabel(method), "결제 완료 · 출고 준비중 (시험용)");
 	}
 
 	/** 일본 운송장 조회. carrier = YAMATO ... MEITETSU. 없으면 null */
 	public TrackingInfo findJapanese(String carrier, String number) {
-		String sql = "SELECT TO_CHAR(PAID_AT, 'YYYY-MM-DD HH24:MI') AS PAID_TXT FROM PAYMENT "
-				+ "WHERE JP_WAYBILL_NO = ? AND JP_CARRIER = ? AND STATUS = 'PAID'";
-		String paidAt = findOne(sql, number, carrier);
-		return paidAt == null ? null : new TrackingInfo(Waybill.jpLabel(carrier), number, "결제 완료 · 일본 현지 집하 대기 (시험용)", paidAt);
+		String sql = baseSql("p.JP_WAYBILL_NO = ? AND p.JP_CARRIER = ?");
+		return find(sql, number, carrier, Waybill.jpLabel(carrier), "결제 완료 · 일본 현지 집하 대기 (시험용)");
 	}
 
-	/** 첫 번째 행의 PAID_TXT 를 돌려준다 (없으면 null, DB 오류는 예외로 알린다) */
-	private String findOne(String sql, String number, String type) {
+	/** 운송장이 붙은 결제와, 그 결제로 낸 청구(CHARGE)의 주문 상태를 함께 읽는 SQL (주문이 아직 없어도 결제 행은 나온다) */
+	private static String baseSql(String where) {
+		return "SELECT TO_CHAR(p.PAID_AT, 'YYYY-MM-DD HH24:MI') AS PAID_TXT, o.STATUS AS ORDER_STATUS "
+				+ "FROM PAYMENT p "
+				+ "LEFT JOIN CHARGE c ON c.PAYMENT_ID = p.ID "
+				+ "LEFT JOIN BUY_ORDER o ON o.ORDER_NO = c.ORDER_NO "
+				+ "WHERE " + where + " AND p.STATUS = 'PAID'";
+	}
+
+	/** 운송장이 있으면 결과를, 없으면 null 을 돌려준다 (DB 오류는 예외로 알린다) */
+	private TrackingInfo find(String sql, String number, String type, String typeLabel, String defaultStatus) {
 		try (Connection conn = MemberDAO.conn(); PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setString(1, number);
 			ps.setString(2, type);
 			try (ResultSet rs = ps.executeQuery()) {
-				if (rs.next()) {
-					String t = rs.getString("PAID_TXT");
-					return t == null ? "-" : t;
+				String paidAt = null;
+				boolean found = false;
+				List<String> statuses = new ArrayList<>();
+				while (rs.next()) {
+					found = true;
+					if (paidAt == null) {
+						String t = rs.getString("PAID_TXT");
+						paidAt = t == null ? "-" : t;
+					}
+					String st = rs.getString("ORDER_STATUS");
+					if (st != null) {
+						statuses.add(st);
+					}
+				}
+				if (found) {
+					return new TrackingInfo(typeLabel, number, defaultStatus, paidAt, statuses);
 				}
 			}
 		} catch (Exception e) {
