@@ -40,6 +40,40 @@ public final class OrderTracker {
 		return sb.append('}').toString();
 	}
 
+	// ------------------------------------------------------------------ 운송장 조회(메인 화면)에 보일 문구
+
+	/**
+	 * 한 운송장에 주문이 여러 건 묶여 있으면 가장 덜 진행된 주문을 기준으로 한다.
+	 * 단계에 없는 값(취소 등)은 건너뛰고, 기준이 될 주문이 없으면 0.
+	 */
+	public static int stepOf(java.util.List<String> orderStatuses) {
+		int min = 0;
+		for (String st : orderStatuses) {
+			int s = OrderStatus.step(st);
+			if (s > 0 && (min == 0 || s < min)) {
+				min = s;
+			}
+		}
+		return min;
+	}
+
+	/** 일본 운송장 조회 문구 (step : 주문 진행 단계). 단계를 모르면 null -> 기본 문구를 쓴다 */
+	public static String jpStatusText(int step) {
+		return step >= 2 ? "배송 완료 · 쿠로로지 일본 창고 입고" : null;
+	}
+
+	/** 한국 운송장 조회 문구. 단계를 모르면 null -> 기본 문구를 쓴다 */
+	public static String krStatusText(int step, String method) {
+		String transport = "AIR".equals(method) ? "항공" : ("SEA".equals(method) ? "해운" : "항공/해운");
+		if (step >= 5) {
+			return "통관 완료 · 한국 택배 배송 중";
+		}
+		if (step == 4) {
+			return "쿠로로지 일본 창고 출고 · " + transport + " 운송 중";
+		}
+		return null;
+	}
+
 	// ------------------------------------------------------------------ 1단계 : 일본 내 이동
 
 	private static String stage1(OrderTrackData d, int step, String ctx) {
@@ -47,7 +81,7 @@ public final class OrderTracker {
 		String state = step >= 2 ? "done" : (step == 1 ? "active" : "wait");
 		String summary;
 		if (step >= 2) {
-			summary = "쿠로로지 일본 창고에 입고되었습니다.";
+			summary = "배송 완료 · 쿠로로지 일본 창고 입고";
 		} else if (step == 1) {
 			summary = "일본 쇼핑몰에서 쿠로로지 일본 창고로 이동 중입니다. (입고 대기)";
 		} else {
