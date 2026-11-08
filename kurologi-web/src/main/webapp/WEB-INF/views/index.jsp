@@ -315,6 +315,7 @@ button { font: inherit; cursor: pointer; }
   display: inline-block;
   background: #fff;
   padding-right: 10px;
+  white-space: nowrap;
 }
 
 /* 제목 뒤 가로선 */
@@ -328,15 +329,14 @@ button { font: inherit; cursor: pointer; }
   z-index: -1;
 }
 
-/* 제목 줄 안의 "더보기" */
+/* 제목 줄 안의 "더보기" — 제목 글자 바로 옆에 한 칸 띄워 나란히 놓는다 (언어를 바꿔도 겹치지 않도록 position 을 쓰지 않음) */
 .panel-title__more {
-  position: absolute;
-  right: 0;
-  top: 3px;
+  display: inline-block;
+  margin-left: 0.5em;
   font-size: 13px;
   font-weight: 400;
-  background: #fff;
-  padding-left: 10px;
+  white-space: nowrap;
+  vertical-align: baseline;
 }
 
 /* --- 탭 (배송센터 안내) ---
@@ -961,7 +961,6 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
           <a href="<%= ctx %>/status/dashboard">종합현황</a>
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/status/dashboard">종합현황</a></li>
-            <li><a href="<%= ctx %>/status/tracking">트레킹입력</a></li>
           </ul>
         </li>
         <li class="main-nav__item">

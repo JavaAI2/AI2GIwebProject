@@ -82,7 +82,6 @@
           <a href="<%= ctx %>/status/dashboard">종합현황</a>
           <ul class="main-nav__submenu">
             <li><a href="<%= ctx %>/status/dashboard">종합현황</a></li>
-            <li><a href="<%= ctx %>/status/tracking">트레킹입력</a></li>
           </ul>
         </li>
         <li class="main-nav__item<%= Html.cls("mypage".equals(menu), "is-current") %>">
