@@ -11,7 +11,7 @@ public class DBmanager {
 		Connection conn = null;
 		String driver = "oracle.jdbc.driver.OracleDriver";
 		String url = "jdbc:oracle:thin:@localhost:1521:xe";
-		String id = "ai2gi";
+		String id = "system";
 		String pw = "1234";
 		try {
 			Class.forName(driver);

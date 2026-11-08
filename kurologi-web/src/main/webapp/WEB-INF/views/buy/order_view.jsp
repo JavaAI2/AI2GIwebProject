@@ -514,7 +514,8 @@ a:hover { color: var(--teal); }
 .state--shipped { color: #fff; background: #37b149; border: 1px solid #37b149; }
 .state--billed { color: #b34700; border: 1px solid #e8a15c; }
 .state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
-/* 진행 단계 표시줄 (01 신청 완료 ~ 05 국내 배송 중) */
+.state--delivered { color: #fff; background: #0f6b5c; border: 1px solid #0f6b5c; }
+/* 진행 단계 표시줄 (01 신청 완료 ~ 06 배송 완료) */
 .step-bar { display: flex; margin: 22px 0 8px; padding: 0; list-style: none; }
 .step-bar li { flex: 1; position: relative; padding-top: 32px; font-size: 13px; text-align: center; color: var(--muted); }
 .step-bar li::before { content: attr(data-n); position: absolute; top: 0; left: 50%; z-index: 1; width: 24px; height: 24px; margin-left: -12px; line-height: 24px; font-size: 12px; font-weight: 700; color: #fff; background: #d6d6d6; border-radius: 50%; }
@@ -576,7 +577,7 @@ a.pager__item:hover { background: var(--orange-bg); }
     int curStep = OrderStatus.step(o.getStatus());
     String[] STEP_DESC = { "신청서가 접수되었습니다.", "일본 물류센터에 물건이 도착했습니다.",
             "무게를 측정했고, 배송비 결제를 기다리고 있습니다.", "결제가 완료되어 한국으로 발송했습니다.",
-            "통관이 끝나 한국 택배사로 인계되어 배송 중입니다." };
+            "통관이 끝나 한국 택배사로 인계되어 배송 중입니다.", "배송이 완료되었습니다. 고객님께 전달되었습니다." };
     if (curStep > 0) {
 %>
     <ol class="step-bar">

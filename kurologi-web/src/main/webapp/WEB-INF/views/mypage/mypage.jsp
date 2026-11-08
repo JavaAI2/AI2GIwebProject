@@ -537,6 +537,7 @@ button.info-link { font-family: inherit; background: #fff; cursor: pointer; }
 .state--shipped { color: #fff; background: #37b149; border: 1px solid #37b149; }
 .state--billed { color: #b34700; border: 1px solid #e8a15c; }
 .state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
+.state--delivered { color: #fff; background: #0f6b5c; border: 1px solid #0f6b5c; }
 </style>
 </head>
 <body>
@@ -587,7 +588,7 @@ button.info-link { font-family: inherit; background: #fff; cursor: pointer; }
               <td class="money">¥<%= Html.num(member.getPoints()) %></td>
               <td>
                 <span class="dim"><%= Html.num(member.getReferralPointsPending()) %> P 적립대기</span>
-                <br><button class="info-link" type="button" data-copy="<%= Html.esc(referralUrl) %>">나의 추천 링크</button>
+                
               </td>
               <td class="money">¥<%= Html.num(member.getDeposit()) %></td>
               <td><%= Html.esc(member.getMemberNo()) %></td>

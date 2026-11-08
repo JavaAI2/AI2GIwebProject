@@ -315,7 +315,7 @@ a:hover { color: var(--teal); }
 	
 	<p class="level-2 fontsize-bold22">1. 보험 가입 화물 (추천)</p>	
 	<p class="level-3" >고가 상품 또는 파손 위험이 높은 상품은 배송보험 가입을 권장드립니다.<p>
-	<p class="level-3" ><span class="fontcolor_blue">니폰바이 안심케어 상세보기=></span><a class="btn btn--info btn--sm" href='https://nipponbuy.jp/service/insurance' target='_blank'>클릭!</a></p>
+	
 	<p class="level-3 fontsize-bold22">①보상범위</p>
 	<p class="level-4" ><span class="is-red">·보험 가입 화물은 보험약관에 따라 최대 500만원까지 보상</span>이 가능합니다.</p>
 	<p class="level-4"  class="fontsize-bold18">·파손, 도난, 분실, 오발송(주문한제품과 다른제품 수령)  발생시</p>

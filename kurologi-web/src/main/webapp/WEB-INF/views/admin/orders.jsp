@@ -21,7 +21,7 @@
 
     // 필터 탭의 { 값, 이름 }
     String[][] SVC_TABS = { { "all", "전체" }, { "BUY", "구매대행" }, { "SHIP", "배송대행" } };
-    String[][] ST_TABS = { { "all", "전체" }, { "submit", "접수신청" }, { "received", "입고완료" }, { "billed", "배송비 대기" }, { "shipped", "출고완료" }, { "delivering", "국내 배송 중" }, { "unpaid", "미결제" } };
+    String[][] ST_TABS = { { "all", "전체" }, { "submit", "접수신청" }, { "received", "입고완료" }, { "billed", "배송비 대기" }, { "shipped", "출고완료" }, { "delivering", "국내 배송 중" }, { "delivered", "배송 완료" }, { "unpaid", "미결제" } };
 %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -553,6 +553,7 @@ a.btn:hover { color: #fff; }
 .state--shipped { color: #fff; background: var(--green); border: 1px solid var(--green); }
 .state--billed { color: #b34700; border: 1px solid #e8a15c; }
 .state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
+.state--delivered { color: #fff; background: #0f6b5c; border: 1px solid #0f6b5c; }
 /* 배송 추적 (1단계 일본 내 이동 / 2단계 국제 배송 및 국내 이동) */
 .track-toggle { display: block; margin: 6px auto 0; padding: 4px 10px; font-family: inherit; font-size: 12px; color: var(--teal); background: #fff; border: 1px solid var(--teal); border-radius: 12px; cursor: pointer; }
 .track-toggle:hover, .track-toggle.is-open { color: #fff; background: var(--teal); }
@@ -588,6 +589,10 @@ tr.track-row > td { padding: 0; background: #fafcfc; }
 .order-items summary { cursor: pointer; }
 .order-items ul { margin: 6px 0 0 16px; padding: 0; font-size: 12px; text-align: left; list-style: disc; color: var(--body); }
 .inline-form { display: inline; }
+.delete-bar { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; }
+.delete-bar__hint { font-size: 12px; color: var(--muted); }
+.btn--danger { color: #fff; background: #d9534f; border-color: #d9534f; }
+.btn--danger:hover { background: #c23a2a; }
 .act-col .btn { margin: 2px 0; white-space: nowrap; }
 a.pager__item { text-decoration: none; margin: 0 2px; }
 .pager__item.is-active { color: #fff; background: var(--orange); }
@@ -617,7 +622,7 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
     <h1 class="sub-title"><span class="sub-title__dash"></span>주문 관리</h1>
 
     <div class="info-box">
-      <p>접수신청된 구매대행 · 배송대행 주문을 처리합니다. <strong>입고 처리 → 결제 확인 → 출고 처리</strong> 순서이며, 출고는 입고완료(또는 배송비 대기) + 결제완료 주문만 할 수 있습니다. (접수대기 주문은 표시되지 않습니다) 각 주문의 <strong>배송 추적</strong> 버튼으로 일본 내 이동(1단계)과 국제 배송 · 국내 이동(2단계)을 운송장 기준으로 확인할 수 있습니다.</p>
+      <p>접수신청된 구매대행 · 배송대행 주문을 처리합니다. <strong>입고 처리 → 결제 확인 → 출고 처리 → 통관 완료 처리 → 배송 완료 처리</strong> 순서이며, 출고는 입고완료(또는 배송비 대기) + 결제완료 주문만 할 수 있습니다. 출고 뒤에는 한국 입국 · 세관 통관이 끝나면 <strong>통관 완료 처리</strong>(국내 배송 중), 택배가 고객에게 전달되면 <strong>배송 완료 처리</strong>를 눌러 주세요. 처리 결과는 고객의 주문상세 진행 표시줄과 메인 페이지 한국 운송장 조회에 바로 반영됩니다. (접수대기 주문은 표시되지 않습니다) 각 주문의 <strong>배송 추적</strong> 버튼으로 일본 내 이동(1단계)과 국제 배송 · 국내 이동(2단계)을 운송장 기준으로 확인할 수 있습니다.</p>
     </div>
 
     <div class="filter-row">
@@ -636,6 +641,7 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
     <table class="data-table">
       <thead>
         <tr>
+          <th class="is-narrow"><input type="checkbox" id="chkAll" aria-label="전체 선택"></th>
           <th>주문번호</th>
           <th>구분</th>
           <th>회원</th>
@@ -648,7 +654,7 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
       </thead>
       <tbody>
 <% if (orders.isEmpty()) { %>
-        <tr><td class="data-table__empty" colspan="8">해당하는 주문이 없습니다.</td></tr>
+        <tr><td class="data-table__empty" colspan="9">해당하는 주문이 없습니다.</td></tr>
 <% } %>
 <% for (BuyOrderDTO o : orders) {
        List<BuyOrderItemDTO> its = itemsByOrder.get(o.getOrderId());
@@ -659,6 +665,7 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
        boolean canShip = ("RECEIVED".equals(o.getStatus()) || "BILLED".equals(o.getStatus())) && !unpaid;
 %>
         <tr>
+          <td class="is-center"><input type="checkbox" class="chk-order" form="deleteForm" name="ids" value="<%= o.getOrderId() %>" aria-label="주문 선택"></td>
           <td class="is-center"><%= Html.esc(o.getOrderNo()) %><span class="order-sub"><%= Html.esc(o.getCreatedAt()) %></span></td>
           <td class="is-center"><%= ServiceType.label(o.getServiceType()) %></td>
           <td class="is-center"><%= Html.esc(o.getMemberName()) %><span class="order-sub"><%= Html.esc(o.getMemberLoginId()) %></span></td>
@@ -700,18 +707,37 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
               <button class="btn btn--navy btn--sm" type="submit">출고 처리</button>
             </form>
 <% } %>
-<% if ("SHIPPED".equals(o.getStatus()) || "DELIVERING".equals(o.getStatus())) { %>
-            처리 완료
+<% if ("SHIPPED".equals(o.getStatus())) { %>
+            <form class="inline-form" action="<%= ctx %>/admin/orders/action" method="post" onsubmit="return confirm('한국 입국 · 세관 통관이 끝났습니까? 국내 배송 중으로 바꿉니다.');">
+              <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="id" value="<%= o.getOrderId() %>"><input type="hidden" name="action" value="customs">
+              <input type="hidden" name="svc" value="<%= svc %>"><input type="hidden" name="st" value="<%= st %>"><input type="hidden" name="page" value="<%= curPage %>">
+              <button class="btn btn--navy btn--sm" type="submit">통관 완료 처리</button>
+            </form>
+<% } else if ("DELIVERING".equals(o.getStatus())) { %>
+            <form class="inline-form" action="<%= ctx %>/admin/orders/action" method="post" onsubmit="return confirm('택배가 고객에게 전달되었습니까? 배송 완료로 바꿉니다.');">
+              <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="id" value="<%= o.getOrderId() %>"><input type="hidden" name="action" value="deliver">
+              <input type="hidden" name="svc" value="<%= svc %>"><input type="hidden" name="st" value="<%= st %>"><input type="hidden" name="page" value="<%= curPage %>">
+              <button class="btn btn--navy btn--sm" type="submit">배송 완료 처리</button>
+            </form>
+<% } else if ("DELIVERED".equals(o.getStatus())) { %>
+            배송 완료
 <% } %>
             <button type="button" class="track-toggle" data-id="<%= o.getOrderId() %>" aria-expanded="false">배송 추적</button>
           </td>
         </tr>
         <tr class="track-row" id="track-<%= o.getOrderId() %>" hidden>
-          <td colspan="8"><div class="track-panel"><p class="track-msg">불러오는 중...</p></div></td>
+          <td colspan="9"><div class="track-panel"><p class="track-msg">불러오는 중...</p></div></td>
         </tr>
 <% } %>
       </tbody>
     </table>
+
+    <form id="deleteForm" class="delete-bar" action="<%= ctx %>/admin/orders/action" method="post" onsubmit="return confirmDelete();">
+      <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="action" value="delete">
+      <input type="hidden" name="svc" value="<%= svc %>"><input type="hidden" name="st" value="<%= st %>"><input type="hidden" name="page" value="<%= curPage %>">
+      <button class="btn btn--danger btn--sm" type="submit">선택한 주문 삭제</button>
+      <span class="delete-bar__hint">체크한 주문을 완전히 지우고, 결제한 금액은 회원의 예치금으로 환불합니다. 회원의 주문내역 · 결제내역에서도 사라지며 되돌릴 수 없습니다.</span>
+    </form>
 
     <div class="pager">
 <% if (curPage > 1) { %>
@@ -728,6 +754,20 @@ a.pager__item { text-decoration: none; margin: 0 2px; }
   </div>
 </main>
 
+<script>
+function confirmDelete() {
+  var n = document.querySelectorAll('.chk-order:checked').length;
+  if (n === 0) { alert('삭제할 주문을 체크해 주세요.'); return false; }
+  return confirm('선택한 ' + n + '건을 삭제하고 결제금액을 예치금으로 환불할까요?\n회원의 주문내역 · 결제내역에서도 사라지며 되돌릴 수 없습니다.');
+}
+(function () {
+  var all = document.getElementById('chkAll');
+  if (!all) { return; }
+  all.addEventListener('change', function () {
+    document.querySelectorAll('.chk-order').forEach(function (c) { c.checked = all.checked; });
+  });
+})();
+</script>
 <script>
 (function () {
   var CTX = '<%= ctx %>';

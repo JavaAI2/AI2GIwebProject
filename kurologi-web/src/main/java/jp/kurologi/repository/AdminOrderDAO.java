@@ -4,9 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jp.kurologi.model.BuyOrderDTO;
 import jp.kurologi.model.BuyOrderItemDTO;
@@ -31,12 +33,13 @@ public class AdminOrderDAO {
 		case "billed":     return "o.STATUS = 'BILLED'";
 		case "shipped":  return "o.STATUS = 'SHIPPED'";
 		case "delivering": return "o.STATUS = 'DELIVERING'";
+		case "delivered":  return "o.STATUS = 'DELIVERED'";
 		case "unpaid":   return "o.STATUS <> 'WAIT' AND o.PAY_STATUS = 'UNPAID'";
 		default:         return "o.STATUS <> 'WAIT'";
 		}
 	}
 
-	/** 탭에 보여 줄 건수 : all, submit, received, billed, shipped, delivering, unpaid (svc 가 BUY / SHIP 이면 그 서비스만) */
+	/** 탭에 보여 줄 건수 : all, submit, received, billed, shipped, delivering, delivered, unpaid (svc 가 BUY / SHIP 이면 그 서비스만) */
 	public Map<String, Integer> counts(String svc) {
 
 		boolean bySvc = "BUY".equals(svc) || "SHIP".equals(svc);
@@ -47,11 +50,12 @@ public class AdminOrderDAO {
 				+ "NVL(SUM(CASE WHEN o.STATUS = 'BILLED' THEN 1 ELSE 0 END), 0) AS BILLED_CNT, "
 				+ "NVL(SUM(CASE WHEN o.STATUS = 'SHIPPED' THEN 1 ELSE 0 END), 0) AS SHIPPED_CNT, "
 				+ "NVL(SUM(CASE WHEN o.STATUS = 'DELIVERING' THEN 1 ELSE 0 END), 0) AS DELIVERING_CNT, "
+				+ "NVL(SUM(CASE WHEN o.STATUS = 'DELIVERED' THEN 1 ELSE 0 END), 0) AS DELIVERED_CNT, "
 				+ "NVL(SUM(CASE WHEN o.PAY_STATUS = 'UNPAID' THEN 1 ELSE 0 END), 0) AS UNPAID_CNT "
 				+ "FROM BUY_ORDER o WHERE o.STATUS <> 'WAIT'" + (bySvc ? " AND o.SERVICE_TYPE = ?" : "");
 
 		Map<String, Integer> map = new LinkedHashMap<>();
-		for (String k : new String[] { "all", "submit", "received", "billed", "shipped", "delivering", "unpaid" }) {
+		for (String k : new String[] { "all", "submit", "received", "billed", "shipped", "delivering", "delivered", "unpaid" }) {
 			map.put(k, 0);
 		}
 
@@ -68,6 +72,7 @@ public class AdminOrderDAO {
 					map.put("billed", rs.getInt("BILLED_CNT"));
 					map.put("shipped", rs.getInt("SHIPPED_CNT"));
 					map.put("delivering", rs.getInt("DELIVERING_CNT"));
+					map.put("delivered", rs.getInt("DELIVERED_CNT"));
 					map.put("unpaid", rs.getInt("UNPAID_CNT"));
 				}
 			}
@@ -168,6 +173,128 @@ public class AdminOrderDAO {
 		return map;
 	}
 
+	/** 삭제 결과 : 지운 주문 수와, 회원들에게 예치금으로 환불한 금액 합계(원) */
+	public record DeleteResult(int deleted, long refunded) { }
+
+	/**
+	 * 선택한 주문을 완전히 지우고, 결제한 금액은 회원의 예치금으로 환불한다.
+	 * 하나라도 실패하면 전부 되돌리고 null 을 돌려준다.
+	 *   0) 주문의 결제완료(PAID) 청구 금액 합계를 그 주문을 한 회원의 예치금(KURO_MEMBER.DEPOSIT)에 더한다
+	 *   1) 주문의 청구(CHARGE : 비용결제 · 결제내역에 보이는 줄)를 지운다
+	 *   2) 주문을 지운다 (상품 BUY_ORDER_ITEM 은 ON DELETE CASCADE 로 같이 지워진다)
+	 *   3) 그 청구가 묶여 있던 결제(PAYMENT)에 다른 청구가 하나도 남지 않았으면 결제도 지운다
+	 *      (여러 주문을 한 번에 결제한 경우, 다른 주문이 남아 있으면 결제는 그대로 둔다)
+		 */
+	public DeleteResult deleteOrders(List<Long> orderIds) {
+
+		if (orderIds == null || orderIds.isEmpty()) {
+			return new DeleteResult(0, 0);
+		}
+
+		Connection conn = null;
+		try {
+			conn = DBmanager.getInstance();
+			conn.setAutoCommit(false);
+
+			Set<Long> paymentIds = new LinkedHashSet<>();
+			int deleted = 0;
+			long refundedTotal = 0;
+
+			for (Long orderId : orderIds) {
+				String orderNo = null;
+				long memberId = 0;
+				try (PreparedStatement ps = conn.prepareStatement("SELECT ORDER_NO, MEMBER_ID FROM BUY_ORDER WHERE ORDER_ID = ? FOR UPDATE")) {
+					ps.setLong(1, orderId);
+					try (ResultSet rs = ps.executeQuery()) {
+						if (rs.next()) {
+							orderNo = rs.getString(1);
+							memberId = rs.getLong(2);
+						}
+					}
+				}
+				if (orderNo == null) {
+					continue;   // 이미 지워진 주문
+				}
+
+				// 결제가 끝난 청구 금액은 예치금으로 환불한다 (이미 환불된 청구는 STATUS 가 달라 더하지 않는다)
+				long refund = 0;
+				try (PreparedStatement ps = conn.prepareStatement(
+						"SELECT NVL(SUM(AMOUNT), 0) FROM CHARGE WHERE ORDER_NO = ? AND MEMBER_ID = ? AND STATUS = 'PAID'")) {
+					ps.setString(1, orderNo);
+					ps.setLong(2, memberId);
+					try (ResultSet rs = ps.executeQuery()) {
+						if (rs.next()) {
+							refund = rs.getLong(1);
+						}
+					}
+				}
+				if (refund > 0) {
+					try (PreparedStatement ps = conn.prepareStatement("UPDATE KURO_MEMBER SET DEPOSIT = NVL(DEPOSIT, 0) + ? WHERE ID = ?")) {
+						ps.setLong(1, refund);
+						ps.setLong(2, memberId);
+						if (ps.executeUpdate() != 1) {
+							throw new IllegalStateException("환불할 회원을 찾지 못했습니다. (회원 번호 " + memberId + ")");
+						}
+					}
+					refundedTotal += refund;
+				}
+
+				try (PreparedStatement ps = conn.prepareStatement("SELECT DISTINCT PAYMENT_ID FROM CHARGE WHERE ORDER_NO = ? AND PAYMENT_ID IS NOT NULL")) {
+					ps.setString(1, orderNo);
+					try (ResultSet rs = ps.executeQuery()) {
+						while (rs.next()) {
+							paymentIds.add(rs.getLong(1));
+						}
+					}
+				}
+				try (PreparedStatement ps = conn.prepareStatement("DELETE FROM CHARGE WHERE ORDER_NO = ?")) {
+					ps.setString(1, orderNo);
+					ps.executeUpdate();
+				}
+				try (PreparedStatement ps = conn.prepareStatement("DELETE FROM BUY_ORDER WHERE ORDER_ID = ?")) {
+					ps.setLong(1, orderId);
+					deleted += ps.executeUpdate();
+				}
+			}
+
+			for (Long pid : paymentIds) {
+				int left = 0;
+				try (PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM CHARGE WHERE PAYMENT_ID = ?")) {
+					ps.setLong(1, pid);
+					try (ResultSet rs = ps.executeQuery()) {
+						if (rs.next()) {
+							left = rs.getInt(1);
+						}
+					}
+				}
+				if (left == 0) {
+					try (PreparedStatement ps = conn.prepareStatement("DELETE FROM PAYMENT WHERE ID = ?")) {
+						ps.setLong(1, pid);
+						ps.executeUpdate();
+					}
+				}
+			}
+
+			conn.commit();
+			return new DeleteResult(deleted, refundedTotal);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				if (conn != null) conn.rollback();
+			} catch (Exception ignore) {
+				// 되돌리기 실패는 무시한다
+			}
+			return null;
+		} finally {
+			try {
+				if (conn != null) conn.close();
+			} catch (Exception ignore) {
+				// 닫기 실패는 무시한다
+			}
+		}
+	}
+
 	/**
 	 * 주문을 다음 단계로 넘긴다. 성공하면 true.
 	 * 현재 상태를 WHERE 에 함께 적어서, 이미 처리된 주문이거나 순서가 안 맞으면 0건이 바뀌고 false 가 된다.
@@ -175,6 +302,8 @@ public class AdminOrderDAO {
 	 *   receive : 접수신청 -> 입고완료
 	 *   pay     : 미결제 -> 결제완료 (입금 확인)
 	 *   ship    : (입고완료 또는 배송비 대기) + 결제완료 -> 출고완료
+	 *   customs : 출고완료 -> 국내 배송 중   (한국 입국 · 세관 통관이 끝나 한국 택배사로 넘어감)
+	 *   deliver : 국내 배송 중 -> 배송 완료   (한국 택배가 고객에게 전달됨)
 	 */
 	public boolean advance(long orderId, String action) {
 
@@ -189,8 +318,16 @@ public class AdminOrderDAO {
 					+ "WHERE ORDER_ID = ? AND STATUS <> 'WAIT' AND PAY_STATUS = 'UNPAID'";
 			break;
 		case "ship":
-			sql = "UPDATE BUY_ORDER SET STATUS = 'SHIPPED', STATUS_UPDATED_AT = SYSTIMESTAMP "
+			sql = "UPDATE BUY_ORDER SET STATUS = 'SHIPPED', STATUS_UPDATED_AT = SYSTIMESTAMP, SHIPPED_AT = SYSTIMESTAMP "
 					+ "WHERE ORDER_ID = ? AND STATUS IN ('RECEIVED', 'BILLED') AND PAY_STATUS = 'PAID'";
+			break;
+		case "customs":
+			sql = "UPDATE BUY_ORDER SET STATUS = 'DELIVERING', STATUS_UPDATED_AT = SYSTIMESTAMP, CUSTOMS_AT = SYSTIMESTAMP "
+					+ "WHERE ORDER_ID = ? AND STATUS = 'SHIPPED'";
+			break;
+		case "deliver":
+			sql = "UPDATE BUY_ORDER SET STATUS = 'DELIVERED', STATUS_UPDATED_AT = SYSTIMESTAMP, DELIVERED_AT = SYSTIMESTAMP "
+					+ "WHERE ORDER_ID = ? AND STATUS = 'DELIVERING'";
 			break;
 		default:
 			return false;

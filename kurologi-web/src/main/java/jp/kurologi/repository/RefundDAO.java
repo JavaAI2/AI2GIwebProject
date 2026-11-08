@@ -24,6 +24,9 @@ import util.DBmanager;
  */
 public class RefundDAO {
 
+	/** 현지 반품신청(환불) 허용 여부. 출고 이후에는 환불할 수 없으므로 false — 다시 열려면 true 로 바꾸고 listShipping 의 return 도 지운다 */
+	private static final boolean REFUND_OPEN = false;
+
 	/** 취소할 수 있는 배송 중 주문 한 건 (화면 목록용) */
 	public record ShippingOrder(long orderId, String orderNo, String serviceType, String status,
 			String firstItem, int itemCount, long paidAmount) { }
@@ -31,8 +34,15 @@ public class RefundDAO {
 	/** 취소 결과 */
 	public record RefundResult(boolean ok, String message, long refunded, String orderNo) { }
 
-	/** 내 배송 중 주문(출고완료 · 국내 배송 중) 목록. 최신 순 */
+	/**
+	 * 취소(환불)할 수 있는 내 주문 목록. 출고 이후(출고완료 · 국내 배송 중 · 배송 완료)에는 환불할 수 없으므로
+	 * 현재는 항상 빈 목록이다. (환불 가능 단계를 다시 열 때는 아래 SQL 의 STATUS 조건을 바꾸고 이 return 을 지운다)
+	 */
 	public List<ShippingOrder> listShipping(long memberId) {
+
+		if (!REFUND_OPEN) {
+			return new ArrayList<>();
+		}
 
 		String sql = "SELECT o.ORDER_ID, o.ORDER_NO, o.SERVICE_TYPE, o.STATUS, "
 				+ "(SELECT COUNT(*) FROM BUY_ORDER_ITEM i WHERE i.ORDER_ID = o.ORDER_ID) AS ITEM_CNT, "
@@ -93,9 +103,13 @@ public class RefundDAO {
 				conn.rollback();
 				return new RefundResult(false, "존재하지 않는 주문입니다.", 0, null);
 			}
-			if (!"SHIPPED".equals(status) && !"DELIVERING".equals(status)) {
+			if ("SHIPPED".equals(status) || "DELIVERING".equals(status) || "DELIVERED".equals(status)) {
 				conn.rollback();
-				return new RefundResult(false, orderNo + " : 배송 중인 주문만 취소할 수 있습니다.", 0, orderNo);
+				return new RefundResult(false, orderNo + " : 출고 이후에는 환불할 수 없습니다.", 0, orderNo);
+			}
+			if (!REFUND_OPEN) {
+				conn.rollback();
+				return new RefundResult(false, orderNo + " : 환불할 수 없는 주문입니다.", 0, orderNo);
 			}
 
 			// 2) 이 주문으로 결제한 청구건 (결제완료인 것만 환불 대상)

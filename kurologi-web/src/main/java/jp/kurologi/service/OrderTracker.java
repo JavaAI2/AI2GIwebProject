@@ -11,7 +11,7 @@ import jp.kurologi.repository.TrackingDAO.OrderTrackData;
  * 관리자 주문 관리의 [배송 추적] 내용을 만든다. 주문 1건의 이동 과정을 두 단계로 나누어 JSON 으로 돌려준다.
  *
  *   1단계 (일본 내 이동)         일본 쇼핑몰 -> 쿠로로지 일본 창고            (일본 운송장으로 확인)
- *   2단계 (국제 배송 및 국내 이동) 창고 -> 항공/해운 운송 · 세관 통관 -> 한국 택배  (한국 운송장으로 확인)
+ *   2단계 (국제 배송 및 국내 이동) 창고 -> 항공/해운 운송 · 세관 통관 -> 한국 택배 -> 배송 완료  (한국 운송장으로 확인)
  *
  * 운송장번호는 주문의 결제에 배정된 값(PAYMENT)을 쓰고, 지금 어디까지 왔는지는 주문의 진행 단계(OrderStatus)로 정한다.
  * 택배사 / 운송사의 실시간 조회 API 는 아직 연결하지 않았다. 연결할 때는 stage1(), stage2() 안의 events 만 바꾸면 된다.
@@ -65,8 +65,11 @@ public final class OrderTracker {
 	/** 한국 운송장 조회 문구. 단계를 모르면 null -> 기본 문구를 쓴다 */
 	public static String krStatusText(int step, String method) {
 		String transport = "AIR".equals(method) ? "항공" : ("SEA".equals(method) ? "해운" : "항공/해운");
-		if (step >= 5) {
-			return "통관 완료 · 한국 택배 배송 중";
+		if (step >= 6) {
+			return "배송 완료 · 고객님께 전달되었습니다";
+		}
+		if (step == 5) {
+			return "세관 통관 완료 · 한국 택배 배송 중";
 		}
 		if (step == 4) {
 			return "쿠로로지 일본 창고 출고 · " + transport + " 운송 중";
@@ -107,10 +110,12 @@ public final class OrderTracker {
 
 	private static String stage2(OrderTrackData d, int step, String ctx) {
 
-		String state = step >= 4 ? "active" : "wait";
+		String state = step >= 6 ? "done" : (step >= 4 ? "active" : "wait");
 		String summary;
-		if (step >= 5) {
-			summary = "통관이 끝나 한국 택배로 배송 중입니다.";
+		if (step >= 6) {
+			summary = "배송이 완료되었습니다. 고객님께 전달되었습니다.";
+		} else if (step == 5) {
+			summary = "세관 통관이 끝나 한국 택배로 배송 중입니다.";
 		} else if (step == 4) {
 			summary = "창고에서 출고되어 국제 운송 · 세관 통관 중입니다.";
 		} else if (step >= 1) {
@@ -124,16 +129,18 @@ public final class OrderTracker {
 				: ("SEA".equals(method) ? "해운 운송 (" + Waybill.krLabel(method) + ")" : "항공 / 해운 국제 운송");
 
 		List<String[]> ev = new ArrayList<>();
-		ev.add(new String[] { "쿠로로지 일본 창고 출고", step >= 4 ? "done" : "wait", step == 4 ? nz(d.statusUpdatedAt()) : "" });
+		// 각 단계의 시각은 관리자가 처리 버튼을 누른 때 저장한 값이다. (예전 주문은 값이 없어 현재 단계에 한해 마지막 변경 시각을 쓴다)
+		ev.add(new String[] { "쿠로로지 일본 창고 출고", step >= 4 ? "done" : "wait", step >= 4 ? orElse(d.shippedAt(), step == 4 ? d.statusUpdatedAt() : null) : "" });
 		ev.add(new String[] { transport, step >= 5 ? "done" : (step == 4 ? "active" : "wait"), "" });
-		ev.add(new String[] { "세관 통관", step >= 5 ? "done" : "wait", "" });
-		ev.add(new String[] { "한국 택배 배송", step >= 5 ? "active" : "wait", step == 5 ? nz(d.statusUpdatedAt()) : "" });
+		ev.add(new String[] { "세관 통관 (한국 입국)", step >= 5 ? "done" : "wait", step >= 5 ? orElse(d.customsAt(), step == 5 ? d.statusUpdatedAt() : null) : "" });
+		ev.add(new String[] { "한국 택배 배송", step >= 6 ? "done" : (step == 5 ? "active" : "wait"), step >= 5 ? orElse(d.customsAt(), step == 5 ? d.statusUpdatedAt() : null) : "" });
+		ev.add(new String[] { "배송 완료 (고객님께 전달)", step >= 6 ? "done" : "wait", step >= 6 ? orElse(d.deliveredAt(), step == 6 ? d.statusUpdatedAt() : null) : "" });
 
 		String no = d.krWaybillNo();
 		String link = (no == null || no.isEmpty()) ? ""
 				: ctx + "/?krMethod=" + enc(method) + "&krNo=" + enc(no) + "#tracking";
 
-		return stageJson("2단계 · 국제 배송 및 국내 이동", "쿠로로지 일본 창고 → 항공/해운 · 세관 통관 → 한국 택배",
+		return stageJson("2단계 · 국제 배송 및 국내 이동", "쿠로로지 일본 창고 → 항공/해운 · 세관 통관 → 한국 택배 → 배송 완료",
 				Waybill.krLabel(method), no, null, state, summary, ev, link,
 				"한국 운송장은 결제가 끝나면 배정됩니다.");
 	}
@@ -176,6 +183,14 @@ public final class OrderTracker {
 
 	private static String nz(String s) {
 		return s == null ? "" : s;
+	}
+
+	/** 값이 비어 있으면 대신할 값을 쓰고, 둘 다 없으면 빈 문자열 */
+	private static String orElse(String s, String other) {
+		if (s != null && !s.isEmpty()) {
+			return s;
+		}
+		return nz(other);
 	}
 
 	/** 주소에 붙일 값이라 영문 · 숫자만 남긴다 (운송사 코드 · 운송장번호는 원래 영문 · 숫자 · - 뿐) */

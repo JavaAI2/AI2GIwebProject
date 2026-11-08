@@ -75,7 +75,7 @@ public class TrackingDAO {
 	/** 관리자 주문 관리의 배송 추적용 : 주문 1건의 진행 상태와, 그 주문의 결제에 배정된 일본 / 한국 운송장 */
 	public record OrderTrackData(String orderNo, String status, String createdAt, String statusUpdatedAt,
 			String krMethod, String krWaybillNo, String jpCarrier, String jpWaybillNo, String paidAt,
-			List<String> shopTrackingNos) { }
+			List<String> shopTrackingNos, String shippedAt, String customsAt, String deliveredAt) { }
 
 	/**
 	 * 주문(ORDER_ID) 1건의 배송 추적 자료를 읽는다. 주문이 없으면 null.
@@ -84,6 +84,9 @@ public class TrackingDAO {
 	public OrderTrackData findOrderTrack(long orderId) {
 		String sql = "SELECT o.ORDER_NO, o.STATUS, TO_CHAR(o.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_TXT, "
 				+ "TO_CHAR(o.STATUS_UPDATED_AT, 'YYYY-MM-DD HH24:MI') AS UPDATED_TXT, "
+				+ "TO_CHAR(o.SHIPPED_AT, 'YYYY-MM-DD HH24:MI') AS SHIPPED_TXT, "
+				+ "TO_CHAR(o.CUSTOMS_AT, 'YYYY-MM-DD HH24:MI') AS CUSTOMS_TXT, "
+				+ "TO_CHAR(o.DELIVERED_AT, 'YYYY-MM-DD HH24:MI') AS DELIVERED_TXT, "
 				+ "p.KR_METHOD, p.KR_WAYBILL_NO, p.JP_CARRIER, p.JP_WAYBILL_NO, "
 				+ "TO_CHAR(p.PAID_AT, 'YYYY-MM-DD HH24:MI') AS PAID_TXT "
 				+ "FROM BUY_ORDER o "
@@ -114,7 +117,8 @@ public class TrackingDAO {
 								rs.getString("CREATED_TXT"), rs.getString("UPDATED_TXT"),
 								rs.getString("KR_METHOD"), rs.getString("KR_WAYBILL_NO"),
 								rs.getString("JP_CARRIER"), rs.getString("JP_WAYBILL_NO"),
-								rs.getString("PAID_TXT"), shopNos);
+								rs.getString("PAID_TXT"), shopNos,
+								rs.getString("SHIPPED_TXT"), rs.getString("CUSTOMS_TXT"), rs.getString("DELIVERED_TXT"));
 					}
 				}
 			}

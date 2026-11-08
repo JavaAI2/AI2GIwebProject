@@ -516,6 +516,7 @@ a:hover { color: var(--teal); }
 .state--shipped { color: #fff; background: #37b149; border: 1px solid #37b149; }
 .state--billed { color: #b34700; border: 1px solid #e8a15c; }
 .state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
+.state--delivered { color: #fff; background: #0f6b5c; border: 1px solid #0f6b5c; }
 .list-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--body); }
 .list-top strong { color: var(--orange); }
 a.pager__item { text-decoration: none; margin: 0 2px; }

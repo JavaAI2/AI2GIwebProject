@@ -746,9 +746,7 @@ a:hover { color: var(--teal); }
 
       </div>
 
-      <div class="status-actions">
-        <button class="action-btn" type="button" id="btnReturn">현지 반품신청 <span class="action-btn__badge"><%= shippingCount %></span></button>
-      </div>
+      
     </div>
 
     <!-- ============ 3. 공지 / 1:1 (커뮤니티 DB) ============ -->
@@ -887,7 +885,7 @@ a:hover { color: var(--teal); }
       .then(function (r) { return r.json(); })
       .then(function (j) {
         if (!j.ok) { msg.textContent = j.message; return; }
-        if (!j.items.length) { msg.textContent = '현재 배송 중인 물품이 없습니다.'; return; }
+        if (!j.items.length) { msg.textContent = '출고 이후에는 환불(취소)할 수 없습니다.'; return; }
         msg.textContent = '취소할 물품을 선택해 주세요. (보유 예치금 ' + won(j.deposit) + ')';
         j.items.forEach(function (it) {
           var li = document.createElement('li');

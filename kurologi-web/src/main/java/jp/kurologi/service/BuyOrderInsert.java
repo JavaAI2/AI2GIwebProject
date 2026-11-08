@@ -25,7 +25,7 @@ import jp.kurologi.web.Session;
  * 구매대행 · 배송대행 주문서 저장 서비스 (POST /buyorder/save, /shiporder/save)
  * 새 주문 저장 + 접수대기 주문 수정을 함께 처리한다.
  *   mode=wait   : 접수대기 — 받는 사람 이름과 상품명만 있으면 저장 (트래킹번호 등은 나중에 입력)
- *   mode=submit : 접수신청 — 주소 · 휴대전화 · 트래킹번호 · 25개 동의를 모두 확인
+ *   mode=submit : 접수신청 — 주소 · 휴대전화 · 25개 동의를 모두 확인 (트래킹번호는 선택 입력)
  *                 저장이 끝나면 비용결제 목록에 결제 대기건을 올리고, 마이페이지 > 결제방법으로 이동한다.
  *   orderId 가 같이 넘어오면 "수정"이다 (내 주문 + 접수대기 상태일 때만).
  *
@@ -344,9 +344,6 @@ public class BuyOrderInsert implements Command {
 			}
 			if (!isSafeUrl(item.getImageUrl(), true)) {
 				return label + "이미지URL은 http:// 또는 https:// 로 시작하거나, 이미지 업로드 버튼으로 올려 주세요.";
-			}
-			if (submit && item.getTrackingNo().isEmpty()) {
-				return label + "트래킹번호를 입력해 주세요. (없으면 '접수대기'로 저장하세요)";
 			}
 			if (item.getQty() < 1 || item.getQty() > 99999) {
 				return label + "수량은 1 이상으로 입력해 주세요.";

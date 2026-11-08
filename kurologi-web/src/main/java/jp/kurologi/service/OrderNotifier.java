@@ -13,13 +13,14 @@ import jp.kurologi.repository.MessageDAO;
  *   03    결제            배송비 결제를 기다립니다.
  *   04    출고            결제가 완료되어 한국으로 출고되었습니다.
  *   05    배송            한국 택배사로 인계되어 배송 중입니다.
+ *   06    배송            배송이 완료되었습니다.
  *   (01 신청 완료는 회원이 직접 신청한 것이라 알림을 보내지 않는다)
  */
 public final class OrderNotifier {
 
 	private OrderNotifier() { }
 
-	/** 단계 번호(2 ~ 5)에 맞는 알림을 보낸다. 보냈으면 true */
+	/** 단계 번호(2 ~ 6)에 맞는 알림을 보낸다. 보냈으면 true */
 	public static boolean sendStep(BuyOrderDTO order, int step) {
 
 		String type;
@@ -40,6 +41,10 @@ public final class OrderNotifier {
 		case 5:
 			type = "배송";
 			text = "통관이 끝나 한국 택배사로 인계되었습니다. 국내 배송 중입니다.";
+			break;
+		case 6:
+			type = "배송";
+			text = "배송이 완료되었습니다. 이용해 주셔서 감사합니다.";
 			break;
 		default:
 			return false;   // 01 신청 완료 등은 알림 대상이 아니다

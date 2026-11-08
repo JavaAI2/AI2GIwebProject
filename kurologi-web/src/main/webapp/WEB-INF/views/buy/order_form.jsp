@@ -915,10 +915,10 @@ a:hover { color: var(--teal); }
               </div>
               <div class="field">
                 <label class="field__label" for="tracking">트래킹번호 (Tracking No)</label>
-                <input class="input input--required" id="tracking" name="itemTrackingNo" value="<%= Html.esc(it.getTrackingNo()) %>" type="text">
+                <input class="input" id="tracking" name="itemTrackingNo" value="<%= Html.esc(it.getTrackingNo()) %>" type="text">
               </div>
             </div>
-            <p class="note note--red">* 트래킹번호 없을 경우 '마이페이지' 주문신청 현황에서 입력</p>
+            <p class="note">* 트래킹번호는 선택 입력입니다. 없어도 접수신청할 수 있습니다.</p>
 
             <div class="field-grid">
               <div class="field">
@@ -1499,8 +1499,6 @@ a:hover { color: var(--teal); }
       if (!bs[i].querySelector('[name="itemNameEn"]').value.trim()) return label + '상품명(영문)을 입력해 주세요.';
       var q = parseInt(bs[i].querySelector('[name="itemQty"]').value, 10);
       if (isNaN(q) || q < 1) return label + '수량은 1 이상으로 입력해 주세요.';
-      if (mode === 'submit' && !bs[i].querySelector('[name="itemTrackingNo"]').value.trim())
-        return label + '트래킹번호를 입력해 주세요. (없으면 접수대기로 저장하세요)';
     }
     if (mode === 'submit') {
       if (!v('postcode') || !v('addr1')) return '우편번호와 주소를 입력해 주세요.';

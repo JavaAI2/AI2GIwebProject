@@ -114,10 +114,14 @@ public final class DashboardBoard {
 		return groups;
 	}
 
-	/** 지금 배송 중(출고완료 · 국내 배송 중)인 내 주문 수 */
+	/** 현지 반품신청(환불)할 수 있는 내 주문 수. 출고 이후에는 환불할 수 없으므로 항상 0 */
 	public static int shippingCount(long memberId) {
 
-		String sql = "SELECT COUNT(*) FROM BUY_ORDER WHERE MEMBER_ID = ? AND STATUS IN ('SHIPPED', 'DELIVERING')";
+		if (true) {
+			return 0;
+		}
+
+		String sql = "SELECT COUNT(*) FROM BUY_ORDER WHERE MEMBER_ID = ? AND STATUS = 'DELIVERING'";
 
 		try (Connection conn = DBmanager.getInstance();
 				PreparedStatement ps = conn.prepareStatement(sql)) {
