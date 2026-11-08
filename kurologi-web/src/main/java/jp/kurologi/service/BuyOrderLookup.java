@@ -11,6 +11,7 @@ import jp.kurologi.model.Address;
 import jp.kurologi.model.BuyOrderDTO;
 import jp.kurologi.model.BuyOrderItemDTO;
 import jp.kurologi.model.Page;
+import jp.kurologi.repository.AddressDAO;
 import jp.kurologi.repository.BuyOrderDAO;
 import jp.kurologi.web.App;
 import jp.kurologi.web.Session;
@@ -49,10 +50,9 @@ public class BuyOrderLookup implements Command {
 		boolean first = true;
 
 		if ("addresses".equals(kind)) {
-			App app = App.of(request.getServletContext());
 			// 주소는 한 페이지에 8개씩 나뉘어 있으므로 5페이지(40개)까지만 모은다
 			for (int page = 1; page <= 5; page++) {
-				Page<Address> p = app.addresses.search(memberId, "name", "", page);
+				Page<Address> p = new AddressDAO().search(memberId, "name", "", page, 8);
 				for (Address a : p.getItems()) {
 					if (!first) sb.append(',');
 					first = false;

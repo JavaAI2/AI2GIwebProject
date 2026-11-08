@@ -651,7 +651,6 @@ a:hover { color: var(--teal); }
     if (!"sea1".equals(center) && !"sea2".equals(center)) {
         center = "air";
     }
-    String centerName = "sea1".equals(center) ? "해상-후쿠오카 제1센터(JP)" : "해상-후쿠오카 제2센터(JP)";
 %>
 	<h4 id="extra-fee">추가 수수료 안내</h4>
 
@@ -785,7 +784,130 @@ a:hover { color: var(--teal); }
 										
 	</table>
 <% } else { %>
-	<p class="center-empty"><%= centerName %>의 추가 수수료 안내는 준비 중입니다.</p>
+	<%-- 해상-후쿠오카 제1센터 · 제2센터 (공식 사이트 기준 내용 동일). 항공과 다른 항목 : 7) 사업자통관 880엔, 8) 수출통관 5,900엔/건 --%>
+	<table class="data-table grade-table">
+		<tr>
+			<th >수수료</th>
+			<th >비용</th>
+		</tr>
+		
+			<tr>
+				<td >1)적정 박스 재포장비 (박스비 포함)</td>
+				<td><span class="fontcolor_blue">적정 박스로 재포장 (※파손방지, 송료절감 위해 NIPPON BUY 판단후 필요시 실시) </span><br>
+				ㅇ 80사이즈 이하 : <span class="fontcolor_blue">80엔</span><br>
+				ㅇ 81~100사이즈 이하 : <span class="fontcolor_blue">180엔</span><br>
+				ㅇ 101사이즈 이상 : <span class="fontcolor_blue">330엔</span><br>
+				ㅇ 161이상 사이즈 : <span class="fontcolor_blue">별도견적</span><br>				
+				※ 적정 박스 재포장 ☑ 체크를 삭제하면 추가없음. 단, 불가피할시 NIPPON BUY가 체크후 실시.<br>
+				※ 파손가능성 있는 봉투입고시, 나눔배송시 ☑ 체크 상관없이 무조건 실시(필수)<br>
+				※ 신발류 등 일부제품은 부피무게를 줄이기 위해 전용 크래프트 택배봉투로 재포장.<br>
+				※ 환경을 위해 깨끗한 재활용 박스를 사용하는 경우도 있습니다.
+				</td>
+			</tr>
+			<tr>
+			<td >2)추가 완충제</td>
+			<td>사이즈에 따라 차등적용 <br>
+			ㅇ ~ 80사이즈 까지 : <span class="fontcolor_blue">110엔</span><br>
+			ㅇ 81~100사이즈     : <span class="fontcolor_blue">220엔</span><br>
+			ㅇ 101~160사이즈   : <span class="fontcolor_blue">440엔</span><br>
+			ㅇ 161사이즈~ : 작업 불가  <br>
+			※ 사이즈 기준 : 가로(cm) + 세로(cm) + 높이(cm) 의 합
+
+			</td>
+			</tr>
+			<tr>
+			<td >3)박스성형 수수료 <span style='color:red;font-weight:bold;'>(※적용가능 건만 실시, 과금)</span></td>
+				<td><span class="fontcolor_blue">220엔</span>(※ 골프채 등, 100Cm 미만으로 박스성형이 가능한 경우 실시)
+
+			</td>
+			</tr>
+
+			<tr>
+			<td >4)관부가세 대납 수수료</td>
+				<td><span class="fontcolor_blue">220엔</span>(※ 관부가세는 니폰바이가 대납하고 예치금 차감)
+
+			</td>
+			</tr>
+			<tr>
+			<td >5)수화인 정보 변경 수수료 (출고일 15시 이후 요청시)	</td>
+				<td><span class="fontcolor_blue">330엔</span>  (※변경서류가 필요, 적하목록 정정신고시 과태료 추가될 수 있습니다.)
+			</td>
+			</tr>
+			<tr>
+			<td >6)일반통관 수수료</td>
+				<td>100엔 ->  <span style='color:red;font-weight:bold;'>무료(기간 한정)</span>
+			</td>
+			</tr>
+			<tr>
+			<td >7)사업자통관 수수료</td>
+				<td><span class="fontcolor_blue">880엔</span> <span style='color:red;font-weight:bold;'> (사업자 통관 신청방법 >>> <a href='https://nipponbuy.jp/service/business-customs
+' target='_blank'> 확인</a>)</span>	
+			</td>
+			</tr>
+			
+						
+			<tr>
+			<td >8) 수출통관 수수료 (신고가 20만엔 이상시) 수수료</td>
+				<td><span class="fontcolor_blue">5,900엔/건</span></td>
+			</tr>
+			
+			
+			<tr>
+			<td >9)일본내 전화 서비스</td>
+				<td>
+				<span class="fontcolor_blue">ㅇ 대리 전화서비스</span><br>
+				<span class="fontcolor_blue">220엔/한통 </span><br>
+					 (※ 전화 -일본 현지 구매숍, 매장 등 전화연락이 필요한 경우)<br><br>
+					 
+				<span class="fontcolor_blue">ㅇ 대리 계좌이체</span><br>
+				<span class="fontcolor_blue">400엔 / 한건</span>  (니폰바이 수수료 220엔 + 은행 이제 수수료 180엔)<br>
+				(배송대행 물품 구매 후 추가 금액이 발생하는 경우 이용가능)<br>
+				<span class="is-red">(※ 주의 : 물품 구매 목적으로 계좌이체 서비스 이용 불가!!)</span>
+				
+			</td>
+			</tr>
+			<tr>
+			<td >10) 수출 증빙서류 (수출허가서) 발행</td>
+				<td>
+				<span class="fontcolor_blue">ㅇ 30건까지 :  무료 (1달기준)</span><br>
+				<span class="fontcolor_blue">ㅇ 31건째 부터 : 10엔/건당</span><br>
+				(※ 각 건별 수출허가서를 PDF파일로 제공해 드립니다. 주문번호로 파일명 검색 가능)
+			</td>
+			</tr>
+			<tr>
+			<td >11) 대형화물 추가 송료
+			
+			      <br><span class="fontcolor-red">※회원등급 상관없이 발생 (한국도착후 발생)</span>
+
+			</td>
+				<td>
+				<span class="fontcolor_blue">약 900엔 ~</span><br>
+				(화물의 사이즈와 무계에 따라 청구 금액이 상이합니다. – 실비청구)  <br>
+				대형화물의 경우  <span class="fontcolor_blue">[경동택배], [대신택배]로 인계되어 배송</span>하게 되며 추가 <br>
+				비용이 발생<br>
+				※ 달러->엔 청구로 환율에 의해 매월 금액이 변동됩니다.<br>
+				<br>
+				<span style='font-weight:bold;'>ㅇ 대형화물 기준 (1가지 이상 해당시 적용)<br>
+				① 한변 100cm 이상    ② 세변의 합 160cm 이상     ③ 중량 25kg 이상</span><br>
+				<br>
+				<span style='font-weight:bold;'>■ 청구방법 및 타이밍</span> (대형화물, 기타 추가비용 공통)<br>
+		     월말 마감후 익월 10일까지 상세내역을 메일로 보내드린 후 예치금 차감<br>
+		     (바쁜 시기에는 청구가 늦어 질 수 있습니다.) 
+			</td>
+			</tr>
+			<tr>
+			<td ><span class="fontcolor_blue">12) 기타 추가 비용</span></td>
+				<td>
+				ㅇ 동물/식품검역 : 약 440엔/건<br>
+ ㅇ 폐기(세관 통관불합격) : 약 1,000엔/건 <br>
+ ㅇ 반송/ 재배송 (주소미확인) : 약 440엔/건<br>
+  　※ 달러->엔 청구로 환율에 의해 매월 금액이 변동됩니다. 
+
+			</td>
+			</tr>
+			
+										
+	</table>
 <% } %>
   </div>
 </main>

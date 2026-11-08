@@ -5,11 +5,10 @@ import java.util.List;
 
 import jp.kurologi.model.BuyOrderDTO;
 import jp.kurologi.model.Charge;
-import jp.kurologi.model.Member;
 import jp.kurologi.model.Payment;
 import jp.kurologi.model.ShipmentRow;
 import jp.kurologi.repository.BuyOrderDAO;
-import jp.kurologi.web.App;
+import jp.kurologi.repository.PaymentDAO;
 
 /**
  * 마이페이지 "결제 완료 운송품 현황" 박스에 보여 줄 목록을 만든다.
@@ -26,21 +25,22 @@ public final class ShipmentBoard {
 	public static final int LIMIT = 5;
 
 	/** 목록을 만든다. 오류가 나도 마이페이지가 깨지지 않도록 빈 목록을 돌려준다. */
-	public static List<ShipmentRow> load(App app, Member m) {
+	public static List<ShipmentRow> load(long memberId) {
 		List<ShipmentRow> rows = new ArrayList<>();
-		if (app == null || m == null) {
+		if (memberId <= 0) {
 			return rows;
 		}
 
 		try {
-			for (Payment p : app.payments.history(m.getId())) {
+			PaymentDAO paymentDao = new PaymentDAO();
+			for (Payment p : paymentDao.findPayments(memberId)) {
 				if (p.getStatus() != Payment.Status.PAID) {
 					continue;
 				}
 				if (rows.size() >= LIMIT) {
 					break;
 				}
-				rows.add(toRow(app, m, p));
+				rows.add(toRow(paymentDao, memberId, p));
 			}
 		} catch (RuntimeException e) {
 			e.printStackTrace();
@@ -49,7 +49,7 @@ public final class ShipmentBoard {
 	}
 
 	/** 결제 1건 -> 화면 한 줄. 주문을 못 찾아도 "결제완료" 로 보여 준다. */
-	private static ShipmentRow toRow(App app, Member m, Payment p) {
+	private static ShipmentRow toRow(PaymentDAO paymentDao, long memberId, Payment p) {
 
 		String orderNo = null;
 		String orderUrl = null;
@@ -57,13 +57,13 @@ public final class ShipmentBoard {
 		String css = "state--submit";
 
 		try {
-			List<Charge> charges = app.payments.chargesOf(p);
+			List<Charge> charges = paymentDao.findCharges(memberId, p.getChargeIds());
 			if (!charges.isEmpty()) {
 				orderNo = charges.get(0).getOrderNo();
 				long orderId = orderIdOf(orderNo);
 				if (orderId > 0) {
 					BuyOrderDTO order = new BuyOrderDAO().findById(orderId);
-					if (order != null && order.getMemberId() == m.getId()) {
+					if (order != null && order.getMemberId() == memberId) {
 						label = OrderStatus.label(order.getStatus());
 						css = OrderStatus.css(order.getStatus());
 						orderUrl = ServiceType.base(ServiceType.normalize(order.getServiceType()))

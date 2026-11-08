@@ -433,7 +433,7 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
                 <input class="field field--block" type="text" name="loginId" value="<%= Html.esc(savedId) %>" maxlength="20" placeholder="ID" aria-label="ID" required>
                 <input class="field field--block" type="password" name="password" maxlength="30" placeholder="PASSWORD" aria-label="PASSWORD" required>
                 <button class="btn btn--primary btn--block" type="submit">로그인</button>
-                <label class="checkbox"><input type="checkbox" name="saveId" value="Y" tabindex="-1"<%= Html.checked(savedId != null) %>> 아이디저장</label>
+                <label class="checkbox"><input type="checkbox" name="saveId" value="Y" tabindex="-1"<%= Html.checked(savedId != null) %>> 아이디 저장</label>
                 <div class="btn-row btn-row--split">
                   <a class="btn btn--dark" href="${pageContext.request.contextPath}/member/join">회원가입</a>
                   <a class="btn btn--dark" href="${pageContext.request.contextPath}/member/find/id">ID/pw 찾기</a>

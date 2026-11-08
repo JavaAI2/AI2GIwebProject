@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import jp.kurologi.service.LoginCommand;
+
 /**
  * 안내 · 현황 · 신청서 같은 화면용 — 주소를 받아 같은 이름의 JSP 로 넘겨 줍니다.
  *
@@ -19,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
  *   /service/info_company     → WEB-INF/views/service/info_company.jsp
  *   /status/dashboard  /buy/order_form  /ship/order_form  /community/notice …
  *
- * 마이페이지는 기능이 있어서 따로 서블릿이 있습니다 (MyPageServlet 등).
+ * 마이페이지는 기능이 있어서 따로 컨트롤러가 있습니다 (MyPageController).
  */
 @WebServlet(urlPatterns = {"", "/service/*", "/status/*", "/buy/*", "/ship/*", "/community/*"})
 public class PageServlet extends HttpServlet {
@@ -55,11 +57,11 @@ public class PageServlet extends HttpServlet {
         req.getRequestDispatcher(jsp).forward(req, res);
     }
 
-    /** 아이디저장 쿠키 (LoginServlet 이 만듭니다) */
+    /** 아이디저장 쿠키 (LoginCommand 가 만듭니다) */
     private static String savedId(HttpServletRequest req) {
         if (req.getCookies() == null) return null;
         for (Cookie c : req.getCookies()) {
-            if (LoginServlet.SAVED_ID_COOKIE.equals(c.getName())) {
+            if (LoginCommand.SAVED_ID_COOKIE.equals(c.getName())) {
                 return URLDecoder.decode(c.getValue(), StandardCharsets.UTF_8);
             }
         }

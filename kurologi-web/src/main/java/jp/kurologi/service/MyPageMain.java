@@ -8,41 +8,44 @@ import javax.servlet.http.HttpServletResponse;
 
 import jp.kurologi.model.Grade;
 import jp.kurologi.model.MailboxCenter;
-import jp.kurologi.model.Member;
+import jp.kurologi.model.MemberDTO;
 import jp.kurologi.model.UsageStats;
-import jp.kurologi.web.App;
-import jp.kurologi.web.Session;
 
-/** 마이페이지 첫 화면에 필요한 값을 모아서 request 에 담는다 (기존 MyPageServlet + BaseServlet.render 의 내용) */
+/**
+ * 마이페이지 첫 화면 서비스
+ * 화면(mypage.jsp)에 필요한 값을 모아서 request 에 담는다. (blogProject2 의 MypageCommand 와 같은 역할)
+ * 로그인 확인과 회원정보("member")는 MyPageController 가 이미 담아 두었다.
+ */
 public class MyPageMain implements Command {
 
 	@Override
 	public boolean doCommand(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		App app = App.of(request.getServletContext());
+		MemberDTO member = (MemberDTO) request.getAttribute("member");
 
-		// AuthFilter 를 통과했으므로 로그인한 회원이 반드시 있다
-		Member m = app.members.findById(Session.memberId(request)).orElseThrow();
-		UsageStats usage = app.members.usageStats(m.getId());
-
-		// 모든 마이페이지 화면이 쓰는 값 (BaseServlet.render 가 넣던 것)
-		request.setAttribute("member", m);
-		request.setAttribute("unpaidCount", app.payments.pendingCharges(m.getId()).size());
-
-		// 마이페이지 첫 화면 전용 값
+		// 이용실적 (전월 · 당월 · 누적 이용건수) : 화물(shipment) 집계 테이블이 생기기 전이라 지금은 0건으로 보여준다
+		UsageStats usage = UsageStats.EMPTY;
 		request.setAttribute("usage", usage);
+
+		// 일본 사서함(센터) 주소 목록
 		request.setAttribute("centers", MailboxCenter.ALL);
-		request.setAttribute("nextGrade", m.getGrade() == Grade.ROYAL_FAMILY ? null : Grade.ROYAL_FAMILY);
+
+		// 다음 등급 안내 : 이미 최고 등급이면 null
+		boolean topGrade = "ROYAL_FAMILY".equals(member.getGrade());
+		request.setAttribute("nextGrade", topGrade ? null : Grade.ROYAL_FAMILY);
 		request.setAttribute("countToNextGrade", Math.max(0, Grade.ROYAL_FAMILY_THRESHOLD - usage.thisMonth()));
-		request.setAttribute("referralUrl", baseUrl(request) + "/member/join?ref=" + m.getReferralCode());
 
-		// 결제가 완료된 운송품 현황 (mypage.jsp 도 값이 없으면 같은 방법으로 직접 만든다)
-		request.setAttribute("shipments", ShipmentBoard.load(app, m));
+		// 친구 추천 링크
+		request.setAttribute("referralUrl", baseUrl(request) + "/member/join?ref=" + member.getReferralCode());
 
-		return true;   // MyPageController 가 mypage.jsp 로 forward 한다
+		// 결제가 완료된 운송품 현황 (최근 결제 5건)
+		request.setAttribute("shipments", ShipmentBoard.load(member.getId()));
+
+		return true;   // 컨트롤러가 mypage.jsp 로 forward 한다
 	}
 
+	// http://서버:포트/프로젝트 까지의 주소를 만든다
 	private static String baseUrl(HttpServletRequest req) {
 		String port = (req.getServerPort() == 80 || req.getServerPort() == 443) ? "" : ":" + req.getServerPort();
 		return req.getScheme() + "://" + req.getServerName() + port + req.getContextPath();

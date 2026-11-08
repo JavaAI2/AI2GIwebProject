@@ -8,7 +8,7 @@
 
     request.setAttribute("menu", "mypage");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
 
-    Member member = (Member) request.getAttribute("member");
+    MemberDTO member = (MemberDTO) request.getAttribute("member");   // MyPageController 가 담아 준 회원정보(DTO)
     Map<String, String> errors = Html.errors(request);
 
     // 검증 실패로 다시 그릴 때는 회원이 입력한 값(파라미터)을, 아니면 저장된 값(member)을 보여줍니다.
@@ -16,7 +16,7 @@
     String vEnglishName = retry ? request.getParameter("englishName") : member.getEnglishName();
     String vPhone       = retry ? request.getParameter("phone")       : member.getPhone();
     boolean vSmsRefuse  = retry ? request.getParameter("smsRefuse") != null : member.isSmsRefuse();
-    String vMemberType  = retry ? request.getParameter("memberType")  : member.getMemberType().name();
+    String vMemberType  = retry ? request.getParameter("memberType")  : member.getMemberType();
 %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -524,7 +524,7 @@ a:hover { color: var(--teal); }
             <th>이메일</th>
             <td class="is-readonly"><%= Html.esc(member.getEmail()) %></td>
             <th>마지막 로그인</th>
-            <td class="is-readonly"><%= member.getLastLoginAtText() %> &nbsp;<a href="<%= ctx %>/logout">로그아웃</a></td>
+            <td class="is-readonly"><%= member.getLastLoginAt() %> &nbsp;<a href="<%= ctx %>/logout">로그아웃</a></td>
           </tr>
           <tr>
             <th>SMS 수신동의<br>(자동 필수)</th>

@@ -8,7 +8,7 @@
 
     request.setAttribute("menu", "mypage");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
 
-    Member member = (Member) request.getAttribute("member");
+    MemberDTO member = (MemberDTO) request.getAttribute("member");   // MyPageController 가 담아 준 회원정보(DTO)
     String tab = (String) request.getAttribute("tab");                         // pending | history
     List<Charge> charges = (List<Charge>) request.getAttribute("charges");     // 비용결제 탭 (결제 대기건)
     List<Payment> payments = (List<Payment>) request.getAttribute("payments"); // 결제내역 탭

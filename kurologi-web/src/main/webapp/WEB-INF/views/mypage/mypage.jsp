@@ -10,8 +10,8 @@
 
     request.setAttribute("menu", "mypage");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
 
-    // MyPageServlet 이 넣어 준 값
-    Member member = (Member) request.getAttribute("member");
+    // MyPageController 와 MyPageMain(Command)이 넣어 준 값
+    MemberDTO member = (MemberDTO) request.getAttribute("member");   // 최신 회원정보(DTO)
     UsageStats usage = (UsageStats) request.getAttribute("usage");
     List<MailboxCenter> centers = (List<MailboxCenter>) request.getAttribute("centers");
     Grade nextGrade = (Grade) request.getAttribute("nextGrade");
@@ -19,9 +19,9 @@
     String referralUrl = (String) request.getAttribute("referralUrl");
 
     // 결제가 완료된 운송품 현황 : MyPageMain 이 넣어 준 값을 쓰고,
-    // 값이 없으면(예전 MyPageServlet 이 이 화면을 열었을 때 등) 여기서 직접 만든다.
+    // 값이 없으면(Command 를 거치지 않고 열렸을 때 등) 여기서 직접 만든다.
     List<ShipmentRow> shipments = (List<ShipmentRow>) request.getAttribute("shipments");
-    if (shipments == null) shipments = ShipmentBoard.load(App.of(application), member);
+    if (shipments == null) shipments = ShipmentBoard.load(member.getId());
 %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -537,7 +537,6 @@ button.info-link { font-family: inherit; background: #fff; cursor: pointer; }
 .state--shipped { color: #fff; background: #37b149; border: 1px solid #37b149; }
 .state--billed { color: #b34700; border: 1px solid #e8a15c; }
 .state--delivering { color: #fff; background: #1b6fb5; border: 1px solid #1b6fb5; }
-.state--delivered { color: #fff; background: #0f6b5c; border: 1px solid #0f6b5c; }
 </style>
 </head>
 <body>
@@ -564,7 +563,7 @@ button.info-link { font-family: inherit; background: #fff; cursor: pointer; }
         <p class="box__title">나의 정보</p>
         <p class="box__note">
 <%  if (nextGrade == null) { %>
-          최고 등급인 <strong><%= member.getGrade().getLabelShort() %></strong> 회원입니다.
+          최고 등급인 <strong><%= member.getGradeLabelShort() %></strong> 회원입니다.
 <%  } else { %>
           다음 등급인 <strong><%= nextGrade.getLabelShort() %></strong> 레벨로 상향되려면, <strong><%= Html.num(countToNextGrade) %></strong>건 더 이용하시면 됩니다.
 <%  } %>
@@ -584,11 +583,11 @@ button.info-link { font-family: inherit; background: #fff; cursor: pointer; }
           </thead>
           <tbody>
             <tr>
-              <td><%= member.getGrade().getLabel() %></td>
+              <td><%= member.getGradeLabel() %></td>
               <td class="money">¥<%= Html.num(member.getPoints()) %></td>
               <td>
                 <span class="dim"><%= Html.num(member.getReferralPointsPending()) %> P 적립대기</span>
-                
+                <br><button class="info-link" type="button" data-copy="<%= Html.esc(referralUrl) %>">나의 추천 링크</button>
               </td>
               <td class="money">¥<%= Html.num(member.getDeposit()) %></td>
               <td><%= Html.esc(member.getMemberNo()) %></td>

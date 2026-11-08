@@ -8,15 +8,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jp.kurologi.model.Member;
-import jp.kurologi.web.App;
+import jp.kurologi.model.MemberDTO;
+import jp.kurologi.repository.MemberDAO;
 import jp.kurologi.web.Session;
 
 /**
- * [시연용] 예치금 충전
+ * [시연용] 예치금 충전 서비스
  * 실제 은행 거래 없이, 충전 신청을 하면 DB(KURO_MEMBER.DEPOSIT)의 예치금에 금액을 더한다.
- *   GET  : 충전 화면 (true -> forward)
- *   POST : 입력 확인 -> 예치금 증가 -> 안내 메시지를 담아 같은 화면으로 redirect (false)
+ *
+ *   GET  : 충전 화면 (true -> deposit.jsp)
+ *   POST : 입력 확인 -> DAO 로 예치금 증가 -> 안내 메시지를 담아 같은 화면으로 redirect (false)
+ *          입력이 잘못되면 request 에 "errors" 를 담고 화면을 다시 보여준다 (true)
  */
 public class DepositCharge implements Command {
 
@@ -27,12 +29,7 @@ public class DepositCharge implements Command {
 	public boolean doCommand(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		App app = App.of(request.getServletContext());
-		Member m = app.members.findById(Session.memberId(request)).orElseThrow();
-
-		// 화면(layout.jsp 의 요약 바)이 쓰는 값
-		request.setAttribute("member", m);
-		request.setAttribute("unpaidCount", app.payments.pendingCharges(m.getId()).size());
+		MemberDTO member = (MemberDTO) request.getAttribute("member");
 
 		if ("GET".equalsIgnoreCase(request.getMethod())) {
 			return true;
@@ -62,15 +59,17 @@ public class DepositCharge implements Command {
 		}
 
 		// 시연: 입금 확인을 기다리지 않고 바로 예치금에 더한다
-		m.setDeposit(m.getDeposit() + amount);
-		app.members.save(m);   // DB 반영
-
-		Session.flash(request, "info", String.format(
-				"₩%,d 충전이 완료되었습니다. (무통장입금 시연) 현재 예치금: ₩%,d", amount, m.getDeposit()));
+		if (new MemberDAO().addDeposit(member.getId(), amount) > 0) {
+			Session.flash(request, "info", String.format(
+					"₩%,d 충전이 완료되었습니다. (무통장입금 시연) 현재 예치금: ₩%,d", amount, member.getDeposit() + amount));
+		} else {
+			Session.flash(request, "error", "충전 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+		}
 		response.sendRedirect(request.getContextPath() + "/mypage/deposit");
 		return false;
 	}
 
+	// 숫자가 아니면 -1
 	private static long parseLong(String s) {
 		try {
 			return s == null ? -1 : Long.parseLong(s.trim());

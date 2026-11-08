@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*, jp.kurologi.model.Member, jp.kurologi.web.Session" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*, jp.kurologi.model.MemberDTO, jp.kurologi.web.Session" %>
 <%!
     /** 화면에 다시 찍는 값(XSS 방지용 HTML 이스케이프) */
     static String esc(String s) {
@@ -15,8 +15,8 @@
     String ctx = request.getContextPath();
     request.setAttribute("menu", "mypage");   // layout.jsp 주 메뉴에서 현재 메뉴 표시
 
-    // DepositCharge 가 넣어 주는 값
-    Member member = (Member) request.getAttribute("member");
+    // MyPageController 가 넣어 주는 값 (최신 회원정보 DTO)
+    MemberDTO member = (MemberDTO) request.getAttribute("member");
     @SuppressWarnings("unchecked")
     Map<String, String> errors = (Map<String, String>) request.getAttribute("errors");
     if (errors == null) errors = new HashMap<String, String>();
