@@ -14,467 +14,121 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from info-regulation.css */
-/* ==========================================================================
-   NIPPON BUY — 내부 페이지 공통 기본 스타일
-
-   이 파일은 5개 페이지의 CSS 맨 위에 그대로 복사해서 씁니다.
-   (페이지마다 CSS를 따로 두기로 했기 때문에 @import 대신 복사합니다)
-
-   바꾸고 싶은 값은 :root 한 곳만 고치면 됩니다.
-   ========================================================================== */
-
 :root {
-  --teal:      #159692;   /* 헤더, 기본 버튼 */
-  --teal-dark: #107a77;   /* 호버 */
-  --teal-tab:  #129692;   /* 선택된 탭 */
-  --teal-line: #107976;   /* 표 상단 굵은 선 */
-  --blue:      #107abd;   /* 링크, 포인트 */
-  --red:       #dd4b39;   /* 경고, 강조 */
+  --teal:      #159692;
+  --teal-dark: #107a77;
+  --teal-tab:  #129692;
+  --teal-line: #107976;
+  --blue:      #107abd;
+  --red:       #dd4b39;
   --mint:      #159692;
-
-  --ink:       #333333;   /* 제목 */
-  --body:      #555555;   /* 본문 */
-  --muted:     #666666;   /* 보조 */
+  --ink:       #333333;
+  --body:      #555555;
+  --muted:     #666666;
   --footer-text: #cccccc;
-
   --line:       #e5e5e5;
   --line-soft:  #eeeeee;
   --line-table: #dddddd;
   --line-input: #ced4da;
   --fill:       #f2f2f2;
-  --fill-th:    #f4fafa;   /* 표 머리글 배경 */
-  --fill-head:  #f6f6f6;   /* 페이지 제목 띠 배경 */
-
+  --fill-th:    #f4fafa;
+  --fill-head:  #f6f6f6;
   --container:  1360px;
   --gutter:     15px;
   --radius:     4px;
 }
-
-/* --------------------------------------------------------------- 리셋 */
-
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
+*, *::before, *::after { box-sizing: border-box; }
 html { font-size: 16px; }
-
-body {
-  margin: 0;
-  font-family: 'Noto Sans KR', serif;
-  font-size: 0.875rem;      /* 14px */
-  line-height: 1.5;
-  color: var(--body);
-  background: #fff;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  margin: 0 0 0.5rem;
-  color: #444;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
+body { margin: 0; font-family: 'Noto Sans KR', serif; font-size: 0.875rem; line-height: 1.5; color: var(--body); background: #fff; }
+h1, h2, h3, h4, h5, h6 { margin: 0 0 0.5rem; color: #444; font-weight: 400; line-height: 1.5; }
 h1 { font-size: 36px; }
 h2 { font-size: 30px; }
 h3 { font-size: 24px; }
 h4 { font-size: 18px; }
-
 p { margin: 0 0 1rem; }
-
 img { max-width: 100%; height: auto; border: 0; }
-
 a { color: var(--blue); text-decoration: none; }
 a:hover { color: var(--teal); }
-
-/* ------------------------------------------------------------- 레이아웃 */
-
-.container {
-  width: 100%;
-  max-width: var(--container);
-  margin: 0 auto;
-  padding: 0 10px;
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 calc(var(--gutter) * -1);
-}
-
+.container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 10px; }
+.row { display: flex; flex-wrap: wrap; margin: 0 calc(var(--gutter) * -1); }
 .col { padding: 0 var(--gutter); }
 .col--footer-logo { width: 16.6667%; }
 .col--footer-info { width: 83.3333%; }
-
-/* --------------------------------------------------------------- 상단 바 */
-
-.topbar {
-  border-bottom: 1px solid #c1c1c1;
-  font-size: 13px;
-  line-height: 44px;
-}
-
-.topbar__inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 45px;
-}
-
-.topbar__links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.topbar__links a {
-  display: block;
-  padding: 0 12px;
-  height: 44px;
-  line-height: 44px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
+.topbar { border-bottom: 1px solid #c1c1c1; font-size: 13px; line-height: 44px; }
+.topbar__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; min-height: 45px; }
+.topbar__links { display: flex; flex-wrap: wrap; align-items: center; margin: 0; padding: 0; list-style: none; }
+.topbar__links a { display: block; padding: 0 12px; height: 44px; line-height: 44px; font-size: 13px; color: var(--muted); }
 .topbar__links a.kakao-btn { height: 44px; line-height: 44px; padding: 0 6px; }
-
-/* -------------------------------------------------------- 헤더 + 주 메뉴 */
-
-.site-header {
-  background: var(--teal);
-  color: #eee;
-  border-bottom: 1px solid rgba(255, 255, 255, .05);
-}
-
-.site-header__inner {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-}
-
+.site-header { background: var(--teal); color: #eee; border-bottom: 1px solid rgba(255, 255, 255, .05); }
+.site-header__inner { display: flex; align-items: stretch; justify-content: space-between; }
 .site-header__logo { display: block; padding: 4px 0; }
 .site-header__logo img { display: block; width: 250px; }
-
 .main-nav { display: flex; align-items: stretch; }
-
-.main-nav__list {
-  display: flex;
-  align-items: stretch;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
+.main-nav__list { display: flex; align-items: stretch; margin: 0; padding: 0; list-style: none; }
 .main-nav__item { position: relative; }
-
-.main-nav__item > a {
-  display: block;
-  padding: 39px 10px;
-  font-size: 16px;
-  letter-spacing: -1px;
-  color: #fff;
-  white-space: nowrap;
-}
-
+.main-nav__item > a { display: block; padding: 39px 10px; font-size: 16px; letter-spacing: -1px; color: #fff; white-space: nowrap; }
 .main-nav__item:hover { background: var(--teal-dark); }
 .main-nav__item.is-current > a { color: #fff; }
-
-/* 하위 메뉴 */
-.main-nav__submenu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 100;
-  width: 220px;
-  margin: 0;
-  padding: 10px;
-  list-style: none;
-  background: #fff;
-  border: 1px solid var(--line-soft);
-  border-top: 2px solid var(--blue);
-  box-shadow: 0 13px 42px 11px rgba(0, 0, 0, .05);
-}
-
+.main-nav__submenu { display: none; position: absolute; top: 100%; left: 0; z-index: 100; width: 220px; margin: 0; padding: 10px; list-style: none; background: #fff; border: 1px solid var(--line-soft); border-top: 2px solid var(--blue); box-shadow: 0 13px 42px 11px rgba(0, 0, 0, .05); }
 .main-nav__item:hover .main-nav__submenu { display: block; }
-
-.main-nav__submenu a {
-  display: block;
-  padding: 10px;
-  font-size: 14px;
-  font-family: 'Lato', sans-serif;
-  color: var(--muted);
-  white-space: normal;
-}
-
+.main-nav__submenu a { display: block; padding: 10px; font-size: 14px; font-family: 'Lato', sans-serif; color: var(--muted); white-space: normal; }
 .main-nav__submenu a:hover { padding-left: 18px; color: var(--teal); }
-
-/* ------------------------------------------------------- 페이지 제목 띠 */
-
-.page-head {
-  padding: 15px 0 13px;
-  background: var(--fill-head);
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.page-head__inner {
-  position: relative;
-  min-height: 33px;
-}
-
-.page-head__title {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: -2px;
-  color: var(--ink);
-}
-
-/* 현재 위치 (오른쪽 정렬) */
-.breadcrumb {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  margin: -10px 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
-  color: var(--muted);
-}
-
+.page-head { padding: 15px 0 13px; background: var(--fill-head); border-bottom: 1px solid var(--line-soft); }
+.page-head__inner { position: relative; min-height: 33px; }
+.page-head__title { margin: 0; font-size: 22px; font-weight: 400; line-height: 1; letter-spacing: -2px; color: var(--ink); }
+.breadcrumb { position: absolute; top: 50%; right: 10px; margin: -10px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
 .breadcrumb__item { display: inline-block; }
 .breadcrumb__item + .breadcrumb__item::before { content: '/'; margin: 0 6px; color: #bbb; }
 .breadcrumb__item a { color: #555; }
 .breadcrumb__item a:hover { color: var(--blue); }
 .breadcrumb__item.is-current { color: var(--muted); }
-
-/* ------------------------------------------------------------------ 본문 */
-
 .page-body { padding: 30px 0 40px; }
-
-/* 본문 안의 소제목: 왼쪽에 청록 세로 막대 */
-.page-body h3 {
-  margin: 30px 0 14px;
-  padding-left: 12px;
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--ink);
-  border-left: 4px solid var(--teal);
-}
-
-.page-body h4 {
-  margin: 24px 0 12px;
-  padding-left: 12px;
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--ink);
-  border-left: 3px solid var(--teal);
-}
-
-.page-body h3 + p,
-.page-body h4 + p { margin-top: 0; }
-
-/* -------------------------------------------------------------- 표 공통 */
-
-/* 원본 .table1 : 위쪽에 청록 굵은 선, 칸마다 회색 테두리 */
-.data-table {
-  width: 100%;
-  height: auto;
-  margin-bottom: 20px;
-  border-collapse: collapse;
-  border-top: 2px solid var(--teal-line);
-}
-
-.data-table th,
-.data-table td {
-  padding: 12px 7px;
-  font-size: 13px;
-  text-align: center;
-  vertical-align: middle;
-  border: 1px solid var(--line-table);
-}
-
+.page-body h3 { margin: 30px 0 14px; padding-left: 12px; font-size: 20px; font-weight: 500; color: var(--ink); border-left: 4px solid var(--teal); }
+.page-body h4 { margin: 24px 0 12px; padding-left: 12px; font-size: 18px; font-weight: 500; color: var(--ink); border-left: 3px solid var(--teal); }
+.page-body h3 + p, .page-body h4 + p { margin-top: 0; }
+.data-table { width: 100%; height: auto; margin-bottom: 20px; border-collapse: collapse; border-top: 2px solid var(--teal-line); }
+.data-table th, .data-table td { padding: 12px 7px; font-size: 13px; text-align: center; vertical-align: middle; border: 1px solid var(--line-table); }
 .data-table th { font-weight: 700; background: var(--fill-th); }
 .data-table td { background: #fff; }
-
-/* 왼쪽 정렬이 필요한 칸 */
 .data-table td.is-left { text-align: left; }
-
-/* 세로형 표: 머리글 줄을 흰 배경으로 */
 .data-table--vertical thead th { background: #fff; color: #000; font-weight: 700; }
 .data-table--vertical td img { display: block; margin: 0 auto; }
-
-/* ------------------------------------------------------------ 텍스트 도우미 */
-
-.is-bold      { font-weight: 700; }
-.is-red       { color: var(--red); }
-.is-mint      { color: var(--mint); }
-.text-center  { text-align: center; }
-.text-h2      { font-size: 20px; }
-.text-h3      { font-size: 18px; }
-.spaced-top   { margin-top: 30px; }
+.is-bold { font-weight: 700; }
+.is-red { color: var(--red); }
+.is-mint { color: var(--mint); }
+.text-center { text-align: center; }
+.text-h2 { font-size: 20px; }
+.text-h3 { font-size: 18px; }
+.spaced-top { margin-top: 30px; }
 .spaced-bottom { margin-bottom: 30px; }
-
-/* 안내 문구 블록 */
-.note-block {
-  margin: 16px 0;
-  padding: 14px 16px;
-  font-size: 14px;
-  line-height: 1.8;
-  background: #f7fbfb;
-  border: 1px solid #d9ecec;
-  border-radius: var(--radius);
-}
-
-/* 빨간 주의 박스 */
-.alert {
-  margin: 0 0 16px;
-  padding: 0.75rem 1.25rem;
-  font-size: 14px;
-  line-height: 24px;
-  color: #721c24;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: var(--radius);
-}
-
-/* --------------------------------------------------------------- 버튼 */
-
-.btn {
-  display: inline-block;
-  padding: 0.4rem 0.75rem;
-  border: 0;
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  letter-spacing: -0.5px;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
+.note-block { margin: 16px 0; padding: 14px 16px; font-size: 14px; line-height: 1.8; background: #f7fbfb; border: 1px solid #d9ecec; border-radius: var(--radius); }
+.alert { margin: 0 0 16px; padding: 0.75rem 1.25rem; font-size: 14px; line-height: 24px; color: #721c24; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: var(--radius); }
+.btn { display: inline-block; padding: 0.4rem 0.75rem; border: 0; border-radius: var(--radius); font-size: 0.9rem; line-height: 1.5; letter-spacing: -0.5px; text-align: center; white-space: nowrap; vertical-align: middle; }
 .btn--dark { color: #fff; background: #343a40; }
 .btn--dark:hover { color: #fff; background: #23272b; }
-
 .btn--info { color: #fff; background: #17a2b8; }
 .btn--info:hover { color: #fff; background: #138496; }
-
 .btn--sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; border-radius: 0.2rem; }
-
-/* 링크형 버튼 (원본 .btn_link) */
-.link-btn {
-  display: inline-block;
-  margin: 0 6px 6px 0;
-  padding: 0 16px 0 16px;
-  font-size: 16px;
-  line-height: 26px;
-  color: var(--ink);
-  background: #ddd;
-}
+.link-btn { display: inline-block; margin: 0 6px 6px 0; padding: 0 16px 0 16px; font-size: 16px; line-height: 26px; color: var(--ink); background: #ddd; }
 .link-btn:hover { color: var(--ink); background: #cfcfcf; }
 .link-btn--active { color: #fff; background: var(--teal-tab); }
 .link-btn--active:hover { color: #fff; background: var(--teal-dark); }
-
-/* 카카오 상담 버튼 이미지 */
 .kakao-btn img { height: 35px; width: auto; padding-top: 5px; vertical-align: middle; }
-
-/* --------------------------------------------------------------- 푸터 */
-
-.site-footer {
-  margin-top: 10px;
-  background: #333;
-  color: var(--footer-text);
-}
-
+.site-footer { margin-top: 10px; background: #333; color: var(--footer-text); }
 .site-footer__inner { padding-top: 50px; padding-bottom: 50px; }
-
 .site-footer__logo { width: 120px; }
-
 .footer-links { padding-top: 20px; margin-bottom: 20px; }
-
-.footer-links a {
-  display: inline-block;
-  margin: 0 20px 0 0;
-  font-size: 14px;
-  color: #fff;
-  border-bottom: 1px dotted rgba(255, 255, 255, .25);
-}
+.footer-links a { display: inline-block; margin: 0 20px 0 0; font-size: 14px; color: #fff; border-bottom: 1px dotted rgba(255, 255, 255, .25); }
 .footer-links a:hover { color: #fff; border-bottom-style: solid; }
-
-.site-footer__text {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 300;
-  line-height: 28px;
-  color: var(--footer-text);
-}
-
-.copyright {
-  margin: 0;
-  padding: 20px 0;
-  font-size: 13px;
-  text-align: center;
-  color: rgba(255, 255, 255, .5);
-  background: rgba(0, 0, 0, .2);
-}
-
-/* ==========================================================================
-   NIPPON BUY — 검수규정, 보상규정 페이지
-   이 파일만 고치면 이 페이지 디자인이 바뀝니다.
-   ========================================================================== */
-
-
-/* 두 규정으로 나누는 큰 제목 */
-.regulation-part {
-  margin: 40px 0 16px;
-  padding: 12px 16px;
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--teal);
-  border-radius: var(--radius);
-}
+.site-footer__text { margin: 0; font-size: 13px; font-weight: 300; line-height: 28px; color: var(--footer-text); }
+.copyright { margin: 0; padding: 20px 0; font-size: 13px; text-align: center; color: rgba(255, 255, 255, .5); background: rgba(0, 0, 0, .2); }
+.regulation-part { margin: 40px 0 16px; padding: 12px 16px; font-size: 20px; font-weight: 700; color: #fff; background: var(--teal); border-radius: var(--radius); }
 .regulation-part:first-child { margin-top: 0; }
-
-/* 규정 표: 본문이 길어 왼쪽 정렬 */
-.regulation-table th,
-.regulation-table td {
-  padding: 12px 10px;
-  font-size: 13px;
-  line-height: 1.8;
-  text-align: left;
-}
+.regulation-table th, .regulation-table td { padding: 12px 10px; font-size: 13px; line-height: 1.8; text-align: left; }
 .regulation-table th { text-align: center; }
-
-/* 검수 항목 목록 (· 로 시작하는 줄) */
-.check-list {
-  margin: 0 0 20px;
-  padding: 0;
-  list-style: none;
-}
-.check-list li {
-  padding: 4px 0 4px 14px;
-  font-size: 13px;
-  line-height: 1.8;
-  text-indent: -14px;
-}
-
-/* ※ 표시 안내 */
-.notice-line {
-  margin: 6px 0;
-  padding: 10px 12px;
-  font-size: 13px;
-  line-height: 1.8;
-  color: #7a5b00;
-  background: #fffaf0;
-  border-left: 3px solid #e0a800;
-}
-
-/* 안내 그림 */
+.check-list { margin: 0 0 20px; padding: 0; list-style: none; }
+.check-list li { padding: 4px 0 4px 14px; font-size: 13px; line-height: 1.8; text-indent: -14px; }
+.notice-line { margin: 6px 0; padding: 10px 12px; font-size: 13px; line-height: 1.8; color: #7a5b00; background: #fffaf0; border-left: 3px solid #e0a800; }
 .regulation-guide { margin: 16px 0; }
 .regulation-guide img { display: block; margin: 0 auto; }
 </style>
@@ -661,9 +315,10 @@ a:hover { color: var(--teal); }
 	
 	<p class="level-2 fontsize-bold22">1. 보험 가입 화물 (추천)</p>	
 	<p class="level-3" >고가 상품 또는 파손 위험이 높은 상품은 배송보험 가입을 권장드립니다.<p>
+	<p class="level-3" ><span class="fontcolor_blue">니폰바이 안심케어 상세보기=></span><a class="btn btn--info btn--sm" href='https://nipponbuy.jp/service/insurance' target='_blank'>클릭!</a></p>
 	<p class="level-3 fontsize-bold22">①보상범위</p>
 	<p class="level-4" ><span class="is-red">·보험 가입 화물은 보험약관에 따라 최대 500만원까지 보상</span>이 가능합니다.</p>
-	<p class="level-4"  class="fontsize-bold18">·파손, 도난, 분실, 오발송(주문한제품과 다른제품 수령)  발생시</p>
+	<p class="level-4"  class="fontsize-bold18">·파손, 도난, 분실, 오발송(주문한제품과 다른제품 수령)  발생시</p>
 	<br>
 
 	<p class="level-3 fontsize-bold22">② 보상 대상</p>
@@ -816,7 +471,7 @@ a:hover { color: var(--teal); }
 <p class="level-4">✔ 구매내역(Invoice)</p>
 <p class="level-4">※ 아래 **「파손 사진 촬영 가이드」**를 참고하여 촬영해 주시기 바랍니다.</p>
 
-<img src="<%= ctx %>/images/help/regulation_guide.png" style='width:100%'/>
+<img src="<%= ctx %>/images/help/regulation_guide.png" alt="검수규정" data-lang-img="regulation_guide" style='width:100%'/>
 
 <p class="level-4">※ 제출자료가 부족한 경우에는 운송사 및 보험사의 사고조사가 불가능하여 보상이 제한될 수 있습니다.</p>
 

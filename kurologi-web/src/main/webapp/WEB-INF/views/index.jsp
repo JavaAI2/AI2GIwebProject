@@ -34,7 +34,7 @@
     else if (request.getParameter("withdrawn") != null) loginMessage = "탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.";
 %>
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-kuro-lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -44,18 +44,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* inlined from index.css */
-/* ==========================================================================
-   NIPPON BUY — 홈페이지 스타일 (순수 CSS)
-
-   구조:  reset → 공통 요소 → 레이아웃 → 헤더 → 본문 섹션 → 푸터 → 팝업
-   레이아웃: 데스크톱 전용 고정폭 (미디어쿼리 없음)   단위:  rem (1rem = 16px). 14px = 0.875rem, 14.4px = 0.9rem
-   값 출처: 원본 사이트에서 계산된 스타일을 측정해 그대로 옮겼습니다.
-   ========================================================================== */
-
-/* ==========================================================================
-   1. 색상 · 폭 (여기만 바꾸면 전체 톤이 바뀝니다)
-   ========================================================================== */
-
 :root {
   --teal:        #159692;   /* 헤더, 기본 버튼 */
   --teal-dark:   #107a77;   /* 호버 */
@@ -67,762 +55,178 @@
   --body:        #555555;   /* 본문 */
   --muted:       #666666;   /* 보조 텍스트 */
   --footer-text: #cccccc;   /* 푸터 본문 */
-
   --line:        #e5e5e5;
   --line-soft:   #eeeeee;
   --line-input:  #ced4da;
   --fill:        #f2f2f2;   /* 탭 기본 배경 */
   --fill-soft:   #f9f9f9;
   --fill-stripe: rgba(0, 0, 0, .05);
-
   --container:   1360px;    /* 원본 .container 폭 */
   --gutter:      15px;      /* 좌우 여백 */
-
   --radius:      4px;
   --shadow-menu: 0 13px 42px 11px rgba(0, 0, 0, .05);
 }
-
-/* ==========================================================================
-   2. 기본 리셋
-   ========================================================================== */
-
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
+*, *::before, *::after { box-sizing: border-box; }
 html { font-size: 16px; }
-
-body {
-  margin: 0;
-  font-family: 'Noto Sans KR', serif;
-  font-size: 0.875rem;          /* 14px */
-  line-height: 1.5;
-  color: var(--body);
-  background: #fff;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-  color: #444;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
+body { margin: 0; font-family: 'Noto Sans KR', serif; font-size: 0.875rem; line-height: 1.5; color: var(--body); background: #fff; }
+h1, h2, h3, h4, h5, h6 { margin: 0; color: #444; font-weight: 400; line-height: 1.5; }
 h4 { font-size: 18px; }
-
 img { max-width: 100%; height: auto; border: 0; }
-
 a { color: var(--ink); text-decoration: none; }
 a:hover { color: var(--teal); }
-
 button { font: inherit; cursor: pointer; }
-
-/* ==========================================================================
-   3. 공통 요소
-   ========================================================================== */
-
-/* --- 텍스트 도우미 --- */
 .text-center     { text-align: center; }
 .text-red        { color: var(--red); }
 .text-blue       { color: var(--blue); }
 .text-bold       { font-weight: 700; }
 .text-semibold   { font-weight: 600; }
-
 .text-15 { font-size: 15px; }
 .text-16 { font-size: 16px; }
 .text-18 { font-size: 18px; }
 .text-20 { font-size: 20px; }
-
-/* --- 버튼 ---
-   원본: padding .4rem .75rem, font-size .9rem, letter-spacing -.5px, border 없음 */
-
-.btn {
-  display: inline-block;
-  padding: 0.4rem 0.75rem;
-  border: 0;
-  border-radius: var(--radius);
-  font-size: 0.9rem;          /* 14.4px */
-  font-weight: 400;
-  letter-spacing: -0.5px;
-  line-height: 1.5;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
+.btn { display: inline-block; padding: 0.4rem 0.75rem; border: 0; border-radius: var(--radius); font-size: 0.9rem; font-weight: 400; letter-spacing: -0.5px; line-height: 1.5; text-align: center; white-space: nowrap; vertical-align: middle; }
 .btn--dark    { color: #fff; background: #343a40; }
 .btn--dark:hover { color: #fff; background: #23272b; }
-
 .btn--primary { color: #fff; background: var(--teal); }
 .btn--primary:hover { color: #fff; background: var(--teal-dark); }
-
 .btn--block { display: block; width: 100%; }
-
-/* 큰 버튼 (운송장 조회) */
-.btn--lg {
-  padding: 0.5rem 1rem;
-  font-size: 1.25rem;
-  border-radius: 0.3rem;
-}
-
-/* 버튼 묶음 */
+.btn--lg { padding: 0.5rem 1rem; font-size: 1.25rem; border-radius: 0.3rem; }
 .btn-row { display: flex; }
 .btn-row--split > .btn { flex: 1 1 0; border-radius: 0; }
 .btn-row--split > .btn:first-child { border-radius: var(--radius) 0 0 var(--radius); }
 .btn-row--split > .btn:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
 .btn-row--spaced { margin-top: 20px; gap: 4px; }
 .btn-row--spaced > .btn { border-radius: var(--radius); }
-
-/* --- 입력 필드 ---
-   원본: padding .375rem .75rem, font-size .9rem, border-radius 0 */
-
-.field {
-  width: 100%;
-  padding: 0.375rem 0.75rem;
-  font-family: inherit;
-  font-size: 0.9rem;          /* 14.4px */
-  line-height: 1.5;
-  color: #495057;
-  background: #fff;
-  border: 1px solid var(--line-input);
-  border-radius: 0;           /* 원본은 모서리를 둥글리지 않습니다 */
-}
-
+.field { width: 100%; padding: 0.375rem 0.75rem; font-family: inherit; font-size: 0.9rem; line-height: 1.5; color: #495057; background: #fff; border: 1px solid var(--line-input); border-radius: 0; }
 .field:focus { outline: none; border-color: var(--teal); }
-
 .field--block { display: block; margin-bottom: 5px; }
 .field--sm    { padding: 0.25rem 0.5rem; font-size: 12px; height: 30px; }
-.field--lg {
-  height: calc(1.5em + 1rem + 2px);
-  padding: 0.5rem 1rem;
-  font-size: 1.25rem;
-  border-radius: 0.3rem;
-}
-
-.checkbox {
-  display: block;
-  margin: 6px 0;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
-}
+.field--lg { height: calc(1.5em + 1rem + 2px); padding: 0.5rem 1rem; font-size: 1.25rem; border-radius: 0.3rem; }
+.checkbox { display: block; margin: 6px 0; font-size: 13px; color: var(--muted); cursor: pointer; }
 .checkbox input { margin-right: 4px; vertical-align: middle; }
-
-/* --- 표 ---
-   원본: padding 8px, font-size 14px, color #212529, vertical-align middle */
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  padding: 0.5rem;
-  font-size: 14px;
-  color: #212529;
-  text-align: left;
-  vertical-align: middle;
-  border-top: 1px solid #dee2e6;
-}
-
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 0.5rem; font-size: 14px; color: #212529; text-align: left; vertical-align: middle; border-top: 1px solid #dee2e6; }
 .table th { font-weight: 700; white-space: nowrap; width: 90px; }
 .table--striped tbody tr:nth-child(odd) { background: var(--fill-stripe); }
-
-/* --- 카드 ---
-   원본은 border-radius 0 이고, 안쪽 .card__body 가 10px 패딩을 가집니다 */
-
-.card {
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, .125);
-  border-radius: 0;
-}
-
+.card { background: #fff; border: 1px solid rgba(0, 0, 0, .125); border-radius: 0; }
 .card__body { padding: 10px; }
-
-/* 테두리 안쪽에 20px 여백을 한 번 더 주는 카드 (원본 .card.padding20) */
 .card--pad { padding: 20px; }
-
 .card--blue   { background: #e7f2f7; }
 .card--yellow { background: #f3f0e4; }
-
-/* 이미지가 카드 전체를 채우는 형태 (신청서 자동편집기) */
 .card__image-link { display: block; }
 .card__image { display: block; width: 100%; }
-
-/* --- 작은 라벨 (공지 날짜 / 새글) --- */
-
-.badge {
-  display: inline-block;
-  padding: 0.25em 0.4em;
-  border-radius: var(--radius);
-  font-size: 75%;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  vertical-align: baseline;
-}
-
+.badge { display: inline-block; padding: 0.25em 0.4em; border-radius: var(--radius); font-size: 75%; font-weight: 700; line-height: 1; white-space: nowrap; vertical-align: baseline; }
 .badge--info { color: #fff; background: #17a2b8; }
-
-/* 날짜: 알약 모양, 원본 computed padding 6.3px / 2.6px */
-.badge--date {
-  padding: 0.25em 0.6em;
-  border-radius: 10rem;
-  color: #212529;
-  background: #f8f9fa;
-}
-
-/* --- 카카오 상담 버튼 (이미지) --- */
-
-.kakao-btn img {
-  height: 35px;
-  width: auto;
-  padding-top: 5px;
-  vertical-align: middle;
-}
-
-/* --- 세로로 쌓이는 버튼 줄 --- */
-
+.badge--date { padding: 0.25em 0.6em; border-radius: 10rem; color: #212529; background: #f8f9fa; }
+.kakao-btn img { height: 35px; width: auto; padding-top: 5px; vertical-align: middle; }
 .stack { margin-top: 20px; }
 .stack--tight > * { margin-right: 2px; }
 .stack--tight { margin-top: 12px; }
-
-/* --- 경고 박스 (나의 일본주소) --- */
-
-.alert {
-  margin: 0;
-  padding: 0.75rem 1.25rem;
-  font-size: 14px;
-  line-height: 24px;
-  color: #721c24;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: var(--radius);
-}
-
+.alert { margin: 0; padding: 0.75rem 1.25rem; font-size: 14px; line-height: 24px; color: #721c24; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: var(--radius); }
 .caret { font-style: normal; font-size: 10px; margin-left: 4px; }
-
-/* --- 섹션 제목 ---
-   원본 .fancy-title.title-border: 제목 뒤로 1px 선이 지나갑니다 */
-
-.panel-title {
-  position: relative;
-  margin-bottom: 20px;
-  font-size: 18px;
-  font-weight: 500;
-  color: #444;
-  display: inline-block;
-  background: #fff;
-  padding-right: 10px;
-  white-space: nowrap;
-}
-
-/* 제목 뒤 가로선 */
-.panel-title--line::before {
-  content: '';
-  position: absolute;
-  top: 49%;
-  right: -10px;
-  width: 100vw;
-  border-top: 1px solid var(--line-soft);
-  z-index: -1;
-}
-
-/* 제목 줄 안의 "더보기" — 제목 글자 바로 옆에 한 칸 띄워 나란히 놓는다 (언어를 바꿔도 겹치지 않도록 position 을 쓰지 않음) */
-.panel-title__more {
-  display: inline-block;
-  margin-left: 0.5em;
-  font-size: 13px;
-  font-weight: 400;
-  white-space: nowrap;
-  vertical-align: baseline;
-}
-
-/* --- 탭 (배송센터 안내) ---
-   원본 ul.tab-nav: 선택된 탭은 청록 배경에 흰 글자입니다 */
-
+.panel-title { position: relative; margin-bottom: 20px; font-size: 18px; font-weight: 500; color: #444; display: inline-block; background: #fff; padding-right: 10px; white-space: nowrap; }
+.panel-title--line::before { content: ''; position: absolute; top: 49%; right: -10px; width: 100vw; border-top: 1px solid var(--line-soft); z-index: -1; }
+.panel-title__more { display: inline-block; margin-left: 0.5em; font-size: 13px; font-weight: 400; white-space: nowrap; vertical-align: baseline; }
 .tabs { position: relative; margin: 20px 0 30px; }
-
-.tabs__nav {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-bottom: 1px solid #ddd;
-}
-
-.tabs__item {
-  height: 41px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-bottom: 0;
-  border-left: 0;
-}
-
+.tabs__nav { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; border-bottom: 1px solid #ddd; }
+.tabs__item { height: 41px; text-align: center; border: 1px solid #ddd; border-bottom: 0; border-left: 0; }
 .tabs__item:first-child { margin-left: 15px; border-left: 1px solid #ddd; }
-
-.tabs__item a {
-  display: block;
-  height: 40px;
-  padding: 0 7px;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 40px;
-  text-align: center;
-  color: #444;
-  background: var(--fill);
-}
-
+.tabs__item a { display: block; height: 40px; padding: 0 7px; font-size: 13px; font-weight: 700; line-height: 40px; text-align: center; color: #444; background: var(--fill); }
 .tabs__item.is-active a { color: #fff; background: var(--teal-tab); }
-
-/* 탭 내용 */
 .tabs__pane { display: none; }
 .tabs__pane.is-active { display: block; }
-
-/* ==========================================================================
-   4. 레이아웃
-   ========================================================================== */
-
-.container {
-  width: 100%;
-  max-width: var(--container);
-  margin: 0 auto;
-  padding: 0 10px;
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 calc(var(--gutter) * -1);
-}
-
-.col {
-  position: relative;
-  width: 100%;
-  padding: 0 var(--gutter);
-  margin-bottom: 30px;
-}
-
-/* 열 폭 (데스크톱 고정 레이아웃) */
+.container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 10px; }
+.row { display: flex; flex-wrap: wrap; margin: 0 calc(var(--gutter) * -1); }
+.col { position: relative; width: 100%; padding: 0 var(--gutter); margin-bottom: 30px; }
 .col--two-thirds   { width: 66.6667%; }
 .col--half         { width: 50%; }
 .col--one-third    { width: 33.3333%; }
 .col--footer-logo  { width: 16.6667%; }
 .col--footer-info  { width: 83.3333%; }
-
 .section { padding-top: 30px; }
-
-/* ==========================================================================
-   5. 상단 바
-   ========================================================================== */
-
-.topbar {
-  border-bottom: 1px solid #c1c1c1;
-  font-size: 13px;
-  line-height: 44px;
-}
-
-.topbar__inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 45px;
-}
-
-.topbar__links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.topbar__links a {
-  display: block;
-  padding: 0 12px;
-  height: 44px;
-  line-height: 44px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
+.topbar { border-bottom: 1px solid #c1c1c1; font-size: 13px; line-height: 44px; }
+.topbar__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; min-height: 45px; }
+.topbar__links { display: flex; flex-wrap: wrap; align-items: center; margin: 0; padding: 0; list-style: none; }
+.topbar__links a { display: block; padding: 0 12px; height: 44px; line-height: 44px; font-size: 13px; color: var(--muted); }
 .topbar__links a.kakao-btn { height: 44px; line-height: 44px; padding: 0 6px; }
-
-/* "나의 일본주소" 드롭다운 */
 .topbar__links--left .has-menu { position: relative; }
-
-.address-menu {
-  display: none;
-  position: absolute;
-  top: 44px;
-  left: 0;
-  z-index: 100;
-  width: 400px;
-  padding: 10px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, .15);
-  border-radius: var(--radius);
-  box-shadow: 0 0 5px -1px rgba(0, 0, 0, .2);
-}
-
+.address-menu { display: none; position: absolute; top: 44px; left: 0; z-index: 100; width: 400px; padding: 10px; background: #fff; border: 1px solid rgba(0, 0, 0, .15); border-radius: var(--radius); box-shadow: 0 0 5px -1px rgba(0, 0, 0, .2); }
 .topbar__links--left .has-menu:hover .address-menu { display: block; }
-
 .address-menu__title { margin: 10px; font-size: 14px; color: var(--body); }
-
-/* ==========================================================================
-   6. 헤더 + 주 메뉴
-   ========================================================================== */
-
-.site-header {
-  background: var(--teal);
-  color: #eee;
-  border-bottom: 1px solid rgba(255, 255, 255, .05);
-}
-
-.site-header__inner {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-}
-
+.site-header { background: var(--teal); color: #eee; border-bottom: 1px solid rgba(255, 255, 255, .05); }
+.site-header__inner { display: flex; align-items: stretch; justify-content: space-between; }
 .site-header__logo { display: block; padding: 4px 0; }
 .site-header__logo img { display: block; width: 250px; }
-
-/* --- 주 메뉴 --- */
-
 .main-nav { display: flex; align-items: stretch; }
-
-.main-nav__list {
-  display: flex;
-  align-items: stretch;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
+.main-nav__list { display: flex; align-items: stretch; margin: 0; padding: 0; list-style: none; }
 .main-nav__item { position: relative; }
-
-.main-nav__item > a {
-  display: block;
-  padding: 39px 10px;         /* 헤더 높이를 만드는 값 */
-  font-size: 16px;
-  font-weight: 400;
-  letter-spacing: -1px;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
+.main-nav__item > a { display: block; padding: 39px 10px; font-size: 16px; font-weight: 400; letter-spacing: -1px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .main-nav__item:hover { background: var(--teal-dark); }
-
-/* 하위 메뉴 */
-.main-nav__submenu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 100;
-  width: 220px;
-  margin: 0;
-  padding: 10px;
-  list-style: none;
-  background: #fff;
-  border: 1px solid var(--line-soft);
-  border-top: 2px solid var(--blue);
-  box-shadow: var(--shadow-menu);
-}
-
+.main-nav__submenu { display: none; position: absolute; top: 100%; left: 0; z-index: 100; width: 220px; margin: 0; padding: 10px; list-style: none; background: #fff; border: 1px solid var(--line-soft); border-top: 2px solid var(--blue); box-shadow: var(--shadow-menu); }
 .main-nav__item:hover .main-nav__submenu { display: block; }
-
-.main-nav__submenu a {
-  display: block;
-  padding: 10px;
-  font-size: 14px;
-  font-family: 'Lato', sans-serif;
-  color: var(--muted);
-  white-space: normal;
-}
-
+.main-nav__submenu a { display: block; padding: 10px; font-size: 14px; font-family: 'Lato', sans-serif; color: var(--muted); white-space: normal; }
 .main-nav__submenu a:hover { padding-left: 18px; color: var(--teal); }
-
-/* 오른쪽 끝 메뉴는 화면 밖으로 나가지 않게 오른쪽 정렬 */
 .main-nav__item:nth-last-child(-n+2) .main-nav__submenu { left: auto; right: 0; }
-
-/* ==========================================================================
-   8. 배너 슬라이더
-   ========================================================================== */
-
-.hero {
-  position: relative;
-  height: 540px;
-  overflow: hidden;
-  background: url('<%= ctx %>/images/banner1.png') center / 100% 100% no-repeat;
-}
-
-
-/* 언어별 배너 : images/banner1_ja.png , banner1_en.png 를 넣으면 언어를 바꿀 때 자동으로 바뀝니다.
-   (배너 속 글자는 그림이라 번역되지 않기 때문입니다) 파일이 없으면 한국어 배너가 그대로 보입니다. */
+.hero { position: relative; height: 540px; overflow: hidden; background: url('<%= ctx %>/images/banner1.png') center / 100% 100% no-repeat; }
 html[data-kuro-lang="ja"] .hero { background-image: url('<%= ctx %>/images/banner1_ja.png'), url('<%= ctx %>/images/banner1.png'); }
 html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banner1_en.png'), url('<%= ctx %>/images/banner1.png'); }
-
-
-
-/* ==========================================================================
-   9. 운송장 조회
-   ========================================================================== */
-
 .search-bar { display: flex; flex-wrap: wrap; }
-
-/* 이어 붙는 컨트롤은 모서리를 없애고 양 끝만 둥글게 */
 .search-bar > * { border-radius: 0; }
 .search-bar > *:first-child { border-radius: 0.3rem 0 0 0.3rem; }
 .search-bar > *:last-child  { border-radius: 0 0.3rem 0.3rem 0; }
 .search-bar .field { flex: 1 1 120px; min-width: 0; }
-
-/* ==========================================================================
-   10. 공지사항
-   ========================================================================== */
-
 .search-bar button.btn { font: inherit; border: 0; cursor: pointer; }
-
 .notice-list { margin: 0; padding: 0; list-style: none; }
-
-.notice-list__item {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 12px 0;
-}
-
-.notice-list__title {
-    flex: 1;
-    min-width: 0;
-    margin: 0;
-    line-height: 1.5;
-    word-break: keep-all;      /* 단어 중간에서 끊지 않고 줄바꿈 : 글자가 잘리지 않는다 */
-    overflow-wrap: anywhere;
-  }
-
+.notice-list__item { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 12px 0; }
+.notice-list__title { flex: 1; min-width: 0; margin: 0; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
 .notice-list .badge--date { flex-shrink: 0; white-space: nowrap; }
-
 .notice-list__title a { color: var(--body); }
-
-/* ==========================================================================
-   11. 센터 출고 현황
-   ========================================================================== */
-
 .center-status { width: 100%; border-collapse: collapse; }
-
-.center-status__cell {
-  padding: 6px 4px;
-  font-size: 14px;
-  text-align: center;
-  vertical-align: middle;
-  border-right: 1px dotted #ccc;   /* 세 칸을 나누는 점선 */
-}
-
+.center-status__cell { padding: 6px 4px; font-size: 14px; text-align: center; vertical-align: middle; border-right: 1px dotted #ccc; }
 .center-status__cell--last { border-right: 0; }
 .center-status__cell img { display: block; width: 60px; margin: 0 auto; }
 .center-status__status { margin-top: 4px; }
 .center-status__name { word-break: auto-phrase; }
-
-/* ==========================================================================
-   12. 환율 · 계좌
-   ========================================================================== */
-
 .exchange { margin: 0; }
-
-.exchange--main {
-  margin: 20px 0 25px;
-  font-size: 24px;
-}
-
+.exchange--main { margin: 20px 0 25px; font-size: 24px; }
 .exchange__flag { width: 16px; margin-top: -7px; margin-right: 4px; vertical-align: middle; }
 .exchange__value { padding-left: 20px; }
-
 .bank-logo { margin-bottom: 20px; }
-
-/* ==========================================================================
-   13. 푸터
-   ========================================================================== */
-
-.site-footer {
-  margin-top: 10px;
-  background: #333;
-  color: var(--footer-text);
-}
-
+.site-footer { margin-top: 10px; background: #333; color: var(--footer-text); }
 .site-footer__inner { padding-top: 50px; padding-bottom: 50px; }
-
 .site-footer__logo { width: 120px; }
-
 .footer-links { padding-top: 20px; margin-bottom: 20px; }
-
-.footer-links a {
-  display: inline-block;
-  margin: 0 20px 0 0;
-  font-size: 14px;
-  color: #fff;
-  border-bottom: 1px dotted rgba(255, 255, 255, .25);
-}
+.footer-links a { display: inline-block; margin: 0 20px 0 0; font-size: 14px; color: #fff; border-bottom: 1px dotted rgba(255, 255, 255, .25); }
 .footer-links a:hover { color: #fff; border-bottom-style: solid; }
-
-.site-footer__text {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 300;
-  line-height: 28px;
-  color: var(--footer-text);
-}
-
-.copyright {
-  margin: 0;
-  padding: 20px 0;
-  font-size: 13px;
-  text-align: center;
-  color: rgba(255, 255, 255, .5);
-  background: rgba(0, 0, 0, .2);
-}
-
-/* ==========================================================================
-   14. 긴급 안내 팝업
-   ========================================================================== */
-
-.popup {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
+.site-footer__text { margin: 0; font-size: 13px; font-weight: 300; line-height: 28px; color: var(--footer-text); }
+.copyright { margin: 0; padding: 20px 0; font-size: 13px; text-align: center; color: rgba(255, 255, 255, .5); background: rgba(0, 0, 0, .2); }
+.popup { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 16px; }
 .popup.is-hidden { display: none; }
-
 .popup__backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .5); }
-
-.popup__panel {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 560px;
-  max-height: 90vh;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, .2);
-  border-radius: 0.3rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, .3);
-  overflow: auto;
-}
-
+.popup__panel { position: relative; display: flex; flex-direction: column; width: 100%; max-width: 560px; max-height: 90vh; background: #fff; border: 1px solid rgba(0, 0, 0, .2); border-radius: 0.3rem; box-shadow: 0 10px 40px rgba(0, 0, 0, .3); overflow: auto; }
 .popup__body { padding: 20px 24px 10px; text-align: center; }
-
-.popup__label {
-  display: inline-block;
-  margin: 0 0 8px;
-  padding: 4px 14px;
-  border-radius: 10rem;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #fff;
-  background: var(--red);
-}
-
-.popup__title {
-  margin: 10px 0 12px;
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 1.25;
-  color: #222;
-}
-
+.popup__label { display: inline-block; margin: 0 0 8px; padding: 4px 14px; border-radius: 10rem; font-size: 16px; font-weight: 700; letter-spacing: 1px; color: #fff; background: var(--red); }
+.popup__title { margin: 10px 0 12px; font-size: 26px; font-weight: 700; line-height: 1.25; color: #222; }
 .popup__lead { margin: 0 0 16px; font-size: 14px; }
-
-.popup__note {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 16px;
-  padding: 12px;
-  font-size: 12px;
-  text-align: left;
-  background: #fdf3e7;
-  border-radius: var(--radius);
-}
-
-.popup__note-mark {
-  flex: 0 0 26px;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  font-weight: 700;
-  color: #fff;
-  background: var(--red);
-}
-
-.popup__foot {
-  padding: 8px;
-  font-size: 12px;
-  text-align: right;
-  color: #fff;
-  background: #a3a3a3;
-}
-
+.popup__note { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; padding: 12px; font-size: 12px; text-align: left; background: #fdf3e7; border-radius: var(--radius); }
+.popup__note-mark { flex: 0 0 26px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; font-weight: 700; color: #fff; background: var(--red); }
+.popup__foot { padding: 8px; font-size: 12px; text-align: right; color: #fff; background: #a3a3a3; }
 .popup__mute { cursor: pointer; }
 .popup__mute input { margin-right: 4px; vertical-align: middle; }
-
-/* --- 변경 전 / 변경 후 비교 박스 --- */
-
-.compare {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.compare__item {
-  flex: 1;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.compare__head {
-  display: block;
-  padding: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-}
-
+.compare { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; }
+.compare__item { flex: 1; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.compare__head { display: block; padding: 6px; font-size: 12px; font-weight: 700; color: #fff; }
 .compare__name { display: block; padding: 12px 6px; font-size: 17px; font-weight: 700; }
-
 .compare__item--before .compare__head { background: #999; }
 .compare__item--before .compare__name { color: #444; }
-
 .compare__item--after { border-color: var(--red); }
 .compare__item--after .compare__head { background: var(--red); }
 .compare__item--after .compare__name { color: var(--red); }
-
 .compare__arrow { font-size: 20px; color: #444; }
-
-/* JSP — 로그인 상자 안내 */
 .login-message { margin: 0 0 10px; padding: 8px 10px; font-size: 13px; color: #8a1f11; background: #fdecea; border-radius: 4px; }
 .login-welcome { margin: 0 0 14px; font-size: 14px; line-height: 1.8; color: #333; }
 .topbar__welcome { display: block; padding: 0 12px 0 20px; height: 44px; line-height: 44px; font-size: 13px; color: #444; white-space: nowrap; }
 .topbar__welcome strong { color: #159692; font-weight: 700; }
-
-/* JSP — 운송장 조회 결과 (시험용) */
 .track-result { margin: 10px 0 0; font-size: 14px; line-height: 1.8; color: var(--ink); white-space: pre-line; }
 .track-result:empty { display: none; }
 .track-result--error { color: var(--red); }
@@ -879,7 +283,6 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
   <div class="container topbar__inner">
 
     <ul class="topbar__links topbar__links--left">
-      <li><a href="#" data-favorite>즐겨찾기추가</a></li>
       <li><a href="<%= ctx %>/community/qna">1:1게시판</a></li>
       <li class="has-menu">
         <a href="#">나의 일본주소 <i class="caret">▾</i></a>
@@ -1370,18 +773,6 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
 })();
 </script>
 <script>
-(function () {
-  // 번역 위젯은 선택한 언어를 googtrans 쿠키(예: /ko/ja)에 저장한다. 그 값을 읽어 언어별 배너(CSS)가 바뀌게 한다.
-  function sync() {
-    var m = document.cookie.match(/(?:^|;\s*)googtrans=\/[^\/]*\/([a-z-]+)/i);
-    var l = m ? m[1].toLowerCase() : 'ko';
-    if (document.documentElement.getAttribute('data-kuro-lang') !== l) document.documentElement.setAttribute('data-kuro-lang', l);
-  }
-  sync();
-  setInterval(sync, 1000);
-})();
-</script>
-<script>
 /* ---- 운송장 조회 (시험용) ----
    결제가 완료되면 결제내역에 만들어지는 한국 · 일본 운송장을 /track/kr, /track/jp 에서 찾아 아래에 보여 준다.
    결제내역의 "조회" 링크로 들어오면 (?krMethod=..&krNo=.. / ?jpCarrier=..&jpNo=..) 칸을 채우고 바로 조회한다. */
@@ -1446,6 +837,5 @@ html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banne
 })();
 </script>
 <%@ include file="common/translate.jspf" %>
-<%@ include file="common/favorite.jspf" %>
 </body>
 </html>
