@@ -1,1323 +1,796 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>일본 배대지 쿠로로지 (KURO Logi)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nippon Buy プロジェクト発表 · Team Java Cargo</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <style>
-/* inlined from index.css */
-/* ==========================================================================
-   KURO Logi — 홈페이지 스타일 (순수 CSS)
-
-   구조:  reset → 공통 요소 → 레이아웃 → 헤더 → 본문 섹션 → 푸터 → 팝업
-   레이아웃: 데스크톱 전용 고정폭 (미디어쿼리 없음)   단위:  rem (1rem = 16px). 14px = 0.875rem, 14.4px = 0.9rem
-   값 출처: 원본 사이트에서 계산된 스타일을 측정해 그대로 옮겼습니다.
-   ========================================================================== */
-
-/* ==========================================================================
-   1. 색상 · 폭 (여기만 바꾸면 전체 톤이 바뀝니다)
-   ========================================================================== */
-
-:root {
-
-/*수정*/
-/*3차수정*/
-  --teal:        #159692;   /* 헤더, 기본 버튼 */
-  --teal-dark:   #107a77;   /* 호버 */
-  --teal-tab:    #129692;   /* 선택된 탭 */
-  --blue:        #107abd;   /* 링크, 포인트 */
-  --kakao:       #fae100;   /* 카카오 버튼 */
-  --red:         #dd4b39;   /* 경고, 강조 */
-  --ink:         #333333;   /* 제목, 기본 링크 */
-  --body:        #555555;   /* 본문 */
-  --muted:       #666666;   /* 보조 텍스트 */
-  --footer-text: #cccccc;   /* 푸터 본문 */
-
-  --line:        #e5e5e5;
-  --line-soft:   #eeeeee;
-  --line-input:  #ced4da;
-  --fill:        #f2f2f2;   /* 탭 기본 배경 */
-  --fill-soft:   #f9f9f9;
-  --fill-stripe: rgba(0, 0, 0, .05);
-
-  --container:   1360px;    /* 원본 .container 폭 */
-  --gutter:      15px;      /* 좌우 여백 */
-
-  --radius:      4px;
-  --shadow-menu: 0 13px 42px 11px rgba(0, 0, 0, .05);
-}
-
-/* ==========================================================================
-   2. 기본 리셋
-   ========================================================================== */
-
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
-html { font-size: 16px; }
-
-body {
-  margin: 0;
-  font-family: 'Noto Sans KR', serif;
-  font-size: 0.875rem;          /* 14px */
-  line-height: 1.5;
-  color: var(--body);
-  background: #fff;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-  color: #444;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-h4 { font-size: 18px; }
-
-img { max-width: 100%; height: auto; border: 0; }
-
-a { color: var(--ink); text-decoration: none; }
-a:hover { color: var(--teal); }
-
-button { font: inherit; cursor: pointer; }
-
-/* ==========================================================================
-   3. 공통 요소
-   ========================================================================== */
-
-/* --- 텍스트 도우미 --- */
-.text-center     { text-align: center; }
-.text-red        { color: var(--red); }
-.text-blue       { color: var(--blue); }
-.text-bold       { font-weight: 700; }
-.text-semibold   { font-weight: 600; }
-
-.text-15 { font-size: 15px; }
-.text-16 { font-size: 16px; }
-.text-18 { font-size: 18px; }
-.text-20 { font-size: 20px; }
-
-/* --- 버튼 ---
-   원본: padding .4rem .75rem, font-size .9rem, letter-spacing -.5px, border 없음 */
-
-.btn {
-  display: inline-block;
-  padding: 0.4rem 0.75rem;
-  border: 0;
-  border-radius: var(--radius);
-  font-size: 0.9rem;          /* 14.4px */
-  font-weight: 400;
-  letter-spacing: -0.5px;
-  line-height: 1.5;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
-.btn--dark    { color: #fff; background: #343a40; }
-.btn--dark:hover { color: #fff; background: #23272b; }
-
-.btn--primary { color: #fff; background: var(--teal); }
-.btn--primary:hover { color: #fff; background: var(--teal-dark); }
-
-.btn--block { display: block; width: 100%; }
-
-/* 큰 버튼 (운송장 조회) */
-.btn--lg {
-  padding: 0.5rem 1rem;
-  font-size: 1.25rem;
-  border-radius: 0.3rem;
-}
-
-/* 버튼 묶음 */
-.btn-row { display: flex; }
-.btn-row--split > .btn { flex: 1 1 0; border-radius: 0; }
-.btn-row--split > .btn:first-child { border-radius: var(--radius) 0 0 var(--radius); }
-.btn-row--split > .btn:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
-.btn-row--spaced { margin-top: 20px; gap: 4px; }
-.btn-row--spaced > .btn { border-radius: var(--radius); }
-
-/* --- 입력 필드 ---
-   원본: padding .375rem .75rem, font-size .9rem, border-radius 0 */
-
-.field {
-  width: 100%;
-  padding: 0.375rem 0.75rem;
-  font-family: inherit;
-  font-size: 0.9rem;          /* 14.4px */
-  line-height: 1.5;
-  color: #495057;
-  background: #fff;
-  border: 1px solid var(--line-input);
-  border-radius: 0;           /* 원본은 모서리를 둥글리지 않습니다 */
-}
-
-.field:focus { outline: none; border-color: var(--teal); }
-
-.field--block { display: block; margin-bottom: 5px; }
-.field--sm    { padding: 0.25rem 0.5rem; font-size: 12px; height: 30px; }
-.field--lg {
-  height: calc(1.5em + 1rem + 2px);
-  padding: 0.5rem 1rem;
-  font-size: 1.25rem;
-  border-radius: 0.3rem;
-}
-
-.checkbox {
-  display: block;
-  margin: 6px 0;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
-}
-.checkbox input { margin-right: 4px; vertical-align: middle; }
-
-/* --- 표 ---
-   원본: padding 8px, font-size 14px, color #212529, vertical-align middle */
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  padding: 0.5rem;
-  font-size: 14px;
-  color: #212529;
-  text-align: left;
-  vertical-align: middle;
-  border-top: 1px solid #dee2e6;
-}
-
-.table th { font-weight: 700; white-space: nowrap; width: 90px; }
-.table--striped tbody tr:nth-child(odd) { background: var(--fill-stripe); }
-
-/* --- 카드 ---
-   원본은 border-radius 0 이고, 안쪽 .card__body 가 10px 패딩을 가집니다 */
-
-.card {
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, .125);
-  border-radius: 0;
-}
-
-.card__body { padding: 10px; }
-
-/* 테두리 안쪽에 20px 여백을 한 번 더 주는 카드 (원본 .card.padding20) */
-.card--pad { padding: 20px; }
-
-.card--blue   { background: #e7f2f7; }
-.card--yellow { background: #f3f0e4; }
-
-/* 이미지가 카드 전체를 채우는 형태 (신청서 자동편집기) */
-.card__image-link { display: block; }
-.card__image { display: block; width: 100%; }
-
-/* --- 작은 라벨 (공지 날짜 / 새글) --- */
-
-.badge {
-  display: inline-block;
-  padding: 0.25em 0.4em;
-  border-radius: var(--radius);
-  font-size: 75%;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  vertical-align: baseline;
-}
-
-.badge--info { color: #fff; background: #17a2b8; }
-
-/* 날짜: 알약 모양, 원본 computed padding 6.3px / 2.6px */
-.badge--date {
-  padding: 0.25em 0.6em;
-  border-radius: 10rem;
-  color: #212529;
-  background: #f8f9fa;
-}
-
-/* --- 카카오 상담 버튼 (이미지) --- */
-
-.kakao-btn img {
-  height: 35px;
-  width: auto;
-  padding-top: 5px;
-  vertical-align: middle;
-}
-
-/* --- 세로로 쌓이는 버튼 줄 --- */
-
-.stack { margin-top: 20px; }
-.stack--tight > * { margin-right: 2px; }
-.stack--tight { margin-top: 12px; }
-
-/* --- 경고 박스 (나의 일본주소) --- */
-
-.alert {
-  margin: 0;
-  padding: 0.75rem 1.25rem;
-  font-size: 14px;
-  line-height: 24px;
-  color: #721c24;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: var(--radius);
-}
-
-.caret { font-style: normal; font-size: 10px; margin-left: 4px; }
-
-/* --- 섹션 제목 ---
-   원본 .fancy-title.title-border: 제목 뒤로 1px 선이 지나갑니다 */
-
-.panel-title {
-  position: relative;
-  margin-bottom: 20px;
-  font-size: 18px;
-  font-weight: 500;
-  color: #444;
-  display: inline-block;
-  background: #fff;
-  padding-right: 10px;
-}
-
-/* 제목 뒤 가로선 */
-.panel-title--line::before {
-  content: '';
-  position: absolute;
-  top: 49%;
-  right: -10px;
-  width: 100vw;
-  border-top: 1px solid var(--line-soft);
-  z-index: -1;
-}
-
-/* 제목 줄 안의 "더보기" */
-.panel-title__more {
-  position: absolute;
-  right: 0;
-  top: 3px;
-  font-size: 13px;
-  font-weight: 400;
-  background: #fff;
-  padding-left: 10px;
-}
-
-/* --- 탭 (배송센터 안내) ---
-   원본 ul.tab-nav: 선택된 탭은 청록 배경에 흰 글자입니다 */
-
-.tabs { position: relative; margin: 20px 0 30px; }
-
-.tabs__nav {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-bottom: 1px solid #ddd;
-}
-
-.tabs__item {
-  height: 41px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-bottom: 0;
-  border-left: 0;
-}
-
-.tabs__item:first-child { margin-left: 15px; border-left: 1px solid #ddd; }
-
-.tabs__item a {
-  display: block;
-  height: 40px;
-  padding: 0 7px;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 40px;
-  text-align: center;
-  color: #444;
-  background: var(--fill);
-}
-
-.tabs__item.is-active a { color: #fff; background: var(--teal-tab); }
-
-/* 탭 내용 */
-.tabs__pane { display: none; }
-.tabs__pane.is-active { display: block; }
-
-/* ==========================================================================
-   4. 레이아웃
-   ========================================================================== */
-
-.container {
-  width: 100%;
-  max-width: var(--container);
-  margin: 0 auto;
-  padding: 0 10px;
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 calc(var(--gutter) * -1);
-}
-
-.col {
-  position: relative;
-  width: 100%;
-  padding: 0 var(--gutter);
-  margin-bottom: 30px;
-}
-
-/* 열 폭 (데스크톱 고정 레이아웃) */
-.col--two-thirds   { width: 66.6667%; }
-.col--half         { width: 50%; }
-.col--one-third    { width: 33.3333%; }
-.col--footer-logo  { width: 16.6667%; }
-.col--footer-info  { width: 83.3333%; }
-
-.section { padding-top: 30px; }
-
-/* ==========================================================================
-   5. 상단 바
-   ========================================================================== */
-
-.topbar {
-  border-bottom: 1px solid #c1c1c1;
-  font-size: 13px;
-  line-height: 44px;
-}
-
-.topbar__inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 45px;
-}
-
-.topbar__links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.topbar__links a {
-  display: block;
-  padding: 0 12px;
-  height: 44px;
-  line-height: 44px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.topbar__links a.kakao-btn { height: 44px; line-height: 44px; padding: 0 6px; }
-
-/* "나의 일본주소" 드롭다운 */
-.topbar__links--left .has-menu { position: relative; }
-
-.address-menu {
-  display: none;
-  position: absolute;
-  top: 44px;
-  left: 0;
-  z-index: 100;
-  width: 400px;
-  padding: 10px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, .15);
-  border-radius: var(--radius);
-  box-shadow: 0 0 5px -1px rgba(0, 0, 0, .2);
-}
-
-.topbar__links--left .has-menu:hover .address-menu { display: block; }
-
-.address-menu__title { margin: 10px; font-size: 14px; color: var(--body); }
-
-/* ==========================================================================
-   6. 헤더 + 주 메뉴
-   ========================================================================== */
-
-.site-header {
-  background: var(--teal);
-  color: #eee;
-  border-bottom: 1px solid rgba(255, 255, 255, .05);
-}
-
-.site-header__inner {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-}
-
-.site-header__logo { display: block; padding: 4px 0; }
-.site-header__logo img { display: block; width: 250px; }
-
-/* --- 주 메뉴 --- */
-
-.main-nav { display: flex; align-items: stretch; }
-
-.main-nav__list {
-  display: flex;
-  align-items: stretch;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.main-nav__item { position: relative; }
-
-.main-nav__item > a {
-  display: block;
-  padding: 39px 10px;         /* 헤더 높이를 만드는 값 */
-  font-size: 16px;
-  font-weight: 400;
-  letter-spacing: -1px;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.main-nav__item:hover { background: var(--teal-dark); }
-
-/* 하위 메뉴 */
-.main-nav__submenu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 100;
-  width: 220px;
-  margin: 0;
-  padding: 10px;
-  list-style: none;
-  background: #fff;
-  border: 1px solid var(--line-soft);
-  border-top: 2px solid var(--blue);
-  box-shadow: var(--shadow-menu);
-}
-
-.main-nav__item:hover .main-nav__submenu { display: block; }
-
-.main-nav__submenu a {
-  display: block;
-  padding: 10px;
-  font-size: 14px;
-  font-family: 'Lato', sans-serif;
-  color: var(--muted);
-  white-space: normal;
-}
-
-.main-nav__submenu a:hover { padding-left: 18px; color: var(--teal); }
-
-/* 오른쪽 끝 메뉴는 화면 밖으로 나가지 않게 오른쪽 정렬 */
-.main-nav__item:nth-last-child(-n+2) .main-nav__submenu { left: auto; right: 0; }
-
-/* ==========================================================================
-   8. 배너 슬라이더
-   ========================================================================== */
-
-.hero {
-  position: relative;
-  height: 540px;
-  overflow: hidden;
-  background: url('../images/banner1.png') center / 100% 100% no-repeat;
-}
-
-.hero__link { position: absolute; inset: 0; z-index: 1; }
-
-.hero__arrow {
-  position: absolute;
-  top: 50%;
-  z-index: 2;
-  width: 40px;
-  height: 40px;
-  margin-top: -20px;
-  font-size: 26px;
-  color: #fff;
-  background: transparent;
-  border: 0;
-  opacity: .6;
-}
-.hero__arrow:hover { opacity: 1; }
-.hero__arrow--prev { left: 12px; }
-.hero__arrow--next { right: 12px; }
-
-.hero__dots {
-  position: absolute;
-  bottom: 20px;
-  z-index: 2;
-  width: 100%;
-  text-align: center;
-}
-.hero__dots span {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin: 0 4px;
-  border: 1px solid #fff;
-  border-radius: 50%;
-}
-.hero__dots span.is-active { background: #fff; }
-
-/* ==========================================================================
-   9. 운송장 조회
-   ========================================================================== */
-
-.search-bar { display: flex; flex-wrap: wrap; }
-
-/* 이어 붙는 컨트롤은 모서리를 없애고 양 끝만 둥글게 */
-.search-bar > * { border-radius: 0; }
-.search-bar > *:first-child { border-radius: 0.3rem 0 0 0.3rem; }
-.search-bar > *:last-child  { border-radius: 0 0.3rem 0.3rem 0; }
-.search-bar .field { flex: 1 1 120px; min-width: 0; }
-
-/* ==========================================================================
-   10. 공지사항
-   ========================================================================== */
-
-.notice-list { margin: 0; padding: 0; list-style: none; }
-
-.notice-list__item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 12px 0;
-}
-
-.notice-list__title {
-  width: 80%;
-  margin: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.notice-list__title a { color: var(--body); }
-
-/* ==========================================================================
-   11. 센터 출고 현황
-   ========================================================================== */
-
-.center-status { width: 100%; border-collapse: collapse; }
-
-.center-status__cell {
-  padding: 6px 4px;
-  font-size: 14px;
-  text-align: center;
-  vertical-align: middle;
-  border-right: 1px dotted #ccc;   /* 세 칸을 나누는 점선 */
-}
-
-.center-status__cell--last { border-right: 0; }
-.center-status__cell img { display: block; width: 60px; margin: 0 auto; }
-.center-status__status { margin-top: 4px; }
-.center-status__name { word-break: auto-phrase; }
-
-/* ==========================================================================
-   12. 환율 · 계좌
-   ========================================================================== */
-
-.exchange { margin: 0; }
-
-.exchange--main {
-  margin: 20px 0 25px;
-  font-size: 24px;
-}
-
-.exchange__flag { width: 16px; margin-top: -7px; margin-right: 4px; vertical-align: middle; }
-.exchange__value { padding-left: 20px; }
-
-.bank-logo { margin-bottom: 20px; }
-
-/* ==========================================================================
-   13. 푸터
-   ========================================================================== */
-
-.site-footer {
-  margin-top: 10px;
-  background: #333;
-  color: var(--footer-text);
-}
-
-.site-footer__inner { padding-top: 50px; padding-bottom: 50px; }
-
-.site-footer__logo { width: 120px; }
-
-.footer-links { padding-top: 20px; margin-bottom: 20px; }
-
-.footer-links a {
-  display: inline-block;
-  margin: 0 20px 0 0;
-  font-size: 14px;
-  color: #fff;
-  border-bottom: 1px dotted rgba(255, 255, 255, .25);
-}
-.footer-links a:hover { color: #fff; border-bottom-style: solid; }
-
-.site-footer__text {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 300;
-  line-height: 28px;
-  color: var(--footer-text);
-}
-
-.copyright {
-  margin: 0;
-  padding: 20px 0;
-  font-size: 13px;
-  text-align: center;
-  color: rgba(255, 255, 255, .5);
-  background: rgba(0, 0, 0, .2);
-}
-
-/* ==========================================================================
-   14. 긴급 안내 팝업
-   ========================================================================== */
-
-.popup {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-.popup.is-hidden { display: none; }
-
-.popup__backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .5); }
-
-.popup__panel {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 560px;
-  max-height: 90vh;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, .2);
-  border-radius: 0.3rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, .3);
-  overflow: auto;
-}
-
-.popup__body { padding: 20px 24px 10px; text-align: center; }
-
-.popup__label {
-  display: inline-block;
-  margin: 0 0 8px;
-  padding: 4px 14px;
-  border-radius: 10rem;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #fff;
-  background: var(--red);
-}
-
-.popup__title {
-  margin: 10px 0 12px;
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 1.25;
-  color: #222;
-}
-
-.popup__lead { margin: 0 0 16px; font-size: 14px; }
-
-.popup__note {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 16px;
-  padding: 12px;
-  font-size: 12px;
-  text-align: left;
-  background: #fdf3e7;
-  border-radius: var(--radius);
-}
-
-.popup__note-mark {
-  flex: 0 0 26px;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  font-weight: 700;
-  color: #fff;
-  background: var(--red);
-}
-
-.popup__foot {
-  padding: 8px;
-  font-size: 12px;
-  text-align: right;
-  color: #fff;
-  background: #a3a3a3;
-}
-
-.popup__mute { cursor: pointer; }
-.popup__mute input { margin-right: 4px; vertical-align: middle; }
-
-/* --- 변경 전 / 변경 후 비교 박스 --- */
-
-.compare {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.compare__item {
-  flex: 1;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.compare__head {
-  display: block;
-  padding: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.compare__name { display: block; padding: 12px 6px; font-size: 17px; font-weight: 700; }
-
-.compare__item--before .compare__head { background: #999; }
-.compare__item--before .compare__name { color: #444; }
-
-.compare__item--after { border-color: var(--red); }
-.compare__item--after .compare__head { background: var(--red); }
-.compare__item--after .compare__name { color: var(--red); }
-
-.compare__arrow { font-size: 20px; color: #444; }
+  body { font-family: 'Noto Sans JP', sans-serif; margin: 0; padding: 24px 0; background-color: #f3f4f6; }
+  .slide-container { width: 1280px; height: 720px; position: relative; background-color: white; overflow: hidden; display: flex; flex-direction: column; margin: 0 auto 28px; box-shadow: 0 10px 30px rgba(15,23,42,.12); }
+  .bg-pattern { background-image: radial-gradient(#e0e7ff 1px, transparent 1px); background-size: 24px 24px; }
+  .card-shadow { box-shadow: 0 4px 6px -1px rgba(0,0,0,.05), 0 2px 4px -1px rgba(0,0,0,.03); }
+  .tech-icon-bg { background-color: #eff6ff; display: flex; align-items: center; justify-content: center; border-radius: 50%; width: 48px; height: 48px; }
+  .flow-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06); border: 1px solid #e2e8f0; position: relative; }
+  .keyword-chip { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+  .point-badge { display: inline-flex; align-items: center; padding: 5px 11px; border-radius: 9999px; font-size: .8rem; font-weight: 600; border-width: 1px; border-style: solid; }
+  .video-wrapper { position: relative; width: 720px; height: 405px; background-color: #0f172a; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,.1), 0 10px 10px -5px rgba(0,0,0,.04); border: 4px solid #1e293b; }
+  .video-wrapper iframe, .video-wrapper video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+  .video-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: repeating-linear-gradient(45deg, #0f172a 0, #0f172a 14px, #111c33 14px, #111c33 28px); }
+  @media print { @page { size: 1280px 720px; margin: 0; } body { padding: 0; background: #fff; } .slide-container { margin: 0; box-shadow: none; page-break-after: always; } }
 </style>
 </head>
 <body>
+<section class="slide-container bg-white text-slate-800 ">
 
-<!-- ==================================================================
-     긴급 안내 팝업
-     ================================================================== -->
-<div class="popup" id="emergencyPopup">
-  <div class="popup__backdrop" data-close-popup></div>
-  <div class="popup__panel" role="dialog" aria-label="긴급 안내">
-    <div class="popup__body">
-      <p class="popup__label">! 긴급 ㅅㅅ</p>
-      <h2 class="popup__title">-
-        스마트스토어<br><span class="text-red">택배사 설정 변경</span> 부탁드립니다!
-      </h2>
-      <p class="popup__lead">
-        최근 통관사 변경후, <strong>스마트스토어의 트래킹이 되지 않은</strong><br>문제가 발생하고 있습니다.
-      </p>
-
-      <div class="compare">
-        <div class="compare__item compare__item--before">
-          <span class="compare__head">변경 전 (현재 설정)</span>
-          <span class="compare__name">롯데글로벌로지스</span>
-        </div>
-        <span class="compare__arrow" aria-hidden="true">➜</span>
-        <div class="compare__item compare__item--after">
-          <span class="compare__head">변경 후 (설정 부탁)</span>
-          <span class="compare__name">CJ대한통운</span>
-        </div>
-      </div>
-
-      <p class="popup__note">
-        <span class="popup__note-mark">!</span>
-        금일부터 연휴로 스마트스토어 측에서 대응이 안되고 있는 상황입니다.<br>
-        <strong class="text-red">연휴 끝나는 대로 빠르게 개선하겠습니다.</strong>
-      </p>
-
-      <a class="btn btn--primary" href="#">자세히 보기 ›</a>
-    </div>
-    <div class="popup__foot">
-      <label class="popup__mute"><input type="checkbox"> 일주일동안 보이지 않음</label>
-    </div>
-  </div>
+<div class="absolute top-0 left-0 w-3 h-full bg-blue-800 z-10"></div>
+<div class="absolute top-0 left-3 w-6 h-full bg-blue-500 z-10 opacity-90"></div>
+<div class="absolute top-0 right-0 w-2/3 h-full bg-pattern opacity-30 z-0"></div>
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-50 rounded-full z-0"></div>
+<i class="fa-solid fa-plane absolute text-[260px] text-blue-100 opacity-60 z-0" style="right:70px;bottom:40px;transform:rotate(-12deg)"></i>
+<div class="absolute top-12 right-12 z-10"><p class="text-slate-400 font-medium tracking-widest text-sm uppercase">Team Java Cargo · Java Web Project</p></div>
+<div class="flex-1 flex flex-col justify-center px-32 z-10 relative">
+<div class="mb-8"><span class="inline-block py-2 px-4 rounded bg-blue-50 text-blue-700 text-sm font-bold tracking-wider border border-blue-100 uppercase">Project Presentation</span></div>
+<div class="mb-12 border-l-8 border-blue-700 pl-8">
+<h1 class="text-7xl font-black text-slate-900 leading-none mb-4 tracking-tight">Nippon Buy</h1>
+<h2 class="text-3xl font-light text-slate-600 flex items-center"><span class="font-medium mr-2">ニッポンバイ</span> 日本 購買代行・配送代行サービス</h2>
 </div>
+<div class="grid grid-cols-12 gap-8 mt-4 border-t border-slate-200 pt-10 w-full max-w-5xl">
+<div class="col-span-5"><div class="flex items-start">
+<div class="w-12 h-12 rounded-lg bg-blue-600 flex items-center justify-center text-white mr-4 shadow-lg shadow-blue-200"><i class="fa-solid fa-users text-xl"></i></div>
+<div><p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Team</p><p class="text-2xl font-bold text-slate-800">Java Cargo <span class="text-base font-normal text-slate-500 ml-1">ジャバ・カーゴ</span></p></div></div></div>
+<div class="col-span-7"><div class="flex items-start">
+<div class="w-12 h-12 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-blue-600 mr-4 shadow-sm"><i class="fa-solid fa-calendar-check text-xl"></i></div>
+<div><p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Development Period</p><p class="text-2xl font-bold text-slate-800">2026.10.13 ~ 2026.11.08 <span class="text-base font-normal text-slate-500 ml-1">(27日間)</span></p></div></div></div>
+<div class="col-span-12 mt-4">
+<p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3">Tech Stack</p>
+<div class="flex flex-wrap gap-3">
+<div class="flex items-center bg-slate-50 border border-slate-200 px-5 py-3 rounded shadow-sm"><i class="fa-brands fa-java text-orange-600 text-xl mr-3"></i><span class="font-bold text-slate-700 text-lg">Servlet / JSP</span></div>
+<div class="flex items-center bg-slate-50 border border-slate-200 px-5 py-3 rounded shadow-sm"><i class="fa-solid fa-database text-red-600 text-xl mr-3"></i><span class="font-bold text-slate-700 text-lg">Oracle DB</span></div>
+<div class="flex items-center bg-slate-50 border border-slate-200 px-5 py-3 rounded shadow-sm"><i class="fa-solid fa-sitemap text-blue-600 text-xl mr-3"></i><span class="font-bold text-slate-700 text-lg">MVC Pattern</span><span class="text-slate-400 text-sm ml-2 font-normal">(MVC パターン)</span></div>
+</div></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-2 bg-gradient-to-r from-blue-800 via-blue-600 to-blue-400"></div>
+</section>
 
-<!-- ==================================================================
-     상단 바
-     ================================================================== -->
-<div class="topbar">
-  <div class="container topbar__inner">
-
-    <ul class="topbar__links topbar__links--left">
-      <li><a href="#">즐겨찾기추가</a></li>
-      <li><a href="#">1:1게시판</a></li>
-      <li class="has-menu">
-        <a href="#">나의 일본주소 <i class="caret">▾</i></a>
-        <div class="address-menu">
-          <p class="address-menu__title">배송센터 안내</p>
-          <table class="table table--striped">
-            <colgroup><col style="width:130px"><col></colgroup>
-            <tbody>
-              <tr>
-                <th>배송센터</th>
-                <td>
-                  <select class="field field--sm" aria-label="배송센터">
-                    <option>항공-도쿄(JP)</option>
-                    <option>해상-후쿠오카 제1센터(JP)</option>
-                    <option>해상-후쿠오카 제2센터(JP)</option>
-                  </select>
-                </td>
-              </tr>
-              <tr><th>우편번호</th><td>187-0011</td></tr>
-              <tr><th>주소</th><td>東京都小平市鈴木町1-466-19-3F</td></tr>
-              <tr><th>나의 사서함번호</th><td class="text-blue text-bold">로그인후 확인 가능합니다.</td></tr>
-              <tr><th>Telephone</th><td>042-401-0754</td></tr>
-              <tr><th>수취인</th><td>회원님 영문 성함(또는 회원사명)</td></tr>
-            </tbody>
-          </table>
-          <p class="alert">
-            주의사항<br>
-            - 원활한 배송을 위해서 위의 모든 정보를 정확히 기입바랍니다.<br>
-            - 주소 기입시 [주소+나의사서함번호]를 반드시 기입해주세요. 입고시 「나의사서함 번호」로 회원님의 화물을 식별합니다.<br>
-            - 수취인은 한글 사용 불가 (영문, 한자 사용 바랍니다)
-          </p>
-        </div>
-      </li>
-    </ul>
-
-    <ul class="topbar__links topbar__links--right">
-      <li><a href="#">언어 선택 <i class="caret">▾</i></a></li>
-      <li><a class="kakao-btn" href="#"><img src="images/air_kakao.png" alt="카톡상담"></a></li>
-      <li><a class="kakao-btn" href="#"><img src="images/kakao_sea1.png" alt="카톡상담"></a></li>
-      <li><a class="kakao-btn" href="#"><img src="images/kakao_sea2.png" alt="카톡상담"></a></li>
-      <li><a href="#loginForm">로그인</a></li>
-      <li><a href="#">회원가입</a></li>
-    </ul>
-
-  </div>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Team</span>
+<h1 class="text-4xl font-black text-slate-900">チーム紹介 </h1>
 </div>
+<div class="text-slate-400 text-sm font-medium">01 Team</div>
+</div>
+<div class="flex-1 grid grid-cols-12 gap-0 relative overflow-hidden">
+<div class="col-span-5 bg-gradient-to-br from-blue-900 to-blue-700 text-white flex flex-col justify-center px-12 relative">
+<i class="fa-solid fa-box-open absolute text-[300px] text-white opacity-5" style="right:-60px;bottom:-40px;transform:rotate(10deg)"></i>
+<p class="text-blue-200 tracking-widest text-sm font-bold uppercase mb-4">Team Name</p>
+<h2 class="text-7xl font-black leading-none mb-3">Java<br/>Cargo</h2>
+<p class="text-3xl font-light text-blue-100 mb-8">ジャバ・カーゴ</p>
+<p class="text-blue-100 leading-relaxed text-lg">私たちが作った <b class="text-white">Javaコード</b>が<br/><b class="text-white">貨物</b>となって <b class="text-white">日本</b>へ配送されます。</p>
+</div>
+<div class="col-span-7 bg-slate-50 px-12 flex flex-col justify-center relative">
+<div class="flex items-center justify-center gap-4 mb-10">
+<div class="bg-white rounded-2xl card-shadow border-t-4 border-orange-500 px-8 py-6 text-center w-56">
+<i class="fa-brands fa-java text-orange-500 text-6xl mb-3"></i>
+<p class="text-3xl font-black text-slate-800">Java</p><p class="text-sm text-slate-500 font-medium mt-1">技術 (Technology)</p></div>
+<i class="fa-solid fa-plus text-3xl text-slate-300"></i>
+<div class="bg-white rounded-2xl card-shadow border-t-4 border-blue-600 px-8 py-6 text-center w-56">
+<i class="fa-solid fa-boxes-stacked text-blue-600 text-6xl mb-3"></i>
+<p class="text-3xl font-black text-slate-800">Cargo</p><p class="text-sm text-slate-500 font-medium mt-1">貨物 (Cargo)</p></div>
+</div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 p-6">
+<p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-4">Meaning</p>
+<div class="flex items-center justify-between">
+<div class="text-center"><div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-code text-2xl text-slate-600"></i></div><p class="text-sm font-bold text-slate-700">Javaコード</p></div>
+<i class="fa-solid fa-arrow-right text-slate-300 text-xl"></i>
+<div class="text-center"><div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-box text-2xl text-blue-600"></i></div><p class="text-sm font-bold text-slate-700">貨物</p></div>
+<i class="fa-solid fa-arrow-right text-slate-300 text-xl"></i>
+<div class="text-center"><div class="w-16 h-16 rounded-full bg-sky-50 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-plane text-2xl text-sky-600"></i></div><p class="text-sm font-bold text-slate-700">配送</p></div>
+<i class="fa-solid fa-arrow-right text-slate-300 text-xl"></i>
+<div class="text-center"><div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-torii-gate text-2xl text-red-500"></i></div><p class="text-sm font-bold text-slate-700">日本 </p></div>
+</div></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-<!-- ==================================================================
-     헤더 + 주 메뉴
-     ================================================================== -->
-<header class="site-header">
-  <div class="container site-header__inner">
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Team Members & Roles</span>
+<h1 class="text-4xl font-black text-slate-900">メンバー紹介と役割分担 </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">02 Roles</div>
+</div>
+<div class="flex-1 px-12 py-6 bg-slate-50 flex flex-col">
+<div class="grid grid-cols-3 gap-6 flex-1">
+<div class="bg-white rounded-xl card-shadow border border-slate-200 border-t-4 border-t-blue-600 flex flex-col overflow-hidden">
+<div class="px-6 pt-5 pb-4 flex items-center">
+<div class="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl mr-4 shadow-lg"><i class="fa-solid fa-user-lock"></i></div>
+<div><p class="text-xs font-bold text-blue-600 tracking-wider uppercase">Part 01</p><p class="text-2xl font-black text-slate-900 leading-tight">チェ・ドンギュ</p></div>
+</div>
+<div class="mx-6 mb-3 py-2 px-3 rounded bg-blue-50 text-blue-800 text-sm font-bold">ログイン &amp; 会員登録 / マイページ</div>
+<ul class="px-6 pb-5 space-y-2 text-[13.5px] text-slate-600 leading-snug"><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1 mr-2 text-xs"></i><span>会員登録・ID重複確認・パスワード暗号化</span></li><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1 mr-2 text-xs"></i><span>ログイン / ログアウト・ID・パスワード検索</span></li><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1 mr-2 text-xs"></i><span>マイページ (マイ情報・私書箱住所)</span></li><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1 mr-2 text-xs"></i><span>アカウント管理・住所管理・決済方法・預り金</span></li></ul>
+</div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 border-t-4 border-t-indigo-600 flex flex-col overflow-hidden">
+<div class="px-6 pt-5 pb-4 flex items-center">
+<div class="w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center text-2xl mr-4 shadow-lg"><i class="fa-solid fa-cart-shopping"></i></div>
+<div><p class="text-xs font-bold text-indigo-600 tracking-wider uppercase">Part 02</p><p class="text-2xl font-black text-slate-900 leading-tight">ソン・ヒョンソプ</p></div>
+</div>
+<div class="mx-6 mb-3 py-2 px-3 rounded bg-indigo-50 text-indigo-800 text-sm font-bold">購買代行 / 商品登録</div>
+<ul class="px-6 pb-5 space-y-2 text-[13.5px] text-slate-600 leading-snug"><li class="flex items-start"><i class="fa-solid fa-check text-indigo-500 mt-1 mr-2 text-xs"></i><span>購買代行・配送代行の注文書の登録・修正・削除</span></li><li class="flex items-start"><i class="fa-solid fa-check text-indigo-500 mt-1 mr-2 text-xs"></i><span>商品の登録・商品画像のアップロード</span></li><li class="flex items-start"><i class="fa-solid fa-check text-indigo-500 mt-1 mr-2 text-xs"></i><span>為替レートを適用したウォン決済予定額の計算</span></li><li class="flex items-start"><i class="fa-solid fa-check text-indigo-500 mt-1 mr-2 text-xs"></i><span>マイ注文一覧・詳細・進行段階の確認</span></li></ul>
+</div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 border-t-4 border-t-teal-600 flex flex-col overflow-hidden">
+<div class="px-6 pt-5 pb-4 flex items-center">
+<div class="w-14 h-14 rounded-full bg-teal-600 text-white flex items-center justify-center text-2xl mr-4 shadow-lg"><i class="fa-solid fa-comments"></i></div>
+<div><p class="text-xs font-bold text-teal-600 tracking-wider uppercase">Part 03</p><p class="text-2xl font-black text-slate-900 leading-tight">カン・ユビン</p></div>
+</div>
+<div class="mx-6 mb-3 py-2 px-3 rounded bg-teal-50 text-teal-800 text-sm font-bold">コミュニティ</div>
+<ul class="px-6 pb-5 space-y-2 text-[13.5px] text-slate-600 leading-snug"><li class="flex items-start"><i class="fa-solid fa-check text-teal-500 mt-1 mr-2 text-xs"></i><span>お知らせ・1:1掲示板 (投稿・コメント・返信)</span></li><li class="flex items-start"><i class="fa-solid fa-check text-teal-500 mt-1 mr-2 text-xs"></i><span>通知メッセージ (入庫・決済・出庫・配送)</span></li><li class="flex items-start"><i class="fa-solid fa-check text-teal-500 mt-1 mr-2 text-xs"></i><span>よくある質問 (FAQ)</span></li><li class="flex items-start"><i class="fa-solid fa-check text-teal-500 mt-1 mr-2 text-xs"></i><span>管理者向けコミュニティ管理画面</span></li></ul>
+</div>
+</div>
+<div class="mt-5 flex items-center justify-between bg-white rounded-xl border border-slate-200 card-shadow px-6 py-4">
+<div class="flex items-center"><div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-calendar-days"></i></div>
+<div><p class="text-xs text-slate-400 font-bold uppercase tracking-wider">制作期間 (Development Period)</p><p class="text-lg font-bold text-slate-800">2026/10/13 ~ 2026/11/08 <span class="text-sm font-normal text-slate-500">・27日</span></p></div></div>
+<div class="flex items-center gap-3 text-sm font-bold text-slate-500">
+<span class="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700">10/13 開始</span><i class="fa-solid fa-arrow-right text-slate-300"></i>
+<span class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">パート別開発・統合</span><i class="fa-solid fa-arrow-right text-slate-300"></i>
+<span class="px-3 py-1.5 rounded-full bg-blue-600 text-white">11/08 完了</span></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-    <a class="site-header__logo" href="./">
-      <img src="images/logo.png" alt="Kuro Logi 물류시스템">
-    </a>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Overview</span>
+<h1 class="text-4xl font-black text-slate-900">目次 </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">03 Agenda</div>
+</div>
+<div class="flex-1 px-12 py-5 bg-slate-50 grid grid-cols-2 gap-x-6 gap-y-2.5 content-center">
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center mr-4 text-lg">01</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">チーム紹介 &amp; 役割分担 </p></div>
+<span class="text-xs font-bold text-slate-400">p.2-3</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center mr-4 text-lg">02</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">開発背景 </p></div>
+<span class="text-xs font-bold text-slate-400">p.5</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center mr-4 text-lg">03</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">プロジェクト概要 </p></div>
+<span class="text-xs font-bold text-slate-400">p.6</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center mr-4 text-lg">04</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">技術スタック・システムアーキテクチャ </p></div>
+<span class="text-xs font-bold text-slate-400">p.7-8</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center mr-4 text-lg">05</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">データベース設計 </p></div>
+<span class="text-xs font-bold text-slate-400">p.9</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-slate-600 text-white font-black flex items-center justify-center mr-4 text-lg">06</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">設計書 (4種) </p><p class="text-xs text-slate-400 mt-0.5">要件・システム・DB・画面実装</p></div>
+<span class="text-xs font-bold text-slate-400">p.10</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center mr-4 text-lg">07</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">チェ・ドンギュ・ログイン&amp;会員登録 / マイページ </p><p class="text-xs text-slate-400 mt-0.5">機能紹介 + デモ動画2本</p></div>
+<span class="text-xs font-bold text-slate-400">p.11-13</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-indigo-600 text-white font-black flex items-center justify-center mr-4 text-lg">08</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">ソン・ヒョンソプ・購買代行 / 商品登録 </p><p class="text-xs text-slate-400 mt-0.5">機能紹介 + デモ動画</p></div>
+<span class="text-xs font-bold text-slate-400">p.14-15</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-teal-600 text-white font-black flex items-center justify-center mr-4 text-lg">09</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">カン・ユビン・コミュニティ </p><p class="text-xs text-slate-400 mt-0.5">機能紹介 + デモ動画</p></div>
+<span class="text-xs font-bold text-slate-400">p.16-17</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center mr-4 text-lg">10</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">言語切替デモ動画 </p></div>
+<span class="text-xs font-bold text-slate-400">p.18</span></div>
+<div class="flex items-center bg-white rounded-xl border border-slate-200 card-shadow px-5 py-2.5">
+<div class="w-11 h-11 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center mr-4 text-lg">11</div>
+<div class="flex-1"><p class="font-bold text-slate-800 text-[17px] leading-tight">まとめ </p></div>
+<span class="text-xs font-bold text-slate-400">p.19</span></div>
+<div class="flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-900 to-blue-700 text-white px-5 py-3"><i class="fa-solid fa-plane mr-3 text-blue-200"></i><span class="font-bold">Team Java Cargo</span></div>
+</div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-    <nav class="main-nav">
-      <ul class="main-nav__list">
-        <li class="main-nav__item">
-          <a href="서비스안내/info_company.html">서비스안내</a>
-          <ul class="main-nav__submenu">
-            <li><a href="서비스안내/info_company.html">KURO Logi 소개</a></li>
-            <li><a href="서비스안내/info_grade.html">회원등급, 수수료 안내</a></li>
-            <li><a href="서비스안내/weightchart2.html">국제배송비 안내</a></li>
-            <li><a href="서비스안내/info_regulation.html">검수규정,보상규정</a></li>
-            <li><a href="서비스안내/clearance_policy.html">통관불가 품목</a></li>
-            <li><a href="서비스안내/listpass_help.html">목록통관 품목안내</a></li>
-            <li><a href="서비스안내/manual.html">KURO 사용메뉴얼</a></li>
-          </ul>
-        </li>
-        <li class="main-nav__item">
-          <a href="종합현황/dashboard.html">종합현황</a>
-          <ul class="main-nav__submenu">
-            <li><a href="종합현황/dashboard.html">종합현황</a></li>
-            <li><a href="종합현황/tracking.html">트레킹입력</a></li>
-            <li><a href="종합현황/nodata.html">노데이터 확인</a></li>
-            <li><a href="종합현황/storage.html">보관현황</a></li>
-          </ul>
-        </li>
-        <li class="main-nav__item">
-          <a href="마이페이지/mypage.html">마이페이지</a>
-          <ul class="main-nav__submenu">
-            <li><a href="마이페이지/mypage.html">마이페이지</a></li>
-            <li><a href="마이페이지/account.html">계정관리</a></li>
-            <li><a href="마이페이지/payment.html">결제방법</a></li>
-            <li><a href="마이페이지/address.html">주소관리</a></li>
-          </ul>
-        </li>
-        <li class="main-nav__item">
-          <a href="구매대행/order_form.html">구매대행</a>
-          <ul class="main-nav__submenu">
-            <li><a href="구매대행/order_form.html">주문서등록</a></li>
-            <li><a href="구매대행/stock_order.html">재고구매신청등록</a></li>
-            <li><a href="구매대행/excel_upload.html">구매대행 엑셀등록</a></li>
-          </ul>
-        </li>
-        <li class="main-nav__item">
-          <a href="배송대행/order_form.html">배송대행</a>
-          <ul class="main-nav__submenu">
-            <li><a href="배송대행/order_form.html">주문서등록</a></li>
-            <li><a href="배송대행/excel_upload.html">배송대행 엑셀등록</a></li>
-          </ul>
-        </li>
-        <li class="main-nav__item">
-          <a href="커뮤니티/notice.html">커뮤니티</a>
-          <ul class="main-nav__submenu">
-            <li><a href="커뮤니티/notice.html">공지사항</a></li>
-            <li><a href="커뮤니티/qna.html">1:1게시판</a></li>
-            <li><a href="커뮤니티/message.html">알림메세지</a></li>
-            <li><a href="커뮤니티/deals.html">특가제품안내</a></li>
-            <li><a href="커뮤니티/faq.html">자주묻는 질문</a></li>
-          </ul>
-        </li>
-      </ul>
-    </nav>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Background</span>
+<h1 class="text-4xl font-black text-slate-900">開発背景 </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">04 Background</div>
+</div>
+<div class="flex-1 px-12 py-6 bg-slate-50 flex flex-col">
+<div class="grid grid-cols-3 gap-4 flex-1 items-stretch">
+<div class="bg-white rounded-xl card-shadow border border-slate-200 border-t-4 border-t-blue-500 p-6 flex flex-col">
+<div class="flex items-center mb-4"><div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl mr-3"><i class="fa-solid fa-earth-asia"></i></div>
+<div><p class="text-xs font-bold text-blue-600 tracking-wider uppercase">Background</p><h3 class="text-xl font-black text-slate-900 leading-tight">背景 </h3></div></div>
+<ul class="space-y-3 text-[15px] text-slate-600 leading-snug"><li class="flex items-start"><i class="fa-solid fa-circle text-blue-400 mt-2 mr-2.5" style="font-size:6px"></i><span>ファッション・趣味・家電など日本商品を求める人が着実に増えている</span></li><li class="flex items-start"><i class="fa-solid fa-circle text-blue-400 mt-2 mr-2.5" style="font-size:6px"></i><span>海外直接購入への関心は高いが、初めて試すにはハードルが高い</span></li></ul></div>
+<div class="flex items-center justify-center text-slate-300 -mx-2"><i class="fa-solid fa-chevron-right text-2xl"></i></div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 border-t-4 border-t-amber-500 p-6 flex flex-col">
+<div class="flex items-center mb-4"><div class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xl mr-3"><i class="fa-solid fa-triangle-exclamation"></i></div>
+<div><p class="text-xs font-bold text-amber-600 tracking-wider uppercase">Problem</p><h3 class="text-xl font-black text-slate-900 leading-tight">課題 </h3></div></div>
+<ul class="space-y-3 text-[15px] text-slate-600 leading-snug"><li class="flex items-start"><i class="fa-solid fa-circle text-amber-400 mt-2 mr-2.5" style="font-size:6px"></i><span>韓国への直送に対応していない日本のショッピングサイトが多い</span></li><li class="flex items-start"><i class="fa-solid fa-circle text-amber-400 mt-2 mr-2.5" style="font-size:6px"></i><span>日本語サイト・決済手段・配送規定が分かりにくい</span></li><li class="flex items-start"><i class="fa-solid fa-circle text-amber-400 mt-2 mr-2.5" style="font-size:6px"></i><span>注文した商品が今どこにあるか分かりにくく、問い合わせ先も少ない</span></li></ul></div>
+<div class="flex items-center justify-center text-slate-300 -mx-2"><i class="fa-solid fa-chevron-right text-2xl"></i></div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 border-t-4 border-t-emerald-500 p-6 flex flex-col">
+<div class="flex items-center mb-4"><div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl mr-3"><i class="fa-solid fa-lightbulb"></i></div>
+<div><p class="text-xs font-bold text-emerald-600 tracking-wider uppercase">Solution</p><h3 class="text-xl font-black text-slate-900 leading-tight">解決 </h3></div></div>
+<ul class="space-y-3 text-[15px] text-slate-600 leading-snug"><li class="flex items-start"><i class="fa-solid fa-circle text-emerald-400 mt-2 mr-2.5" style="font-size:6px"></i><span>注文書1枚で購買代行・配送代行を申請</span></li><li class="flex items-start"><i class="fa-solid fa-circle text-emerald-400 mt-2 mr-2.5" style="font-size:6px"></i><span>韓国語・日本語・英語の画面切替</span></li><li class="flex items-start"><i class="fa-solid fa-circle text-emerald-400 mt-2 mr-2.5" style="font-size:6px"></i><span>注文進行5段階の確認と入庫・出庫の通知メッセージ</span></li><li class="flex items-start"><i class="fa-solid fa-circle text-emerald-400 mt-2 mr-2.5" style="font-size:6px"></i><span>お知らせ・1:1掲示板・FAQですぐに問い合わせ</span></li></ul></div>
+</div>
+<div class="mt-5 rounded-xl bg-gradient-to-r from-blue-900 to-blue-700 text-white px-7 py-4 flex items-center">
+<div class="w-11 h-11 rounded-lg bg-white/15 flex items-center justify-center mr-4"><i class="fa-solid fa-bullseye text-xl text-blue-100"></i></div>
+<div><p class="text-xs font-bold text-blue-200 uppercase tracking-wider">Goal</p>
+<p class="text-lg font-bold leading-snug">誰でも簡単に日本商品を購入し、安全に受け取れるサービス・学んだJava Web技術(Servlet / JSP / Oracle)を一つのサービスに統合</p></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Project Overview</span>
+<h1 class="text-4xl font-black text-slate-900">プロジェクト概要 </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">05 Overview</div>
+</div>
+<div class="flex-1 px-12 py-6 bg-slate-50 flex flex-col">
+<div class="bg-white rounded-xl card-shadow border-l-8 border-blue-700 px-7 py-5 mb-5">
+<p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">What is Nippon Buy?</p>
+<p class="text-xl font-bold text-slate-800 leading-snug">日本のショッピングサイトの商品を <span class="text-blue-700">代理購入</span>するか、日本現地の物流センターで受け取って <span class="text-blue-700">韓国へ配送</span>してくれる、<br/>海外購入・配送代行Webサービスです。</p>
+</div>
+<p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">注文進行5段階 (Order Flow)</p>
+<div class="flex items-stretch mb-5 pt-2"><div class="flex-1 bg-white rounded-xl border border-slate-200 card-shadow p-4 text-center relative">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold rounded-full px-2.5 py-0.5">01</div>
+<i class="fa-solid fa-file-pen text-2xl text-blue-600 mt-2 mb-2"></i><p class="font-bold text-slate-800 text-sm">申請完了</p></div>
+<div class="flex items-center px-1 text-slate-300"><i class="fa-solid fa-chevron-right"></i></div><div class="flex-1 bg-white rounded-xl border border-slate-200 card-shadow p-4 text-center relative">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold rounded-full px-2.5 py-0.5">02</div>
+<i class="fa-solid fa-warehouse text-2xl text-blue-600 mt-2 mb-2"></i><p class="font-bold text-slate-800 text-sm">現地倉庫入庫</p></div>
+<div class="flex items-center px-1 text-slate-300"><i class="fa-solid fa-chevron-right"></i></div><div class="flex-1 bg-white rounded-xl border border-slate-200 card-shadow p-4 text-center relative">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold rounded-full px-2.5 py-0.5">03</div>
+<i class="fa-solid fa-receipt text-2xl text-blue-600 mt-2 mb-2"></i><p class="font-bold text-slate-800 text-sm">送料待ち</p></div>
+<div class="flex items-center px-1 text-slate-300"><i class="fa-solid fa-chevron-right"></i></div><div class="flex-1 bg-white rounded-xl border border-slate-200 card-shadow p-4 text-center relative">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold rounded-full px-2.5 py-0.5">04</div>
+<i class="fa-solid fa-plane-departure text-2xl text-blue-600 mt-2 mb-2"></i><p class="font-bold text-slate-800 text-sm">決済完了 / 出庫</p></div>
+<div class="flex items-center px-1 text-slate-300"><i class="fa-solid fa-chevron-right"></i></div><div class="flex-1 bg-white rounded-xl border border-slate-200 card-shadow p-4 text-center relative">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold rounded-full px-2.5 py-0.5">05</div>
+<i class="fa-solid fa-truck-fast text-2xl text-blue-600 mt-2 mb-2"></i><p class="font-bold text-slate-800 text-sm">国内配送中</p></div>
+</div>
+<div class="grid grid-cols-4 gap-4 mb-5">
+<div class="bg-white rounded-xl border border-slate-200 card-shadow p-4 flex items-center"><div class="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-users"></i></div><div><p class="text-2xl font-black text-slate-900 leading-none">3名</p><p class="text-xs text-slate-500 mt-1">メンバー・3パート</p></div></div><div class="bg-white rounded-xl border border-slate-200 card-shadow p-4 flex items-center"><div class="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-calendar-check"></i></div><div><p class="text-2xl font-black text-slate-900 leading-none">27日</p><p class="text-xs text-slate-500 mt-1">制作期間</p></div></div><div class="bg-white rounded-xl border border-slate-200 card-shadow p-4 flex items-center"><div class="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-language"></i></div><div><p class="text-2xl font-black text-slate-900 leading-none">3言語</p><p class="text-xs text-slate-500 mt-1">KO · JA · EN</p></div></div><div class="bg-white rounded-xl border border-slate-200 card-shadow p-4 flex items-center"><div class="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-database"></i></div><div><p class="text-2xl font-black text-slate-900 leading-none">8個</p><p class="text-xs text-slate-500 mt-1">DBテーブル</p></div></div>
+</div>
+<div class="grid grid-cols-6 gap-3 text-center text-sm font-bold">
+<div class="py-2.5 rounded-lg bg-white border border-slate-200 text-slate-600">サービス案内</div>
+<div class="py-2.5 rounded-lg bg-white border border-slate-200 text-slate-600">総合状況</div>
+<div class="py-2.5 rounded-lg bg-blue-600 text-white">マイページ</div>
+<div class="py-2.5 rounded-lg bg-indigo-600 text-white">購買代行</div>
+<div class="py-2.5 rounded-lg bg-white border border-slate-200 text-slate-600">配送代行</div>
+<div class="py-2.5 rounded-lg bg-teal-600 text-white">コミュニティ</div>
+</div>
+<p class="text-xs text-slate-400 mt-2 text-right">メインメニュー6つ・色=担当パート (青 チェ・ドンギュ / 藍 ソン・ヒョンソプ / 青緑 カン・ユビン)</p>
+</div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-  </div>
-</header>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Technology</span>
+<h1 class="text-4xl font-black text-slate-900">技術スタック </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">06 Tech Stack</div>
+</div>
+<div class="flex-1 px-12 py-7 bg-slate-50 grid grid-cols-3 gap-5">
+<div class="bg-white rounded-xl card-shadow border border-slate-200 p-5 flex flex-col">
+<div class="flex items-center mb-3"><div class="tech-icon-bg mr-3"><i class="fa-brands fa-java text-orange-600 text-xl"></i></div><h3 class="font-bold text-lg text-slate-800">Backend</h3></div>
+<p class="text-sm text-slate-500 leading-snug mb-3 flex-1">Servlet・JSPベースのWebアプリケーション。Tomcat 9で動作し、JSPはスクリプトレット方式で作成しました。</p><div class="flex flex-wrap gap-1.5"><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">Java 17</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">Servlet 4.0</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">JSP 2.3</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">Tomcat 9</span></div></div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 p-5 flex flex-col">
+<div class="flex items-center mb-3"><div class="tech-icon-bg mr-3"><i class="fa-solid fa-database text-red-600 text-xl"></i></div><h3 class="font-bold text-lg text-slate-800">Database</h3></div>
+<p class="text-sm text-slate-500 leading-snug mb-3 flex-1">Oracle DBにJDBCで接続します。共通接続ユーティリティ(DBmanager)とDAO層でクエリを分離しました。</p><div class="flex flex-wrap gap-1.5"><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">Oracle</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">JDBC (ojdbc8)</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">DAO</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">Sequence</span></div></div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 p-5 flex flex-col">
+<div class="flex items-center mb-3"><div class="tech-icon-bg mr-3"><i class="fa-solid fa-sitemap text-blue-600 text-xl"></i></div><h3 class="font-bold text-lg text-slate-800">Architecture</h3></div>
+<p class="text-sm text-slate-500 leading-snug mb-3 flex-1">Controller(Servlet) → Command → DAO で責務を分けたMVC構造。パートごとにコードを分離して協業しました。</p><div class="flex flex-wrap gap-1.5"><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">MVC</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">Command Pattern</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">DTO</span></div></div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 p-5 flex flex-col">
+<div class="flex items-center mb-3"><div class="tech-icon-bg mr-3"><i class="fa-solid fa-shield-halved text-emerald-600 text-xl"></i></div><h3 class="font-bold text-lg text-slate-800">Security</h3></div>
+<p class="text-sm text-slate-500 leading-snug mb-3 flex-1">パスワードはBCryptで暗号化し、フィルタで偽造リクエスト・未ログインアクセス・管理者アクセスを防ぎます。</p><div class="flex flex-wrap gap-1.5"><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">BCrypt</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">CsrfFilter</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">AuthFilter</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">AdminFilter</span></div></div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 p-5 flex flex-col">
+<div class="flex items-center mb-3"><div class="tech-icon-bg mr-3"><i class="fa-solid fa-language text-sky-600 text-xl"></i></div><h3 class="font-bold text-lg text-slate-800">Multi-language</h3></div>
+<p class="text-sm text-slate-500 leading-snug mb-3 flex-1">GTranslateウィジェットで韓国語・日本語・英語を切り替え、言語別のバナー画像を自動で入れ替えます。</p><div class="flex flex-wrap gap-1.5"><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">KO / JA / EN</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">GTranslate</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">Banner Swap</span></div></div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 p-5 flex flex-col">
+<div class="flex items-center mb-3"><div class="tech-icon-bg mr-3"><i class="fa-solid fa-screwdriver-wrench text-slate-600 text-xl"></i></div><h3 class="font-bold text-lg text-slate-800">Frontend &amp; Tools</h3></div>
+<p class="text-sm text-slate-500 leading-snug mb-3 flex-1">フレームワークを使わず、純粋なHTML・CSS・JavaScriptで画面を作りました。為替レートは外部APIで1日1回更新します。</p><div class="flex flex-wrap gap-1.5"><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">HTML / CSS / JS</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">Eclipse</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">VS Code</span><span class="keyword-chip bg-blue-50 text-blue-700 border border-blue-100">SQL Developer</span></div></div>
+</div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-<main>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">System Architecture</span>
+<h1 class="text-4xl font-black text-slate-900">システムアーキテクチャ </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">07 Architecture</div>
+</div>
+<div class="flex-1 px-12 py-6 bg-slate-50 flex flex-col">
+<div class="flex items-stretch" style="height:250px">
+<div class="flow-card flex-1 p-4 border-t-4 border-t-slate-500 flex flex-col">
+<div class="flex items-center mb-2"><i class="fa-solid fa-display text-slate-600 mr-2"></i><p class="font-bold text-slate-800 leading-tight">Browser · View</p></div>
+<p class="text-[11px] text-slate-400 font-medium mb-2">JSP (WEB-INF/views)</p>
+<ul class="text-[12.5px] text-slate-600 space-y-1 list-disc list-inside leading-snug"><li>画面 = JSP 1つ</li><li>共通レイアウト layout.jsp</li><li>HTML · CSS · JS</li></ul></div><div class="flex items-center px-2 text-slate-400"><i class="fa-solid fa-arrow-right"></i></div>
+<div class="flow-card flex-1 p-4 border-t-4 border-t-amber-500 flex flex-col">
+<div class="flex items-center mb-2"><i class="fa-solid fa-filter text-amber-600 mr-2"></i><p class="font-bold text-slate-800 leading-tight">Filter</p></div>
+<p class="text-[11px] text-slate-400 font-medium mb-2">リクエスト前処理</p>
+<ul class="text-[12.5px] text-slate-600 space-y-1 list-disc list-inside leading-snug"><li>EncodingFilter (UTF-8)</li><li>CsrfFilter</li><li>AuthFilter · AdminFilter</li></ul></div><div class="flex items-center px-2 text-slate-400"><i class="fa-solid fa-arrow-right"></i></div>
+<div class="flow-card flex-1 p-4 border-t-4 border-t-blue-500 flex flex-col">
+<div class="flex items-center mb-2"><i class="fa-solid fa-route text-blue-600 mr-2"></i><p class="font-bold text-slate-800 leading-tight">Controller</p></div>
+<p class="text-[11px] text-slate-400 font-medium mb-2">Servlet (web/)</p>
+<ul class="text-[12.5px] text-slate-600 space-y-1 list-disc list-inside leading-snug"><li>MemberController</li><li>BuyOrderController</li><li>CommunityController</li></ul></div><div class="flex items-center px-2 text-slate-400"><i class="fa-solid fa-arrow-right"></i></div>
+<div class="flow-card flex-1 p-4 border-t-4 border-t-indigo-500 flex flex-col">
+<div class="flex items-center mb-2"><i class="fa-solid fa-gears text-indigo-600 mr-2"></i><p class="font-bold text-slate-800 leading-tight">Command</p></div>
+<p class="text-[11px] text-slate-400 font-medium mb-2">サービスロジック (service/)</p>
+<ul class="text-[12.5px] text-slate-600 space-y-1 list-disc list-inside leading-snug"><li>Command.doCommand()</li><li>LoginCommand · BuyOrderInsert</li><li>QnaWrite · MessageList …</li></ul></div><div class="flex items-center px-2 text-slate-400"><i class="fa-solid fa-arrow-right"></i></div>
+<div class="flow-card flex-1 p-4 border-t-4 border-t-teal-500 flex flex-col">
+<div class="flex items-center mb-2"><i class="fa-solid fa-table text-teal-600 mr-2"></i><p class="font-bold text-slate-800 leading-tight">DAO</p></div>
+<p class="text-[11px] text-slate-400 font-medium mb-2">DBアクセス (repository/)</p>
+<ul class="text-[12.5px] text-slate-600 space-y-1 list-disc list-inside leading-snug"><li>MemberDAO · BuyOrderDAO</li><li>PostDAO · CommentDAO</li><li>DBmanager で接続</li></ul></div><div class="flex items-center px-2 text-slate-400"><i class="fa-solid fa-arrow-right"></i></div>
+<div class="flow-card w-36 p-4 flex flex-col items-center justify-center bg-red-50 border-red-100"><i class="fa-solid fa-database text-4xl text-red-600 mb-2"></i><p class="font-bold text-slate-800">Oracle DB</p><p class="text-[11px] text-slate-400">8 tables</p></div>
+</div>
+<div class="grid grid-cols-2 gap-5 mt-5 flex-1">
+<div class="bg-slate-900 rounded-xl p-5 text-[12.5px] leading-relaxed text-slate-200" style="font-family:Consolas,'Courier New',monospace">
+<p class="text-slate-500 mb-1">// リクエスト1件の流れ</p>
+<p><span class="text-sky-400">@WebServlet</span>(<span class="text-emerald-300">"/member/*"</span>)</p>
+<p><span class="text-purple-300">public class</span> MemberController <span class="text-purple-300">extends</span> HttpServlet {</p>
+<p class="pl-4"><span class="text-purple-300">case</span> <span class="text-emerald-300">"/login"</span>:  → <span class="text-amber-300">new LoginCommand()</span>.doCommand(req, res);</p>
+<p class="pl-4"><span class="text-purple-300">case</span> <span class="text-emerald-300">"/join"</span>:   → <span class="text-amber-300">new MemberInsert()</span>.doCommand(req, res);</p>
+<p>}</p></div>
+<div class="bg-white rounded-xl card-shadow border border-slate-200 p-5">
+<p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Package Structure · jp.kurologi</p>
+<div class="grid grid-cols-2 gap-2 text-sm">
+<div class="rounded-lg bg-blue-50 px-3 py-2"><b class="text-blue-700">web</b> <span class="text-slate-500">サーブレット・フィルタ</span></div>
+<div class="rounded-lg bg-indigo-50 px-3 py-2"><b class="text-indigo-700">service</b> <span class="text-slate-500">Command</span></div>
+<div class="rounded-lg bg-teal-50 px-3 py-2"><b class="text-teal-700">repository</b> <span class="text-slate-500">DAO</span></div>
+<div class="rounded-lg bg-slate-100 px-3 py-2"><b class="text-slate-700">model</b> <span class="text-slate-500">DTO・ドメイン</span></div></div>
+<p class="text-xs text-slate-500 mt-3 leading-snug">すべてのパートが同じ構造に従っているため、チェ・ドンギュ・ソン・ヒョンソプ・カン・ユビンのコードを一つのプロジェクトに統合できました。</p></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-  <!-- ================================================================
-       1) 배너 슬라이더 + 로그인 / 배송센터
-       ================================================================ -->
-  <section class="section">
-    <div class="container">
-      <div class="row">
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Database Design</span>
+<h1 class="text-4xl font-black text-slate-900">データベース設計 </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">08 Database</div>
+</div>
+<div class="flex-1 px-12 py-6 bg-slate-50 flex flex-col">
+<div class="grid grid-cols-3 gap-5 flex-1">
+<div class="rounded-xl bg-blue-50/60 border border-blue-100 p-4 flex flex-col gap-2">
+<div class="flex items-center justify-between mb-1"><p class="font-bold text-blue-800">会員 (Member)</p><span class="text-xs font-bold text-blue-600">チェ・ドンギュ</span></div><div class="bg-white rounded-lg border border-slate-200 px-3 py-2 border-l-4 border-l-blue-500"><p class="font-mono font-bold text-[13px] text-slate-800">KURO_MEMBER</p><p class="text-[11.5px] text-slate-500 leading-snug">ログインID・BCryptパスワード・私書箱/会員番号・等級・ポイント・預り金・退会有無</p></div><p class="text-[12px] text-slate-500 leading-snug mt-1">UNIQUE: ログインID・私書箱番号<br/>CHECK: 会員種別(個人/事業者)・等級4段階(BASIC・PARTNER・FAMILY・ROYAL_FAMILY)</p></div>
+<div class="rounded-xl bg-indigo-50/60 border border-indigo-100 p-4 flex flex-col gap-2">
+<div class="flex items-center justify-between mb-1"><p class="font-bold text-indigo-800">注文 (Order)</p><span class="text-xs font-bold text-indigo-600">ソン・ヒョンソプ</span></div><div class="bg-white rounded-lg border border-slate-200 px-3 py-2 border-l-4 border-l-indigo-500"><p class="font-mono font-bold text-[13px] text-slate-800">BUY_ORDER</p><p class="text-[11.5px] text-slate-500 leading-snug">注文書・サービス区分(購買/配送)・進行状態(STATUS)・為替適用金額</p></div><div class="bg-white rounded-lg border border-slate-200 px-3 py-2 border-l-4 border-l-indigo-500"><p class="font-mono font-bold text-[13px] text-slate-800">BUY_ORDER_ITEM</p><p class="text-[11.5px] text-slate-500 leading-snug">注文に含まれる商品一覧 (注文削除時に一緒に削除・CASCADE)</p></div><div class="bg-white rounded-lg border border-slate-200 px-3 py-2 border-l-4 border-l-indigo-500"><p class="font-mono font-bold text-[13px] text-slate-800">EXCHANGE_RATE</p><p class="text-[11.5px] text-slate-500 leading-snug">1日1回保存される公示為替レート</p></div></div>
+<div class="rounded-xl bg-teal-50/60 border border-teal-100 p-4 flex flex-col gap-2">
+<div class="flex items-center justify-between mb-1"><p class="font-bold text-teal-800">コミュニティ (Community)</p><span class="text-xs font-bold text-teal-600">カン・ユビン</span></div><div class="bg-white rounded-lg border border-slate-200 px-3 py-2 border-l-4 border-l-teal-500"><p class="font-mono font-bold text-[13px] text-slate-800">COMMUNITY_POST</p><p class="text-[11.5px] text-slate-500 leading-snug">お知らせ(NOTICE)・1:1掲示板(QNA)・閲覧数・回答有無</p></div><div class="bg-white rounded-lg border border-slate-200 px-3 py-2 border-l-4 border-l-teal-500"><p class="font-mono font-bold text-[13px] text-slate-800">COMMUNITY_COMMENT</p><p class="text-[11.5px] text-slate-500 leading-snug">コメント・返信(PARENT_ID)・削除表示</p></div><div class="bg-white rounded-lg border border-slate-200 px-3 py-2 border-l-4 border-l-teal-500"><p class="font-mono font-bold text-[13px] text-slate-800">COMMUNITY_MESSAGE</p><p class="text-[11.5px] text-slate-500 leading-snug">会員別の通知メッセージ・既読有無</p></div><div class="bg-white rounded-lg border border-slate-200 px-3 py-2 border-l-4 border-l-teal-500"><p class="font-mono font-bold text-[13px] text-slate-800">COMMUNITY_FAQ</p><p class="text-[11.5px] text-slate-500 leading-snug">分類・質問・回答・並び順・表示有無</p></div></div>
+</div>
+<div class="mt-4 bg-white rounded-xl card-shadow border border-slate-200 px-6 py-3.5 flex items-center justify-between text-sm">
+<span class="font-bold text-slate-400 uppercase text-xs tracking-wider">Relations</span>
+<span class="text-slate-700"><b>KURO_MEMBER</b> 1 : N <b>BUY_ORDER</b> 1 : N <b>BUY_ORDER_ITEM</b></span>
+<span class="text-slate-300">|</span>
+<span class="text-slate-700"><b>KURO_MEMBER</b> 1 : N <b>COMMUNITY_POST</b> 1 : N <b>COMMUNITY_COMMENT</b></span>
+<span class="text-slate-300">|</span>
+<span class="text-slate-700"><b>KURO_MEMBER</b> 1 : N <b>COMMUNITY_MESSAGE</b></span>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-        <div class="col col--two-thirds">
-          <div class="hero">
-            <a class="hero__link" href="#" aria-label="배너 자세히 보기"></a>
-            <button class="hero__arrow hero__arrow--prev" type="button" aria-label="이전">‹</button>
-            <button class="hero__arrow hero__arrow--next" type="button" aria-label="다음">›</button>
-            <div class="hero__dots">
-              <span class="is-active"></span><span></span><span></span>
-            </div>
-          </div>
-        </div>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Design Documents</span>
+<h1 class="text-4xl font-black text-slate-900">設計書 </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">09 Design Docs</div>
+</div>
+<div class="flex-1 px-12 py-6 bg-slate-50 flex flex-col">
+<div class="grid grid-cols-2 gap-5 flex-1">
+<a href="assets/design_01_requirements_ja.pdf" target="_blank" rel="noopener noreferrer" class="doc-card group bg-white rounded-xl card-shadow border border-slate-200 border-l-8 border-l-blue-500 p-6 flex items-center">
+<div class="w-16 h-16 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl mr-5 shrink-0"><i class="fa-solid fa-clipboard-list"></i></div>
+<div class="flex-1"><p class="text-xs font-bold text-blue-600 tracking-wider uppercase mb-1">Document 01</p>
+<h3 class="text-xl font-black text-slate-900 leading-tight">要件分析設計書 </h3>
+<p class="text-sm text-slate-500 mt-1.5">サービスが提供すべき機能と要件の整理</p></div>
+<div class="ml-4 shrink-0 flex items-center text-sm font-bold text-blue-600 bg-blue-50 rounded-full px-4 py-2 group-hover:bg-blue-600 group-hover:text-white transition">開く <i class="fa-solid fa-arrow-up-right-from-square ml-2 text-xs"></i></div></a>
+<a href="assets/design_02_system_ja.pdf" target="_blank" rel="noopener noreferrer" class="doc-card group bg-white rounded-xl card-shadow border border-slate-200 border-l-8 border-l-indigo-500 p-6 flex items-center">
+<div class="w-16 h-16 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl mr-5 shrink-0"><i class="fa-solid fa-diagram-project"></i></div>
+<div class="flex-1"><p class="text-xs font-bold text-indigo-600 tracking-wider uppercase mb-1">Document 02</p>
+<h3 class="text-xl font-black text-slate-900 leading-tight">システム分析設計書 </h3>
+<p class="text-sm text-slate-500 mt-1.5">システム構成と処理フローの分析</p></div>
+<div class="ml-4 shrink-0 flex items-center text-sm font-bold text-indigo-600 bg-indigo-50 rounded-full px-4 py-2 group-hover:bg-indigo-600 group-hover:text-white transition">開く <i class="fa-solid fa-arrow-up-right-from-square ml-2 text-xs"></i></div></a>
+<a href="assets/design_03_db_ja.pdf" target="_blank" rel="noopener noreferrer" class="doc-card group bg-white rounded-xl card-shadow border border-slate-200 border-l-8 border-l-teal-500 p-6 flex items-center">
+<div class="w-16 h-16 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-3xl mr-5 shrink-0"><i class="fa-solid fa-database"></i></div>
+<div class="flex-1"><p class="text-xs font-bold text-teal-600 tracking-wider uppercase mb-1">Document 03</p>
+<h3 class="text-xl font-black text-slate-900 leading-tight">DB設計書 </h3>
+<p class="text-sm text-slate-500 mt-1.5">テーブル構造とリレーションの設計</p></div>
+<div class="ml-4 shrink-0 flex items-center text-sm font-bold text-teal-600 bg-teal-50 rounded-full px-4 py-2 group-hover:bg-teal-600 group-hover:text-white transition">開く <i class="fa-solid fa-arrow-up-right-from-square ml-2 text-xs"></i></div></a>
+<a href="assets/design_04_screen_ja.pdf" target="_blank" rel="noopener noreferrer" class="doc-card group bg-white rounded-xl card-shadow border border-slate-200 border-l-8 border-l-sky-500 p-6 flex items-center">
+<div class="w-16 h-16 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-3xl mr-5 shrink-0"><i class="fa-solid fa-display"></i></div>
+<div class="flex-1"><p class="text-xs font-bold text-sky-600 tracking-wider uppercase mb-1">Document 04</p>
+<h3 class="text-xl font-black text-slate-900 leading-tight">画面実装設計書 </h3>
+<p class="text-sm text-slate-500 mt-1.5">画面ごとの実装内容の設計</p></div>
+<div class="ml-4 shrink-0 flex items-center text-sm font-bold text-sky-600 bg-sky-50 rounded-full px-4 py-2 group-hover:bg-sky-600 group-hover:text-white transition">開く <i class="fa-solid fa-arrow-up-right-from-square ml-2 text-xs"></i></div></a>
+</div>
+<p class="text-xs text-slate-400 mt-4 text-center"><i class="fa-solid fa-hand-pointer mr-1"></i>カードを押すと新しいタブで設計書が開きます</p>
+</div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-        <div class="col col--one-third">
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-700 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Part 01</span>
+<h1 class="text-4xl font-black text-slate-900">ログイン &amp; 会員登録 / マイページ <span class="ml-4 align-middle inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-700 text-sm font-bold border border-blue-100"><i class="fa-solid fa-user mr-1.5"></i>チェ・ドンギュ</span></h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">10 Part 01</div>
+</div>
+<div class="flex-1 px-12 py-5 bg-slate-50 flex flex-col">
+<div class="grid grid-cols-2 gap-5 flex-1"><div class="bg-white rounded-xl card-shadow border border-slate-200 p-5">
+<div class="flex items-center mb-4 pb-3 border-b border-slate-100"><i class="fa-solid fa-user-lock text-blue-600 mr-2.5 text-lg"></i><h3 class="font-bold text-lg text-slate-800">ログイン・会員登録</h3></div>
+<ul class="space-y-3"><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-user-plus"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">会員登録</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">入力値の検証・ID重複確認・私書箱/会員番号の自動付与</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-key"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">パスワードセキュリティ</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">BCryptハッシュで保存・パスワードクイズの答えも暗号化</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-right-to-bracket"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">ログイン / ログアウト</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">セッションログイン・「ID保存」クッキー(30日、HttpOnly)</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-magnifying-glass"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">ID・パスワード検索</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">パスワード再設定</p></div>
+</li></ul></div><div class="bg-white rounded-xl card-shadow border border-slate-200 p-5">
+<div class="flex items-center mb-4 pb-3 border-b border-slate-100"><i class="fa-solid fa-id-card text-blue-600 mr-2.5 text-lg"></i><h3 class="font-bold text-lg text-slate-800">マイページ</h3></div>
+<ul class="space-y-3"><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-chart-simple"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">マイ情報・私書箱住所</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">等級・ポイント・預り金・会員番号 / センター別住所をクリックでコピー</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-user-gear"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">アカウント管理</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">会員情報の修正・退会</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-location-dot"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">住所管理</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">マイ住所録の検索・追加・修正・削除</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-credit-card"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">決済方法・預り金</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">預り金チャージ・銀行振込 / カード決済・決済履歴</p></div>
+</li></ul></div></div>
+<div class="mt-4 bg-slate-900 rounded-xl px-5 py-3 text-[12px] text-slate-300 leading-relaxed" style="font-family:Consolas,'Courier New',monospace"><span class="text-sky-400">@WebServlet</span>(<span class="text-emerald-300">"/member/*"</span>) · <span class="text-sky-400">@WebFilter</span>(<span class="text-emerald-300">"/mypage/*"</span>) AuthFilter → ログインしていないとマイページにアクセス不可</div>
+</div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-          <!-- 로그인 -->
-          <div class="card">
-            <div class="card__body">
-              <form id="loginForm" onsubmit="return false">
-                <input class="field field--block" type="text" maxlength="20" placeholder="ID" aria-label="ID">
-                <input class="field field--block" type="password" maxlength="30" placeholder="PASSWORD" aria-label="PASSWORD">
-                <button class="btn btn--primary btn--block" type="submit">로그인</button>
-                <label class="checkbox"><input type="checkbox" tabindex="-1"> 아이디저장</label>
-                <div class="btn-row btn-row--split">
-                  <a class="btn btn--dark" href="#">회원가입</a>
-                  <a class="btn btn--dark" href="#">ID/PW 찾기</a>
-                </div>
-              </form>
-            </div>
-          </div>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-700 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Demonstration</span>
+<h1 class="text-4xl font-black text-slate-900">会員登録 / ログイン実装動画 <span class="ml-4 align-middle inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-700 text-sm font-bold border border-blue-100"><i class="fa-solid fa-user mr-1.5"></i>チェ・ドンギュ</span></h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">11 Demo</div>
+</div>
+<div class="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-white">
+<div class="absolute top-16 left-20 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="absolute bottom-10 right-20 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="relative z-10 flex flex-col items-center">
+<!-- ▼ 動画の添付: data-video に YouTubeのURL(または動画ID)かmp4ファイルのパスを入力してください。例) data-video="assets/donggyu_login.mp4" -->
+<div class="video-wrapper mb-5" data-video="https://youtu.be/rh2Oe1zoBeI">
+<div class="video-placeholder">
+<i class="fa-regular fa-circle-play text-7xl mb-4 text-slate-500"></i>
+<p class="text-xl font-bold text-slate-300">デモ動画 添付予定</p>
+<p class="text-sm text-slate-500 mt-2">会員登録 / ログイン実装動画</p>
+<p class="text-xs text-slate-600 mt-4 font-mono">data-video="YouTube URLまたは assets/donggyu_login.mp4"</p>
+</div></div>
+<div class="w-[720px] flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm gap-4">
+<div class="flex flex-col gap-1 shrink-0"><h3 class="font-bold text-slate-800 text-base flex items-center"><i class="fa-solid fa-video text-red-500 mr-2"></i>デモのポイント (Check Point)</h3><p class="text-xs text-slate-500">会員登録からログイン、アカウント検索までの実際の動作画面</p></div>
+<div class="flex flex-wrap gap-2 justify-end"><div class="point-badge bg-blue-50 text-blue-700 border-blue-100"><i class="fa-solid fa-check mr-2 text-xs"></i>入力値の検証</div><div class="point-badge bg-blue-50 text-blue-700 border-blue-100"><i class="fa-solid fa-check mr-2 text-xs"></i>ID重複確認</div><div class="point-badge bg-blue-50 text-blue-700 border-blue-100"><i class="fa-solid fa-check mr-2 text-xs"></i>ログイン / セッション</div><div class="point-badge bg-blue-50 text-blue-700 border-blue-100"><i class="fa-solid fa-check mr-2 text-xs"></i>ID・パスワード検索</div></div></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-          <!-- 배송센터 안내 탭 -->
-          <div class="tabs">
-            <ul class="tabs__nav">
-              <li class="tabs__item is-active" data-pane="center-air"><a href="#">항공-도쿄(JP)</a></li>
-              <li class="tabs__item" data-pane="center-sea1"><a href="#">해상-후쿠오카 제1센터(JP)</a></li>
-              <li class="tabs__item" data-pane="center-sea2"><a href="#">해상-후쿠오카 제2센터(JP)</a></li>
-            </ul>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-700 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Demonstration</span>
+<h1 class="text-4xl font-black text-slate-900">マイページ実装動画 <span class="ml-4 align-middle inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-700 text-sm font-bold border border-blue-100"><i class="fa-solid fa-user mr-1.5"></i>チェ・ドンギュ</span></h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">12 Demo</div>
+</div>
+<div class="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-white">
+<div class="absolute top-16 left-20 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="absolute bottom-10 right-20 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="relative z-10 flex flex-col items-center">
+<!-- ▼ 動画の添付: data-video に YouTubeのURL(または動画ID)かmp4ファイルのパスを入力してください。例) data-video="assets/donggyu_mypage.mp4" -->
+<div class="video-wrapper mb-5" data-video="https://youtu.be/qLR5KatLfbk">
+<div class="video-placeholder">
+<i class="fa-regular fa-circle-play text-7xl mb-4 text-slate-500"></i>
+<p class="text-xl font-bold text-slate-300">デモ動画 添付予定</p>
+<p class="text-sm text-slate-500 mt-2">マイページ実装動画</p>
+<p class="text-xs text-slate-600 mt-4 font-mono">data-video="YouTube URLまたは assets/donggyu_mypage.mp4"</p>
+</div></div>
+<div class="w-[720px] flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm gap-4">
+<div class="flex flex-col gap-1 shrink-0"><h3 class="font-bold text-slate-800 text-base flex items-center"><i class="fa-solid fa-video text-red-500 mr-2"></i>デモのポイント (Check Point)</h3><p class="text-xs text-slate-500">マイページのメニュー別の実際の動作画面</p></div>
+<div class="flex flex-wrap gap-2 justify-end"><div class="point-badge bg-blue-50 text-blue-700 border-blue-100"><i class="fa-solid fa-check mr-2 text-xs"></i>マイ情報・私書箱</div><div class="point-badge bg-blue-50 text-blue-700 border-blue-100"><i class="fa-solid fa-check mr-2 text-xs"></i>住所管理</div><div class="point-badge bg-blue-50 text-blue-700 border-blue-100"><i class="fa-solid fa-check mr-2 text-xs"></i>アカウント管理</div><div class="point-badge bg-blue-50 text-blue-700 border-blue-100"><i class="fa-solid fa-check mr-2 text-xs"></i>預り金・決済</div></div></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
-            <div class="tabs__pane is-active" id="center-air">
-              <table class="table">
-                <tbody>
-                  <tr><th>주소</th><td>東京都小平市鈴木町1-466-19-3F</td></tr>
-                  <tr><th>사서함번호</th><td>로그인후 확인 가능합니다.</td></tr>
-                  <tr><th>우편번호</th><td>187-0011</td></tr>
-                  <tr><th>전화번호</th><td>042-401-0754</td></tr>
-                </tbody>
-              </table>
-            </div>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-indigo-700 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-indigo-600 font-bold tracking-wider uppercase text-sm mb-1 block">Part 02</span>
+<h1 class="text-4xl font-black text-slate-900">購買代行 / 商品登録 <span class="ml-4 align-middle inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-700 text-sm font-bold border border-indigo-100"><i class="fa-solid fa-user mr-1.5"></i>ソン・ヒョンソプ</span></h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">13 Part 02</div>
+</div>
+<div class="flex-1 px-12 py-5 bg-slate-50 flex flex-col">
+<div class="grid grid-cols-2 gap-5 flex-1"><div class="bg-white rounded-xl card-shadow border border-slate-200 p-5">
+<div class="flex items-center mb-4 pb-3 border-b border-slate-100"><i class="fa-solid fa-cart-shopping text-indigo-600 mr-2.5 text-lg"></i><h3 class="font-bold text-lg text-slate-800">購買代行・商品登録</h3></div>
+<ul class="space-y-3"><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-file-pen"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">注文書の登録 (受付待ち → 受付申請)</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">受付待ちは一時保存・受付申請は住所・携帯電話・追跡番号・規定への同意後に修正不可</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-boxes-stacked"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">商品の登録</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">1つの注文書に複数の商品・画像アップロード (5MB以下 JPG・PNG・GIF・WEBP)</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-right-left"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">購買代行・配送代行の共通構造</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">同じコード・同じテーブルを使い、URL(/buyorder, /shiporder)で区別</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-list"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">注文一覧・詳細・削除</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">マイ注文を10件ずつ表示・受付待ちの注文のみ修正 / 削除</p></div>
+</li></ul></div><div class="bg-white rounded-xl card-shadow border border-slate-200 p-5">
+<div class="flex items-center mb-4 pb-3 border-b border-slate-100"><i class="fa-solid fa-yen-sign text-indigo-600 mr-2.5 text-lg"></i><h3 class="font-bold text-lg text-slate-800">為替・決済・進行状態</h3></div>
+<ul class="space-y-3"><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-arrows-rotate"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">為替レートの自動更新</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">サーバーが1日1回外部APIから為替レートを取得し、EXCHANGE_RATEに保存</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-calculator"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">ウォン決済予定額</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">保存時点の公示為替レートで計算 → 受付申請すると決済管理の待機件として登録</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-list-check"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">注文進行5段階</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">申請完了 → 入庫 → 送料待ち → 出庫 → 国内配送中</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-bell"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">管理者処理・通知</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">入庫・決済確認・出庫処理時に会員へ通知メッセージを送信</p></div>
+</li></ul></div></div>
+<div class="mt-4 bg-slate-900 rounded-xl px-5 py-3 text-[12px] text-slate-300 leading-relaxed" style="font-family:Consolas,'Courier New',monospace"><span class="text-sky-400">@WebServlet</span>({<span class="text-emerald-300">"/buyorder/*"</span>, <span class="text-emerald-300">"/shiporder/*"</span>}) BuyOrderController → BuyOrder* Command → BuyOrderDAO <span class="text-slate-500">(注文+商品は1トランザクション)</span></div>
+</div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-indigo-800 to-indigo-400"></div>
+</section>
 
-            <div class="tabs__pane" id="center-sea1">
-              <table class="table">
-                <tbody>
-                  <tr><th>주소</th><td>福岡県 福岡市 博多区 昭南町 2-3-8-3F</td></tr>
-                  <tr><th>사서함번호</th><td>로그인후 확인 가능합니다.</td></tr>
-                  <tr><th>우편번호</th><td>812-0876</td></tr>
-                  <tr><th>전화번호</th><td>070-9293-9189</td></tr>
-                </tbody>
-              </table>
-            </div>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-indigo-700 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-indigo-600 font-bold tracking-wider uppercase text-sm mb-1 block">Demonstration</span>
+<h1 class="text-4xl font-black text-slate-900">購買代行 / 商品登録実装動画 <span class="ml-4 align-middle inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-700 text-sm font-bold border border-indigo-100"><i class="fa-solid fa-user mr-1.5"></i>ソン・ヒョンソプ</span></h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">14 Demo</div>
+</div>
+<div class="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-white">
+<div class="absolute top-16 left-20 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="absolute bottom-10 right-20 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="relative z-10 flex flex-col items-center">
+<!-- ▼ 動画の添付: data-video に YouTubeのURL(または動画ID)かmp4ファイルのパスを入力してください。例) data-video="assets/hyeongseop_buy.mp4" -->
+<div class="video-wrapper mb-5" data-video="https://youtu.be/K78skhg6C-k">
+<div class="video-placeholder">
+<i class="fa-regular fa-circle-play text-7xl mb-4 text-slate-500"></i>
+<p class="text-xl font-bold text-slate-300">デモ動画 添付予定</p>
+<p class="text-sm text-slate-500 mt-2">購買代行 / 商品登録実装動画</p>
+<p class="text-xs text-slate-600 mt-4 font-mono">data-video="YouTube URLまたは assets/hyeongseop_buy.mp4"</p>
+</div></div>
+<div class="w-[720px] flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm gap-4">
+<div class="flex flex-col gap-1 shrink-0"><h3 class="font-bold text-slate-800 text-base flex items-center"><i class="fa-solid fa-video text-red-500 mr-2"></i>デモのポイント (Check Point)</h3><p class="text-xs text-slate-500">注文書の登録から受付申請、進行状態の確認まで</p></div>
+<div class="flex flex-wrap gap-2 justify-end"><div class="point-badge bg-indigo-50 text-indigo-700 border-indigo-100"><i class="fa-solid fa-check mr-2 text-xs"></i>注文書作成・受付申請</div><div class="point-badge bg-indigo-50 text-indigo-700 border-indigo-100"><i class="fa-solid fa-check mr-2 text-xs"></i>商品画像アップロード</div><div class="point-badge bg-indigo-50 text-indigo-700 border-indigo-100"><i class="fa-solid fa-check mr-2 text-xs"></i>為替適用金額</div><div class="point-badge bg-indigo-50 text-indigo-700 border-indigo-100"><i class="fa-solid fa-check mr-2 text-xs"></i>注文進行段階</div></div></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-indigo-800 to-indigo-400"></div>
+</section>
 
-            <div class="tabs__pane" id="center-sea2">
-              <table class="table">
-                <tbody>
-                  <tr><th>주소</th><td>福岡県糟屋郡粕屋町仲原２７７４−６ KURO</td></tr>
-                  <tr><th>사서함번호</th><td>로그인후 확인 가능합니다.</td></tr>
-                  <tr><th>우편번호</th><td>811-2304</td></tr>
-                  <tr><th>전화번호</th><td>070-9285-4145</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-teal-700 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-teal-600 font-bold tracking-wider uppercase text-sm mb-1 block">Part 03</span>
+<h1 class="text-4xl font-black text-slate-900">コミュニティ <span class="ml-4 align-middle inline-block py-1 px-3 rounded-full bg-teal-50 text-teal-700 text-sm font-bold border border-teal-100"><i class="fa-solid fa-user mr-1.5"></i>カン・ユビン</span></h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">15 Part 03</div>
+</div>
+<div class="flex-1 px-12 py-5 bg-slate-50 flex flex-col">
+<div class="grid grid-cols-2 gap-5 flex-1"><div class="bg-white rounded-xl card-shadow border border-slate-200 p-5">
+<div class="flex items-center mb-4 pb-3 border-b border-slate-100"><i class="fa-solid fa-comments text-teal-600 mr-2.5 text-lg"></i><h3 class="font-bold text-lg text-slate-800">掲示板・FAQ</h3></div>
+<ul class="space-y-3"><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-bullhorn"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">お知らせ</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">管理者が作成・修正・削除 / 会員は一覧・詳細を閲覧 (閲覧数)</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-circle-question"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">1:1掲示板</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">会員の問い合わせ作成・修正・削除・管理者の回答 (回答有無を表示)</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-reply"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">コメント・返信</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">COMMENT_ID / PARENT_ID 構造でコメントと返信を区別・削除表示</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-clipboard-question"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">よくある質問 (FAQ)</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">分類・並び順・表示 on/off を管理者が直接管理</p></div>
+</li></ul></div><div class="bg-white rounded-xl card-shadow border border-slate-200 p-5">
+<div class="flex items-center mb-4 pb-3 border-b border-slate-100"><i class="fa-solid fa-bell text-teal-600 mr-2.5 text-lg"></i><h3 class="font-bold text-lg text-slate-800">通知・管理</h3></div>
+<ul class="space-y-3"><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-envelope-open-text"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">通知メッセージ</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">入庫・決済・出庫・配送のタイミングで自動送信・既読処理・削除</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-table-list"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">共通ページング</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">お知らせ・1:1・通知の一覧が同じ CommunityPaging で5ページ単位で表示</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-user-shield"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">管理者コミュニティ画面</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">/admin/community — 1:1回答・お知らせ・FAQ・通知送信を一か所で管理</p></div>
+</li><li class="flex items-start">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mr-3 mt-0.5"><i class="fa-solid fa-plug"></i></div>
+<div><p class="font-bold text-slate-800 text-[15px] leading-snug">DB接続</p><p class="text-[13px] text-slate-500 leading-snug mt-0.5">DBmanager 共通ユーティリティ + PostDAO・CommentDAO・MessageDAO・FaqDAO</p></div>
+</li></ul></div></div>
+<div class="mt-4 bg-slate-900 rounded-xl px-5 py-3 text-[12px] text-slate-300 leading-relaxed" style="font-family:Consolas,'Courier New',monospace"><span class="text-sky-400">@WebServlet</span>(<span class="text-emerald-300">"/community/*"</span>) CommunityController → QnaWrite · QnaList · MessageList … Command → PostDAO · CommentDAO <span class="text-slate-500">(Oracle)</span></div>
+</div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-teal-800 to-teal-400"></div>
+</section>
 
-          <div class="btn-row btn-row--split btn-row--spaced">
-            <a class="btn btn--dark" href="#">배송대행 신청</a>
-            <a class="btn btn--dark" href="#">구매대행 신청</a>
-          </div>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-teal-700 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-teal-600 font-bold tracking-wider uppercase text-sm mb-1 block">Demonstration</span>
+<h1 class="text-4xl font-black text-slate-900">コミュニティ実装動画 <span class="ml-4 align-middle inline-block py-1 px-3 rounded-full bg-teal-50 text-teal-700 text-sm font-bold border border-teal-100"><i class="fa-solid fa-user mr-1.5"></i>カン・ユビン</span></h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">16 Demo</div>
+</div>
+<div class="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-white">
+<div class="absolute top-16 left-20 w-64 h-64 bg-teal-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="absolute bottom-10 right-20 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="relative z-10 flex flex-col items-center">
+<!-- ▼ 動画の添付: data-video に YouTubeのURL(または動画ID)かmp4ファイルのパスを入力してください。例) data-video="assets/yubin_community.mp4" -->
+<div class="video-wrapper mb-5" data-video="https://youtu.be/XQ0D2OLd-jA?si=2wiBrztbU6wQUwBL">
+<div class="video-placeholder">
+<i class="fa-regular fa-circle-play text-7xl mb-4 text-slate-500"></i>
+<p class="text-xl font-bold text-slate-300">デモ動画 添付予定</p>
+<p class="text-sm text-slate-500 mt-2">コミュニティ実装動画</p>
+<p class="text-xs text-slate-600 mt-4 font-mono">data-video="YouTube URLまたは assets/yubin_community.mp4"</p>
+</div></div>
+<div class="w-[720px] flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm gap-4">
+<div class="flex flex-col gap-1 shrink-0"><h3 class="font-bold text-slate-800 text-base flex items-center"><i class="fa-solid fa-video text-red-500 mr-2"></i>デモのポイント (Check Point)</h3><p class="text-xs text-slate-500">投稿の作成から管理者の回答、通知の確認まで</p></div>
+<div class="flex flex-wrap gap-2 justify-end"><div class="point-badge bg-teal-50 text-teal-700 border-teal-100"><i class="fa-solid fa-check mr-2 text-xs"></i>お知らせ・1:1掲示板</div><div class="point-badge bg-teal-50 text-teal-700 border-teal-100"><i class="fa-solid fa-check mr-2 text-xs"></i>コメント・返信</div><div class="point-badge bg-teal-50 text-teal-700 border-teal-100"><i class="fa-solid fa-check mr-2 text-xs"></i>通知メッセージ</div><div class="point-badge bg-teal-50 text-teal-700 border-teal-100"><i class="fa-solid fa-check mr-2 text-xs"></i>FAQ</div></div></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-teal-800 to-teal-400"></div>
+</section>
 
-        </div>
-      </div>
-    </div>
-  </section>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-sky-600 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Demonstration</span>
+<h1 class="text-4xl font-black text-slate-900">言語切替デモ動画 </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">17 Demo · Language</div>
+</div>
+<div class="flex-1 relative overflow-hidden flex flex-col items-center justify-center bg-white">
+<div class="absolute top-16 left-20 w-64 h-64 bg-sky-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="absolute bottom-10 right-20 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="flex gap-3 mb-4">
+<span class="px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm font-bold text-slate-700 text-sm">🇰🇷 韓国語</span>
+<i class="fa-solid fa-arrows-left-right text-slate-300 self-center"></i>
+<span class="px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm font-bold text-slate-700 text-sm">🇯🇵 日本語</span>
+<i class="fa-solid fa-arrows-left-right text-slate-300 self-center"></i>
+<span class="px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm font-bold text-slate-700 text-sm">🇺🇸 English</span>
+</div>
+<!-- ▼ 動画の添付: data-video に YouTubeのURL(または動画ID)かmp4ファイルのパスを入力してください。例) data-video="assets/language.mp4" -->
+<div class="video-wrapper mb-5" data-video="">
+<div class="video-placeholder">
+<i class="fa-regular fa-circle-play text-7xl mb-4 text-slate-500"></i>
+<p class="text-xl font-bold text-slate-300">言語切替デモ動画 添付予定</p>
+<p class="text-sm text-slate-500 mt-2">韓国語・日本語・English 切替画面</p>
+<p class="text-xs text-slate-600 mt-4 font-mono">data-video="YouTube URLまたは assets/language.mp4"</p>
+</div></div>
+<div class="w-[720px] flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm gap-4">
+<div class="flex flex-col gap-1 shrink-0"><h3 class="font-bold text-slate-800 text-base flex items-center"><i class="fa-solid fa-video text-red-500 mr-2"></i>デモのポイント (Check Point)</h3><p class="text-xs text-slate-500">言語を変えると画面全体が切り替わる様子</p></div>
+<div class="flex flex-wrap gap-2 justify-end">
+<div class="point-badge bg-sky-50 text-sky-700 border-sky-100"><i class="fa-solid fa-check mr-2 text-xs"></i>KO・JA・EN 切替</div>
+<div class="point-badge bg-sky-50 text-sky-700 border-sky-100"><i class="fa-solid fa-check mr-2 text-xs"></i>全画面の翻訳</div>
+<div class="point-badge bg-sky-50 text-sky-700 border-sky-100"><i class="fa-solid fa-check mr-2 text-xs"></i>バナー画像の入れ替え</div>
+</div></div>
+</div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-sky-700 to-sky-400"></div>
+</section>
 
-  <!-- ================================================================
-       2) 운송장 조회
-       ================================================================ -->
-  <section class="section">
-    <div class="container">
-      <div class="row">
-
-        <div class="col col--half">
-          <h4 class="panel-title panel-title--line">한국 운송장조회</h4>
-          <div class="card card--blue">
-            <div class="card__body">
-              <div class="search-bar">
-                <a class="btn btn--dark btn--lg" href="#">한국</a>
-                <select class="field field--lg" aria-label="배송방법">
-                  <option value="AIR">도쿄에어</option>
-                  <option value="SEA">후쿠오카 고속해상</option>
-                </select>
-                <input class="field field--lg" type="text" placeholder="운송장번호 입력" aria-label="운송장번호">
-                <a class="btn btn--dark btn--lg" href="#">검색</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col col--half">
-          <h4 class="panel-title panel-title--line">일본 운송장조회</h4>
-          <div class="card card--yellow">
-            <div class="card__body">
-              <div class="search-bar">
-                <a class="btn btn--dark btn--lg" href="#">일본</a>
-                <select class="field field--lg" aria-label="택배사">
-                  <option value="YAMATO" selected>야마토</option>
-                  <option value="SAGAWA">사가와</option>
-                  <option value="AMAZON">Amazon</option>
-                  <option value="JAPANPOST">우체국</option>
-                  <option value="SEINO">세이노</option>
-                  <option value="FUKUTSU">후쿠야마</option>
-                  <option value="LASTONE">라스트원</option>
-                  <option value="MEITETSU">메이테츠</option>
-                </select>
-                <input class="field field--lg" type="text" placeholder="트레킹넘버 입력" aria-label="운송장번호">
-                <a class="btn btn--dark btn--lg" href="#">검색</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ================================================================
-       3) 공지사항 / 센터 현황 / 자동편집기
-       ================================================================ -->
-  <section class="section">
-    <div class="container">
-      <div class="row">
-
-        <div class="col col--one-third">
-          <h4 class="panel-title panel-title--line">
-            공지사항
-            <a class="panel-title__more" href="#">더보기 +</a>
-          </h4>
-          <div class="card card--pad">
-            <ul class="notice-list">
-              <li class="notice-list__item">
-                <p class="notice-list__title">
-                  <span class="badge badge--info">새글</span>&nbsp;&nbsp;<a href="#">[긴급!] 스마트스토어 발송처리시 -&gt; CJ대한통운 임시 설정 부탁! </a>
-                </p>
-                <span class="badge badge--date">2026-10-03</span>
-              </li>
-              <li class="notice-list__item">
-                <p class="notice-list__title"><a href="#">[중요!!] 해상 대형화물 옵션 수수료 차감 안내</a></p>
-                <span class="badge badge--date">2026-10-01</span>
-              </li>
-              <li class="notice-list__item">
-                <p class="notice-list__title"><a href="#">[중요!] 항공 통관시스템 변경에 따른 오픈마켓 택배사 선택 변경요</a></p>
-                <span class="badge badge--date">2026-09-24</span>
-              </li>
-              <li class="notice-list__item">
-                <p class="notice-list__title"><a href="#">[중요!] 해상 리드타임 단축 &amp; 재고 보관비무료 이벤트!</a></p>
-                <span class="badge badge--date">2026-09-21</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col col--one-third">
-          <h4 class="panel-title panel-title--line">센터별 현재 출고상황</h4>
-          <div class="card card--pad">
-            <table class="center-status">
-              <tbody>
-                <tr>
-                  <td class="center-status__cell"><img src="images/center_air.png" alt="항공-도쿄"></td>
-                  <td class="center-status__cell"><img src="images/center_sea1.png" alt="해상-후쿠오카 제1센터"></td>
-                  <td class="center-status__cell center-status__cell--last"><img src="images/center_sea2.png" alt="해상-후쿠오카 제2센터"></td>
-                </tr>
-                <tr>
-                  <td class="center-status__cell center-status__name">항공-도쿄(JP)</td>
-                  <td class="center-status__cell center-status__name">해상-후쿠오카 제1센터(JP)</td>
-                  <td class="center-status__cell center-status__cell--last center-status__name">해상-후쿠오카 제2센터(JP)</td>
-                </tr>
-                <tr>
-                  <td class="center-status__cell"><img class="center-status__status" src="images/status_outday.png" alt="당일 입고분 출고중"></td>
-                  <td class="center-status__cell"><img class="center-status__status" src="images/status_outday.png" alt="당일 입고분 출고중"></td>
-                  <td class="center-status__cell center-status__cell--last"><img class="center-status__status" src="images/status_outday.png" alt="당일 입고분 출고중"></td>
-                </tr>
-                <tr>
-                  <td class="center-status__cell">당일 입고분 출고중</td>
-                  <td class="center-status__cell">당일 입고분 출고중</td>
-                  <td class="center-status__cell center-status__cell--last">당일 입고분 출고중</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="col col--one-third">
-          <h4 class="panel-title panel-title--line">신청서 자동편집기</h4>
-          <div class="card">
-            <a class="card__image-link" href="#">
-              <img class="card__image" src="images/editor.png" alt="신청서 자동편집기">
-            </a>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ================================================================
-       4) 고객센터 / 환율정보 / 계좌정보
-       ================================================================ -->
-  <section class="section">
-    <div class="container">
-      <div class="row">
-
-        <div class="col col--one-third">
-          <h4 class="panel-title panel-title--line">고객센터</h4>
-          <div class="card card--pad">
-            <div class="card__body">
-              <p class="text-18">Tel : <span class="text-blue text-18">(+81) 042-401-0754 / 일본</span></p>
-              <p class="text-16">평일 9:30~17:30</p>
-              <p class="text-16 text-red text-semibold">일요일휴무, 토요일/공휴일 정상근무(일본기준)</p>
-              <p class="text-16">email : support@kurologi.jp</p>
-
-              <div class="stack">
-                <a class="btn btn--dark" href="#">자주묻는질문</a>
-                <a class="btn btn--dark" href="#">사용메뉴얼</a>
-              </div>
-
-              <div class="stack stack--tight">
-                <a class="kakao-btn" href="#"><img src="images/air_kakao.png" alt="카톡상담"></a>
-                <a class="kakao-btn" href="#"><img src="images/kakao_sea1.png" alt="카톡상담"></a>
-                <a class="kakao-btn" href="#"><img src="images/kakao_sea2.png" alt="카톡상담"></a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col col--one-third">
-          <h4 class="panel-title panel-title--line">환율정보(100엔)</h4>
-          <div class="card card--pad">
-            <div class="card__body text-center">
-              <p class="text-15">환율 기준일 :  2026.10.03</p>
-              <p class="exchange exchange--main">
-                <img class="exchange__flag" src="images/flag_jp.png" alt="JP"> 고시환율(원)<span class="exchange__value text-red">876.31</span>
-              </p>
-              <p class="exchange text-16">기준환율(원)<span class="exchange__value text-blue">854.58</span></p>
-              <p class="exchange text-16">송금환율(원)<span class="exchange__value text-blue">862.95</span></p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col col--one-third">
-          <h4 class="panel-title panel-title--line">계좌정보</h4>
-          <div class="card card--pad">
-            <div class="card__body">
-              <p class="text-16 bank-logo"><img src="images/img_bank.png" alt="SBI SUMISHIN NET BANK"></p>
-              <p class="text-16">SBI SUMISHIN NET BANK, LTD.</p>
-              <p class="text-16">예금주명: USPbrain Co., Ltd</p>
-              <p class="text-20 text-blue">1537388 (JAPANESE YEN)/NTSSJPJT</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<!-- ==================================================================
-     푸터
-     ================================================================== -->
-<footer class="site-footer">
-  <div class="container site-footer__inner">
-    <div class="row">
-
-      <div class="col col--footer-logo">
-        <img class="site-footer__logo" src="images/logo.png" alt="Kuro Logi 물류시스템">
-      </div>
-
-      <div class="col col--footer-info">
-        <div class="footer-links">
-          <a href="#">이용약관</a>
-          <a href="#">개인정보처리방침</a>
-          <a href="#">이메일무단수집거부</a>
-          <a href="#">特定商取引法に基づく表示</a>
-          <a href="#">個人情報保護方針</a>
-        </div>
-        <p class="site-footer__text">
-          KURO Logi ( USPbrain Co., Ltd ) / WTKOREA <br>
-          3F, 1-466-19,  Suzukicho, Kodaira Shi, Tokyo To, 187-0011, Japan<br>
-          Tel(일본) : (+81) 042-401-0754<br><br>
-          Kuro Logi 물류시스템 에서 운영하는 배송대행은 관세법등 관련규정을 준수합니다.
-          불법물건을 취급하지 않으며, 분할배송 및 가격허위신고 등 고객의 불법사항 요청에는<br>
-          협조하지 않습니다. 고객님의 허위신고로 인한 불이익에는 책임지지 않습니다.
-        </p>
-      </div>
-
-    </div>
-  </div>
-  <p class="copyright">ⓒ 2023 All Rights Reserved by KUROLogi.</p>
-</footer>
+<section class="slide-container bg-white text-slate-800 ">
+<div class="absolute top-0 left-0 w-full h-2 bg-blue-800 z-20"></div>
+<div class="px-12 pt-9 pb-4 flex justify-between items-end border-b border-slate-100 bg-white relative z-10">
+<div>
+<span class="text-blue-600 font-bold tracking-wider uppercase text-sm mb-1 block">Conclusion</span>
+<h1 class="text-4xl font-black text-slate-900">まとめ </h1>
+</div>
+<div class="text-slate-400 text-sm font-medium">18 Conclusion</div>
+</div>
+<div class="flex-1 px-12 py-6 bg-slate-50 relative overflow-hidden">
+<div class="grid grid-cols-2 gap-5 relative z-10 h-full">
+<div class="bg-white p-6 rounded-xl card-shadow border-t-4 border-blue-600 flex flex-col">
+<div class="flex items-center mb-4"><div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mr-3"><i class="fa-solid fa-trophy text-xl"></i></div>
+<div><h3 class="text-xl font-bold text-slate-800">プロジェクトの成果</h3><p class="text-xs text-slate-400 font-medium">Achievements (成果)</p></div></div>
+<ul class="space-y-3 flex-1 text-[15px]"><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1.5 mr-2.5 text-sm"></i><p class="text-slate-600 leading-relaxed"><span class="font-bold text-slate-700">27日間、3名で作ったサービス</span><br/>会員・購買代行・コミュニティの主要機能を一つのプロジェクトに統合</p></li><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1.5 mr-2.5 text-sm"></i><p class="text-slate-600 leading-relaxed"><span class="font-bold text-slate-700">Oracle DB連携</span><br/>8個のテーブル・外部キーと制約条件を備えたDB設計</p></li></ul></div>
+<div class="bg-white p-6 rounded-xl card-shadow border-t-4 border-blue-600 flex flex-col">
+<div class="flex items-center mb-4"><div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mr-3"><i class="fa-solid fa-book-open text-xl"></i></div>
+<div><h3 class="text-xl font-bold text-slate-800">学んだこと</h3><p class="text-xs text-slate-400 font-medium">Lessons Learned (学び)</p></div></div>
+<ul class="space-y-3 flex-1 text-[15px]"><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1.5 mr-2.5 text-sm"></i><p class="text-slate-600 leading-relaxed"><span class="font-bold text-slate-700">MVC・Commandパターンでの協業</span><br/>同じ構造に従ってパートごとにコードを分けて開発し、統合</p></li><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1.5 mr-2.5 text-sm"></i><p class="text-slate-600 leading-relaxed"><span class="font-bold text-slate-700">セキュリティと検証</span><br/>BCrypt・CSRF・ログインフィルタ・サーバー側での金額再計算</p></li></ul></div>
+<div class="bg-white p-6 rounded-xl card-shadow border-t-4 border-blue-600 flex flex-col">
+<div class="flex items-center mb-4"><div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mr-3"><i class="fa-solid fa-rocket text-xl"></i></div>
+<div><h3 class="text-xl font-bold text-slate-800">今後の計画</h3><p class="text-xs text-slate-400 font-medium">Future Plans (今後の計画)</p></div></div>
+<ul class="space-y-3 flex-1 text-[15px]"><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1.5 mr-2.5 text-sm"></i><p class="text-slate-600 leading-relaxed"><span class="font-bold text-slate-700">決済・通関機能の拡張</span><br/>トスペイメンツのカード決済・個人通関固有番号の確認連携</p></li><li class="flex items-start"><i class="fa-solid fa-check text-blue-500 mt-1.5 mr-2.5 text-sm"></i><p class="text-slate-600 leading-relaxed"><span class="font-bold text-slate-700">セキュリティ・運用の高度化</span><br/>ログイン試行制限をDB / IP基準で強化</p></li></ul></div>
+<div class="bg-gradient-to-br from-blue-900 to-blue-700 p-6 rounded-xl card-shadow flex flex-col justify-center items-center text-center text-white">
+<i class="fa-solid fa-handshake text-5xl text-blue-300 opacity-80 mb-4"></i>
+<h3 class="text-2xl font-bold mb-2">ありがとうございました</h3><p class="text-blue-100 text-lg font-light mb-5">ご清聴ありがとうございました。</p>
+<div class="text-sm text-blue-200 border-t border-blue-500/50 pt-4 w-full"><p class="font-bold text-base">Team Java Cargo (ジャバ・カーゴ)</p><p class="mt-1 opacity-80">チェ・ドンギュ・ソン・ヒョンソプ・カン・ユビン</p></div>
+</div></div></div>
+<div class="absolute bottom-0 w-full h-1 bg-gradient-to-r from-blue-800 to-blue-400"></div>
+</section>
 
 <script>
-(function () {
-  /* ---- 배송센터 탭 ---- */
-  var tabItems = document.querySelectorAll('.tabs__item');
-  tabItems.forEach(function (item) {
-    item.querySelector('a').addEventListener('click', function (e) {
-      e.preventDefault();
-      tabItems.forEach(function (other) { other.classList.remove('is-active'); });
-      item.classList.add('is-active');
-      document.querySelectorAll('.tabs__pane').forEach(function (pane) {
-        pane.classList.toggle('is-active', pane.id === item.dataset.pane);
-      });
-    });
-  });
+/* ---- 動画の自動挿入: .video-wrapper[data-video] に値があれば動画に置き換え ----
+   - YouTubeのURLまたは動画ID  → iframeを挿入
+   - .mp4 / .webm / .mov のパス    → <video controls> を挿入 (オフライン発表時に推奨) */
+document.querySelectorAll('.video-wrapper[data-video]').forEach(function (box) {
+  var v = (box.getAttribute('data-video') || '').trim();
+  if (!v) return;
+  box.innerHTML = '';
+  if (/\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(v)) {
+    var el = document.createElement('video');
+    el.src = v; el.controls = true; el.preload = 'metadata';
+    box.appendChild(el);
+  } else {
+    var m = v.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
+    var id = m ? m[1] : v;
+    var f = document.createElement('iframe');
+    f.src = 'https://www.youtube.com/embed/' + id;
+    f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    f.allowFullscreen = true;
+	f.referrerPolicy = 'strict-origin-when-cross-origin';
+    box.appendChild(f);
+  }
+});
 
-  /* ---- 팝업 ---- */
-  var popup = document.getElementById('emergencyPopup');
-  document.querySelectorAll('[data-close-popup]').forEach(function (el) {
-    el.addEventListener('click', function () { popup.classList.add('is-hidden'); });
-  });
-  popup.querySelector('.popup__mute input').addEventListener('change', function (e) {
-   if (e.target.checked) popup.classList.add('is-hidden');
+/* ---- キーボードでスライド移動 (→ ↓ PageDown Space / ← ↑ PageUp) ---- */
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide-container'));
+  function cur() {
+    var best = 0, d = Infinity;
+    slides.forEach(function (s, i) { var t = Math.abs(s.getBoundingClientRect().top); if (t < d) { d = t; best = i; } });
+    return best;
+  }
+  document.addEventListener('keydown', function (e) {
+    if (/INPUT|TEXTAREA|VIDEO/.test(e.target.tagName)) return;
+    var i = cur(), n = null;
+    if (['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key) > -1) n = Math.min(i + 1, slides.length - 1);
+    if (['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key) > -1) n = Math.max(i - 1, 0);
+    if (n !== null) { e.preventDefault(); slides[n].scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   });
 })();
 </script>
