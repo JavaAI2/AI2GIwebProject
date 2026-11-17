@@ -45,7 +45,7 @@ public class MyPageMain implements Command {
 		return true;   // 컨트롤러가 mypage.jsp 로 forward 한다
 	}
 
-	// http://서버:포트/프로젝트 까지의 주소를 만든다 
+	// http://서버:포트/프로젝트 까지의 주소를 만든다  
 	private static String baseUrl(HttpServletRequest req) {
 		String port = (req.getServerPort() == 80 || req.getServerPort() == 443) ? "" : ":" + req.getServerPort();
 		return req.getScheme() + "://" + req.getServerName() + port + req.getContextPath();
