@@ -42,7 +42,7 @@ public class MyPageMain implements Command {
 		// 결제가 완료된 운송품 현황 (최근 결제 5건)
 		request.setAttribute("shipments", ShipmentBoard.load(member.getId()));
 
-		return true;   // 컨트롤러가 mypage.jsp 로 forward 한다
+		return true;   // 컨트롤러가 mypage.jsp 로 forward 한다 
 	}
 
 	// http://서버:포트/프로젝트 까지의 주소를 만든다  
