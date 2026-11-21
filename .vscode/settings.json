@@ -1,0 +1,13 @@
+{
+    // Tomcat AI Deployer (Al-rimi.tomcat) — 이 프로젝트 전용 설정
+    // javax.servlet 프로젝트라 반드시 Tomcat 9 로 실행해야 합니다 (Tomcat 10 이상은 jakarta).
+    "tomcat.home": "/Users/jason/Downloads/apache-tomcat-9.0.100",
+    "tomcat.homes": [
+        "/Users/jason/Downloads/apache-tomcat-9.0.100"
+    ],
+    "tomcat.javaHome": "/Users/jason/Library/Java/JavaVirtualMachines/amazon-corretto-25.jdk/Contents/Home",
+    // Auto 는 .project 를 보고 Eclipse 로 판단해 WebContent/ 를 찾다가 실패합니다.
+    // Local = src/main/webapp 복사 + src/main/java 를 javac 로 컴파일
+    "tomcat.buildType": "Local",
+    "tomcat.port": 8080
+}

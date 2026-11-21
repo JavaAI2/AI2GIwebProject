@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+  <display-name>NIPPON BUY</display-name>
+
+  <!-- web.xml 에 선언된 필터가 @WebFilter(CsrfFilter 등)보다 먼저 실행됩니다 -->
+  <filter>
+    <filter-name>EncodingFilter</filter-name>
+    <filter-class>jp.kurologi.web.EncodingFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>EncodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <!-- true 면 로그인 없이 데모 회원(user_id)으로 자동 로그인 — 개발용. 데모 계정: user_id / demo1234 -->
+  <context-param>
+    <param-name>kurologi.devAutoLogin</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <jsp-config>
+    <jsp-property-group>
+      <url-pattern>*.jsp</url-pattern>
+      <page-encoding>UTF-8</page-encoding>
+      <trim-directive-whitespaces>true</trim-directive-whitespaces>
+    </jsp-property-group>
+  </jsp-config>
+
+  <session-config>
+    <session-timeout>60</session-timeout>
+    <cookie-config>
+      <http-only>true</http-only>
+    </cookie-config>
+    <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
+
+</web-app>

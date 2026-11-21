@@ -1,0 +1,23 @@
+<%-- ==========================================================================
+  즐겨찾기추가 : 브라우저는 보안상 웹페이지가 즐겨찾기를 직접 추가하지 못하게 막아 두었습니다.
+  그래서 링크(data-favorite)를 누르면 단축키(Ctrl+D / Mac ⌘+D)를 안내합니다. (현재 선택한 언어로 안내)
+  layout.jsp(아래쪽 part) 와 index.jsp 두 곳에서 include 한다.
+========================================================================== --%>
+<script>
+(function () {
+  var MSG = {
+    ko: function (k) { return '이 페이지를 즐겨찾기에 추가하려면 ' + k + ' 를 눌러 주세요.'; },
+    ja: function (k) { return 'このページをお気に入りに追加するには ' + k + ' を押してください。'; },
+    en: function (k) { return 'Press ' + k + ' to bookmark this page.'; }
+  };
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-favorite]');
+    if (!a) return;
+    e.preventDefault();
+    var m = document.cookie.match(/(?:^|;\s*)googtrans=\/[^\/]*\/([a-z-]+)/i);   // 번역 위젯이 저장한 현재 언어
+    var lang = m && MSG[m[1].toLowerCase()] ? m[1].toLowerCase() : 'ko';
+    var mac = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
+    alert(MSG[lang](mac ? '\u2318 + D' : 'Ctrl + D'));
+  });
+})();
+</script>
