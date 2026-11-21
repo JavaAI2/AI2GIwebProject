@@ -1,0 +1,841 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="jp.kurologi.model.Member" %>
+<%@ page import="jp.kurologi.web.Html" %>
+<%@ page import="jp.kurologi.web.Session" %>
+<%@ page import="jp.kurologi.model.ExchangeRate" %>
+<%@ page import="jp.kurologi.service.ExchangeRateService" %>
+<%@ page import="jp.kurologi.model.PostDTO" %>
+<%@ page import="jp.kurologi.repository.PostDAO" %>
+<%
+    String ctx = request.getContextPath();
+
+    // 오늘의 환율 (DB 에 저장된 가장 최근 값. 서버가 하루 한 번 자동으로 갱신한다)
+    ExchangeRate rate = ExchangeRateService.current();
+    java.text.DecimalFormat rateFmt = new java.text.DecimalFormat("#,##0.00");
+
+    // 공지사항 : 커뮤니티 > 공지사항의 최신 5건. (DB 에 테이블이 없거나 오류가 나도 메인 화면은 열리도록 try/catch)
+    java.util.List<PostDTO> homeNotices = new java.util.ArrayList<PostDTO>();
+    try {
+        homeNotices = new PostDAO().selectList(PostDAO.TYPE_NOTICE, "title", "", null, 1, 5);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    // 홈은 자기만의 헤더 · 푸터를 가진 독립 페이지입니다 (layout.jsp 를 쓰지 않음).
+    // PageServlet 이 로그인한 회원이면 member 를, 아이디저장 쿠키가 있으면 savedId 를 넣어 줍니다.
+    Member member = (Member) request.getAttribute("member");
+    String savedId = (String) request.getAttribute("savedId");
+    String mailboxNo = member == null ? "로그인후 확인 가능합니다." : member.getMailboxNo();
+
+    // 로그인 상자 위에 보일 안내 (LoginServlet · AuthFilter · 탈퇴 후 돌아올 때)
+    String loginMessage = null;
+    if (request.getParameter("loginError") != null) loginMessage = "아이디 또는 비밀번호가 올바르지 않습니다.";
+    else if (request.getParameter("login") != null) loginMessage = "로그인이 필요한 화면입니다. 로그인해 주세요.";
+    else if (request.getParameter("withdrawn") != null) loginMessage = "탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.";
+%>
+<!DOCTYPE html>
+<html lang="ko" data-kuro-lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>일본 배대지 니폰바이 (NIPPON BUY)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* inlined from index.css */
+:root {
+  --teal:        #159692;   /* 헤더, 기본 버튼 */
+  --teal-dark:   #107a77;   /* 호버 */
+  --teal-tab:    #129692;   /* 선택된 탭 */
+  --blue:        #107abd;   /* 링크, 포인트 */
+  --kakao:       #fae100;   /* 카카오 버튼 */
+  --red:         #dd4b39;   /* 경고, 강조 */
+  --ink:         #333333;   /* 제목, 기본 링크 */
+  --body:        #555555;   /* 본문 */
+  --muted:       #666666;   /* 보조 텍스트 */
+  --footer-text: #cccccc;   /* 푸터 본문 */
+  --line:        #e5e5e5;
+  --line-soft:   #eeeeee;
+  --line-input:  #ced4da;
+  --fill:        #f2f2f2;   /* 탭 기본 배경 */
+  --fill-soft:   #f9f9f9;
+  --fill-stripe: rgba(0, 0, 0, .05);
+  --container:   1360px;    /* 원본 .container 폭 */
+  --gutter:      15px;      /* 좌우 여백 */
+  --radius:      4px;
+  --shadow-menu: 0 13px 42px 11px rgba(0, 0, 0, .05);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 16px; }
+body { margin: 0; font-family: 'Noto Sans KR', serif; font-size: 0.875rem; line-height: 1.5; color: var(--body); background: #fff; }
+h1, h2, h3, h4, h5, h6 { margin: 0; color: #444; font-weight: 400; line-height: 1.5; }
+h4 { font-size: 18px; }
+img { max-width: 100%; height: auto; border: 0; }
+a { color: var(--ink); text-decoration: none; }
+a:hover { color: var(--teal); }
+button { font: inherit; cursor: pointer; }
+.text-center     { text-align: center; }
+.text-red        { color: var(--red); }
+.text-blue       { color: var(--blue); }
+.text-bold       { font-weight: 700; }
+.text-semibold   { font-weight: 600; }
+.text-15 { font-size: 15px; }
+.text-16 { font-size: 16px; }
+.text-18 { font-size: 18px; }
+.text-20 { font-size: 20px; }
+.btn { display: inline-block; padding: 0.4rem 0.75rem; border: 0; border-radius: var(--radius); font-size: 0.9rem; font-weight: 400; letter-spacing: -0.5px; line-height: 1.5; text-align: center; white-space: nowrap; vertical-align: middle; }
+.btn--dark    { color: #fff; background: #343a40; }
+.btn--dark:hover { color: #fff; background: #23272b; }
+.btn--primary { color: #fff; background: var(--teal); }
+.btn--primary:hover { color: #fff; background: var(--teal-dark); }
+.btn--block { display: block; width: 100%; }
+.btn--lg { padding: 0.5rem 1rem; font-size: 1.25rem; border-radius: 0.3rem; }
+.btn-row { display: flex; }
+.btn-row--split > .btn { flex: 1 1 0; border-radius: 0; }
+.btn-row--split > .btn:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.btn-row--split > .btn:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
+.btn-row--spaced { margin-top: 20px; gap: 4px; }
+.btn-row--spaced > .btn { border-radius: var(--radius); }
+.field { width: 100%; padding: 0.375rem 0.75rem; font-family: inherit; font-size: 0.9rem; line-height: 1.5; color: #495057; background: #fff; border: 1px solid var(--line-input); border-radius: 0; }
+.field:focus { outline: none; border-color: var(--teal); }
+.field--block { display: block; margin-bottom: 5px; }
+.field--sm    { padding: 0.25rem 0.5rem; font-size: 12px; height: 30px; }
+.field--lg { height: calc(1.5em + 1rem + 2px); padding: 0.5rem 1rem; font-size: 1.25rem; border-radius: 0.3rem; }
+.checkbox { display: block; margin: 6px 0; font-size: 13px; color: var(--muted); cursor: pointer; }
+.checkbox input { margin-right: 4px; vertical-align: middle; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 0.5rem; font-size: 14px; color: #212529; text-align: left; vertical-align: middle; border-top: 1px solid #dee2e6; }
+.table th { font-weight: 700; white-space: nowrap; width: 90px; }
+.table--striped tbody tr:nth-child(odd) { background: var(--fill-stripe); }
+.card { background: #fff; border: 1px solid rgba(0, 0, 0, .125); border-radius: 0; }
+.card__body { padding: 10px; }
+.card--pad { padding: 20px; }
+.card--blue   { background: #e7f2f7; }
+.card--yellow { background: #f3f0e4; }
+.card__image-link { display: block; }
+.card__image { display: block; width: 100%; }
+.badge { display: inline-block; padding: 0.25em 0.4em; border-radius: var(--radius); font-size: 75%; font-weight: 700; line-height: 1; white-space: nowrap; vertical-align: baseline; }
+.badge--info { color: #fff; background: #17a2b8; }
+.badge--date { padding: 0.25em 0.6em; border-radius: 10rem; color: #212529; background: #f8f9fa; }
+.kakao-btn img { height: 35px; width: auto; padding-top: 5px; vertical-align: middle; }
+.stack { margin-top: 20px; }
+.stack--tight > * { margin-right: 2px; }
+.stack--tight { margin-top: 12px; }
+.alert { margin: 0; padding: 0.75rem 1.25rem; font-size: 14px; line-height: 24px; color: #721c24; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: var(--radius); }
+.caret { font-style: normal; font-size: 10px; margin-left: 4px; }
+.panel-title { position: relative; margin-bottom: 20px; font-size: 18px; font-weight: 500; color: #444; display: inline-block; background: #fff; padding-right: 10px; white-space: nowrap; }
+.panel-title--line::before { content: ''; position: absolute; top: 49%; right: -10px; width: 100vw; border-top: 1px solid var(--line-soft); z-index: -1; }
+.panel-title__more { display: inline-block; margin-left: 0.5em; font-size: 13px; font-weight: 400; white-space: nowrap; vertical-align: baseline; }
+.tabs { position: relative; margin: 20px 0 30px; }
+.tabs__nav { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; border-bottom: 1px solid #ddd; }
+.tabs__item { height: 41px; text-align: center; border: 1px solid #ddd; border-bottom: 0; border-left: 0; }
+.tabs__item:first-child { margin-left: 15px; border-left: 1px solid #ddd; }
+.tabs__item a { display: block; height: 40px; padding: 0 7px; font-size: 13px; font-weight: 700; line-height: 40px; text-align: center; color: #444; background: var(--fill); }
+.tabs__item.is-active a { color: #fff; background: var(--teal-tab); }
+.tabs__pane { display: none; }
+.tabs__pane.is-active { display: block; }
+.container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 10px; }
+.row { display: flex; flex-wrap: wrap; margin: 0 calc(var(--gutter) * -1); }
+.col { position: relative; width: 100%; padding: 0 var(--gutter); margin-bottom: 30px; }
+.col--two-thirds   { width: 66.6667%; }
+.col--half         { width: 50%; }
+.col--one-third    { width: 33.3333%; }
+.col--footer-logo  { width: 16.6667%; }
+.col--footer-info  { width: 83.3333%; }
+.section { padding-top: 30px; }
+.topbar { border-bottom: 1px solid #c1c1c1; font-size: 13px; line-height: 44px; }
+.topbar__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; min-height: 45px; }
+.topbar__links { display: flex; flex-wrap: wrap; align-items: center; margin: 0; padding: 0; list-style: none; }
+.topbar__links a { display: block; padding: 0 12px; height: 44px; line-height: 44px; font-size: 13px; color: var(--muted); }
+.topbar__links a.kakao-btn { height: 44px; line-height: 44px; padding: 0 6px; }
+.topbar__links--left .has-menu { position: relative; }
+.address-menu { display: none; position: absolute; top: 44px; left: 0; z-index: 100; width: 400px; padding: 10px; background: #fff; border: 1px solid rgba(0, 0, 0, .15); border-radius: var(--radius); box-shadow: 0 0 5px -1px rgba(0, 0, 0, .2); }
+.topbar__links--left .has-menu:hover .address-menu { display: block; }
+.address-menu__title { margin: 10px; font-size: 14px; color: var(--body); }
+.site-header { background: var(--teal); color: #eee; border-bottom: 1px solid rgba(255, 255, 255, .05); }
+.site-header__inner { display: flex; align-items: stretch; justify-content: space-between; }
+.site-header__logo { display: block; padding: 4px 0; }
+.site-header__logo img { display: block; width: 250px; }
+.main-nav { display: flex; align-items: stretch; }
+.main-nav__list { display: flex; align-items: stretch; margin: 0; padding: 0; list-style: none; }
+.main-nav__item { position: relative; }
+.main-nav__item > a { display: block; padding: 39px 10px; font-size: 16px; font-weight: 400; letter-spacing: -1px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.main-nav__item:hover { background: var(--teal-dark); }
+.main-nav__submenu { display: none; position: absolute; top: 100%; left: 0; z-index: 100; width: 220px; margin: 0; padding: 10px; list-style: none; background: #fff; border: 1px solid var(--line-soft); border-top: 2px solid var(--blue); box-shadow: var(--shadow-menu); }
+.main-nav__item:hover .main-nav__submenu { display: block; }
+.main-nav__submenu a { display: block; padding: 10px; font-size: 14px; font-family: 'Lato', sans-serif; color: var(--muted); white-space: normal; }
+.main-nav__submenu a:hover { padding-left: 18px; color: var(--teal); }
+.main-nav__item:nth-last-child(-n+2) .main-nav__submenu { left: auto; right: 0; }
+.hero { position: relative; height: 540px; overflow: hidden; background: url('<%= ctx %>/images/banner1.png') center / 100% 100% no-repeat; }
+html[data-kuro-lang="ja"] .hero { background-image: url('<%= ctx %>/images/banner1_ja.png'), url('<%= ctx %>/images/banner1.png'); }
+html[data-kuro-lang="en"] .hero { background-image: url('<%= ctx %>/images/banner1_en.png'), url('<%= ctx %>/images/banner1.png'); }
+.search-bar { display: flex; flex-wrap: wrap; }
+.search-bar > * { border-radius: 0; }
+.search-bar > *:first-child { border-radius: 0.3rem 0 0 0.3rem; }
+.search-bar > *:last-child  { border-radius: 0 0.3rem 0.3rem 0; }
+.search-bar .field { flex: 1 1 120px; min-width: 0; }
+.search-bar button.btn { font: inherit; border: 0; cursor: pointer; }
+.notice-list { margin: 0; padding: 0; list-style: none; }
+.notice-list__item { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 12px 0; }
+.notice-list__title { flex: 1; min-width: 0; margin: 0; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
+.notice-list .badge--date { flex-shrink: 0; white-space: nowrap; }
+.notice-list__title a { color: var(--body); }
+.center-status { width: 100%; border-collapse: collapse; }
+.center-status__cell { padding: 6px 4px; font-size: 14px; text-align: center; vertical-align: middle; border-right: 1px dotted #ccc; }
+.center-status__cell--last { border-right: 0; }
+.center-status__cell img { display: block; width: 60px; margin: 0 auto; }
+.center-status__status { margin-top: 4px; }
+.center-status__name { word-break: auto-phrase; }
+.exchange { margin: 0; }
+.exchange--main { margin: 20px 0 25px; font-size: 24px; }
+.exchange__flag { width: 16px; margin-top: -7px; margin-right: 4px; vertical-align: middle; }
+.exchange__value { padding-left: 20px; }
+.bank-logo { margin-bottom: 20px; }
+.site-footer { margin-top: 10px; background: #333; color: var(--footer-text); }
+.site-footer__inner { padding-top: 50px; padding-bottom: 50px; }
+.site-footer__logo { width: 120px; }
+.footer-links { padding-top: 20px; margin-bottom: 20px; }
+.footer-links a { display: inline-block; margin: 0 20px 0 0; font-size: 14px; color: #fff; border-bottom: 1px dotted rgba(255, 255, 255, .25); }
+.footer-links a:hover { color: #fff; border-bottom-style: solid; }
+.site-footer__text { margin: 0; font-size: 13px; font-weight: 300; line-height: 28px; color: var(--footer-text); }
+.copyright { margin: 0; padding: 20px 0; font-size: 13px; text-align: center; color: rgba(255, 255, 255, .5); background: rgba(0, 0, 0, .2); }
+.popup { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.popup.is-hidden { display: none; }
+.popup__backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .5); }
+.popup__panel { position: relative; display: flex; flex-direction: column; width: 100%; max-width: 560px; max-height: 90vh; background: #fff; border: 1px solid rgba(0, 0, 0, .2); border-radius: 0.3rem; box-shadow: 0 10px 40px rgba(0, 0, 0, .3); overflow: auto; }
+.popup__body { padding: 20px 24px 10px; text-align: center; }
+.popup__label { display: inline-block; margin: 0 0 8px; padding: 4px 14px; border-radius: 10rem; font-size: 16px; font-weight: 700; letter-spacing: 1px; color: #fff; background: var(--red); }
+.popup__title { margin: 10px 0 12px; font-size: 26px; font-weight: 700; line-height: 1.25; color: #222; }
+.popup__lead { margin: 0 0 16px; font-size: 14px; }
+.popup__note { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; padding: 12px; font-size: 12px; text-align: left; background: #fdf3e7; border-radius: var(--radius); }
+.popup__note-mark { flex: 0 0 26px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; font-weight: 700; color: #fff; background: var(--red); }
+.popup__foot { padding: 8px; font-size: 12px; text-align: right; color: #fff; background: #a3a3a3; }
+.popup__mute { cursor: pointer; }
+.popup__mute input { margin-right: 4px; vertical-align: middle; }
+.compare { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; }
+.compare__item { flex: 1; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.compare__head { display: block; padding: 6px; font-size: 12px; font-weight: 700; color: #fff; }
+.compare__name { display: block; padding: 12px 6px; font-size: 17px; font-weight: 700; }
+.compare__item--before .compare__head { background: #999; }
+.compare__item--before .compare__name { color: #444; }
+.compare__item--after { border-color: var(--red); }
+.compare__item--after .compare__head { background: var(--red); }
+.compare__item--after .compare__name { color: var(--red); }
+.compare__arrow { font-size: 20px; color: #444; }
+.login-message { margin: 0 0 10px; padding: 8px 10px; font-size: 13px; color: #8a1f11; background: #fdecea; border-radius: 4px; }
+.login-welcome { margin: 0 0 14px; font-size: 14px; line-height: 1.8; color: #333; }
+.topbar__welcome { display: block; padding: 0 12px 0 20px; height: 44px; line-height: 44px; font-size: 13px; color: #444; white-space: nowrap; }
+.topbar__welcome strong { color: #159692; font-weight: 700; }
+.track-result { margin: 10px 0 0; font-size: 14px; line-height: 1.8; color: var(--ink); white-space: pre-line; }
+.track-result:empty { display: none; }
+.track-result--error { color: var(--red); }
+.track-result--ok strong { color: var(--blue); }
+</style>
+</head>
+<body>
+
+<!-- ==================================================================
+     긴급 안내 팝업
+     ================================================================== -->
+<div class="popup" id="emergencyPopup">
+  <div class="popup__backdrop" data-close-popup></div>
+  <div class="popup__panel" role="dialog" aria-label="긴급 안내">
+    <div class="popup__body">
+      <p class="popup__label">! 안내</p>
+      <h2 class="popup__title">
+        NIPPON BUY<br><span class="text-red">오픈 안내</span>를 드립니다!
+      </h2>
+      <p class="popup__lead">
+        일본 쇼핑몰의 상품을 <strong>구매대행 · 배송대행</strong>으로<br>한국까지 안전하게 받아 보세요.
+      </p>
+
+      <div class="compare">
+        <div class="compare__item compare__item--before">
+          <span class="compare__head">STEP 1</span>
+          <span class="compare__name">일본 쇼핑몰 주문</span>
+        </div>
+        <span class="compare__arrow" aria-hidden="true">➜</span>
+        <div class="compare__item compare__item--after">
+          <span class="compare__head">STEP 2</span>
+          <span class="compare__name">한국 배송</span>
+        </div>
+      </div>
+
+      <p class="popup__note">
+        <span class="popup__note-mark">!</span>
+        회원가입 후 주문서를 등록하면 바로 이용할 수 있습니다.<br>
+        <strong class="text-red">문의는 1:1게시판을 이용해 주세요.</strong>
+      </p>
+
+      <a class="btn btn--primary" href="<%= ctx %>/service/manual">자세히 보기 ›</a>
+    </div>
+    <div class="popup__foot">
+      <label class="popup__mute"><input type="checkbox"> 일주일동안 보이지 않음</label>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================================
+     상단 바
+     ================================================================== -->
+<div class="topbar">
+  <div class="container topbar__inner">
+
+    <ul class="topbar__links topbar__links--left">
+      <li><a href="<%= ctx %>/community/qna">1:1게시판</a></li>
+      <li class="has-menu">
+        <a href="#">나의 일본주소 <i class="caret">▾</i></a>
+        <div class="address-menu">
+          <p class="address-menu__title">배송센터 안내</p>
+          <table class="table table--striped">
+            <colgroup><col style="width:130px"><col></colgroup>
+            <tbody>
+              <tr>
+                <th>배송센터</th>
+                <td>
+                  <select class="field field--sm" id="addrCenter" aria-label="배송센터">
+                    <option value="air">항공-도쿄(JP)</option>
+                    <option value="sea1">해상-후쿠오카 제1센터(JP)</option>
+                    <option value="sea2">해상-후쿠오카 제2센터(JP)</option>
+                  </select>
+                </td>
+              </tr>
+              <tr><th>우편번호</th><td id="addrZip">100-0000</td></tr>
+              <tr><th>주소</th><td id="addrText">東京都千代田区サンプル町1-2-3 NIPPON BUY 3F</td></tr>
+              <tr><th>나의 사서함번호</th><td class="text-blue text-bold"><%= Html.esc(mailboxNo) %></td></tr>
+              <tr><th>Telephone</th><td id="addrTel">03-1234-5678</td></tr>
+              <tr><th>수취인</th><td>회원님 영문 성함(또는 회원사명)</td></tr>
+            </tbody>
+          </table>
+          <p class="alert">
+            주의사항<br>
+            - 원활한 배송을 위해서 위의 모든 정보를 정확히 기입바랍니다.<br>
+            - 주소 기입시 [주소+나의사서함번호]를 반드시 기입해주세요. 입고시 「나의사서함 번호」로 회원님의 화물을 식별합니다.<br>
+            - 수취인은 한글 사용 불가 (영문, 한자 사용 바랍니다)
+          </p>
+        </div>
+      </li>
+    </ul>
+
+    <ul class="topbar__links topbar__links--right">
+      <li class="lang-slot"><div class="gtranslate_wrapper"></div></li>
+<%  boolean topIn = member != null || Session.memberId(request) != null;
+    String topName = member != null ? member.getName() : (String) session.getAttribute("loginMemberName");
+    if (topName == null || topName.trim().isEmpty()) topName = "회원";
+    if (topIn) { %>
+      <li><span class="topbar__welcome"><strong><%= Html.esc(topName) %></strong>님 환영합니다.</span></li>
+      <li><a href="<%= ctx %>/logout">로그아웃</a></li>
+      <li><a href="<%= ctx %>/mypage">마이페이지</a></li>
+<%  } else { %>
+      <li><a href="<%= ctx %>/member/login">로그인</a></li>
+      <li><a href="<%= ctx %>/member/join">회원가입</a></li>
+<%  } %>
+    </ul>
+
+  </div>
+</div>
+
+<!-- ==================================================================
+     헤더 + 주 메뉴
+     ================================================================== -->
+<header class="site-header">
+  <div class="container site-header__inner">
+
+    <a class="site-header__logo" href="<%= ctx %>/">
+      <img src="<%= ctx %>/images/logo.png" alt="NIPPON BUY 물류시스템">
+    </a>
+
+    <nav class="main-nav">
+      <ul class="main-nav__list">
+        <li class="main-nav__item">
+          <a href="<%= ctx %>/service/info_company">서비스 안내</a>
+          <ul class="main-nav__submenu">
+            <li><a href="<%= ctx %>/service/info_company">NIPPON BUY 소개</a></li>
+            <li><a href="<%= ctx %>/service/info_grade">회원등급, 수수료 안내</a></li>
+            <li><a href="<%= ctx %>/service/weightchart2">국제배송비 안내</a></li>
+            <li><a href="<%= ctx %>/service/info_regulation">검수규정,보상규정</a></li>
+            <li><a href="<%= ctx %>/service/clearance_policy">통관불가 품목</a></li>
+            <li><a href="<%= ctx %>/service/listpass_help">목록통관 품목안내</a></li>
+            <li><a href="<%= ctx %>/service/manual">NIPPON BUY 사용메뉴얼</a></li>
+          </ul>
+        </li>
+        <li class="main-nav__item">
+          <a href="<%= ctx %>/status/dashboard">종합현황</a>
+          <ul class="main-nav__submenu">
+            <li><a href="<%= ctx %>/status/dashboard">종합현황</a></li>
+          </ul>
+        </li>
+        <li class="main-nav__item">
+          <a href="<%= ctx %>/mypage">마이페이지</a>
+          <ul class="main-nav__submenu">
+            <li><a href="<%= ctx %>/mypage">마이페이지</a></li>
+            <li><a href="<%= ctx %>/mypage/account">계정관리</a></li>
+            <li><a href="<%= ctx %>/mypage/payment">결제방법</a></li>
+            <li><a href="<%= ctx %>/mypage/address">주소관리</a></li>
+          </ul>
+        </li>
+        <li class="main-nav__item">
+          <a href="<%= ctx %>/buy/order_form">구매대행</a>
+          <ul class="main-nav__submenu">
+            <li><a href="<%= ctx %>/buy/order_form">주문서등록</a></li>
+            <li><a href="<%= ctx %>/buyorder/list">구매대행 주문내역</a></li>
+          </ul>
+        </li>
+        <li class="main-nav__item">
+          <a href="<%= ctx %>/ship/order_form">배송대행</a>
+          <ul class="main-nav__submenu">
+            <li><a href="<%= ctx %>/ship/order_form">주문서등록</a></li>
+            <li><a href="<%= ctx %>/shiporder/list">배송대행 신청내역</a></li>
+          </ul>
+        </li>
+        <li class="main-nav__item">
+          <a href="<%= ctx %>/community/notice">커뮤니티</a>
+          <ul class="main-nav__submenu">
+            <li><a href="<%= ctx %>/community/notice">공지사항</a></li>
+            <li><a href="<%= ctx %>/community/qna">1:1게시판</a></li>
+            <li><a href="<%= ctx %>/community/message">알림메세지</a></li>
+            <li><a href="<%= ctx %>/community/faq">자주묻는 질문</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+
+  </div>
+</header>
+
+<main>
+
+  <!-- ================================================================
+       1) 배너 슬라이더 + 로그인 / 배송센터
+       ================================================================ -->
+  <section class="section">
+    <div class="container">
+      <div class="row">
+
+        <div class="col col--two-thirds">
+          <div class="hero">
+          </div>
+        </div>
+
+        <div class="col col--one-third">
+
+          <!-- 로그인 -->
+          <div class="card">
+            <div class="card__body">
+<%  if (member == null) { %>
+             <form id="loginForm" method="post" action="<%= ctx %>/member/login">
+                <input type="hidden" name="_csrf" value="<%= Html.esc(Session.csrfToken(request)) %>">
+<%      if (loginMessage != null) { %>
+                <p class="login-message"><%= loginMessage %></p>
+<%      } %>
+                <input class="field field--block" type="text" name="loginId" value="<%= Html.esc(savedId) %>" maxlength="20" placeholder="ID" aria-label="ID" required>
+                <input class="field field--block" type="password" name="password" maxlength="30" placeholder="PASSWORD" aria-label="PASSWORD" required>
+                <button class="btn btn--primary btn--block" type="submit">로그인</button>
+                <label class="checkbox"><input type="checkbox" name="saveId" value="Y" tabindex="-1"<%= Html.checked(savedId != null) %>> 아이디 저장</label>
+                <div class="btn-row btn-row--split">
+                  <a class="btn btn--dark" href="${pageContext.request.contextPath}/member/join">회원가입</a>
+                  <a class="btn btn--dark" href="${pageContext.request.contextPath}/member/find/id">ID/pw 찾기</a>
+                </div>
+              </form>
+<%  } else { %>
+              <div id="loginForm">
+                <p class="login-welcome"><strong><%= Html.esc(member.getName()) %></strong>님 환영합니다.<br>나의 사서함 <strong><%= Html.esc(member.getMailboxNo()) %></strong></p>
+                <div class="btn-row btn-row--split">
+                  <a class="btn btn--primary" href="<%= ctx %>/mypage">마이페이지</a>
+                  <a class="btn btn--dark" href="<%= ctx %>/logout">로그아웃</a>
+                </div>
+              </div>
+<%  } %>
+            </div>
+          </div>
+
+          <!-- 배송센터 안내 탭 -->
+          <div class="tabs">
+            <ul class="tabs__nav">
+              <li class="tabs__item is-active" data-pane="center-air"><a href="#">항공-도쿄(JP)</a></li>
+              <li class="tabs__item" data-pane="center-sea1"><a href="#">해상-후쿠오카 제1센터(JP)</a></li>
+              <li class="tabs__item" data-pane="center-sea2"><a href="#">해상-후쿠오카 제2센터(JP)</a></li>
+            </ul>
+
+            <div class="tabs__pane is-active" id="center-air">
+              <table class="table">
+                <tbody>
+                  <tr><th>주소</th><td>東京都千代田区サンプル町1-2-3 NIPPON BUY 3F</td></tr>
+                  <tr><th>사서함번호</th><td><%= Html.esc(mailboxNo) %></td></tr>
+                  <tr><th>우편번호</th><td>100-0000</td></tr>
+                  <tr><th>전화번호</th><td>03-1234-5678</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="tabs__pane" id="center-sea1">
+              <table class="table">
+                <tbody>
+                  <tr><th>주소</th><td>福岡県福岡市中央区サンプル町4-5-6 NIPPON BUY 3F</td></tr>
+                  <tr><th>사서함번호</th><td><%= Html.esc(mailboxNo) %></td></tr>
+                  <tr><th>우편번호</th><td>810-0000</td></tr>
+                  <tr><th>전화번호</th><td>092-123-4567</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="tabs__pane" id="center-sea2">
+              <table class="table">
+                <tbody>
+                  <tr><th>주소</th><td>福岡県糟屋郡サンプル町7-8-9 NIPPON BUY</td></tr>
+                  <tr><th>사서함번호</th><td><%= Html.esc(mailboxNo) %></td></tr>
+                  <tr><th>우편번호</th><td>811-0000</td></tr>
+                  <tr><th>전화번호</th><td>092-234-5678</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="btn-row btn-row--split btn-row--spaced">
+            <a class="btn btn--dark" href="<%= ctx %>/shiporder/form">배송대행 신청</a>
+            <a class="btn btn--dark" href="<%= ctx %>/buyorder/form">구매대행 신청</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       2) 운송장 조회
+          결제가 완료되면 마이페이지 > 결제방법 > 결제내역에 한국 · 일본 운송장이 만들어지고,
+          여기서 그 번호로 조회할 수 있다. (시험용)
+       ================================================================ -->
+  <section class="section" id="tracking">
+    <div class="container">
+      <div class="row">
+
+        <div class="col col--half">
+          <h4 class="panel-title panel-title--line">한국 운송장조회</h4>
+          <div class="card card--blue">
+            <div class="card__body">
+              <div class="search-bar">
+                <span class="btn btn--dark btn--lg">한국</span>
+                <select class="field field--lg" id="krType" aria-label="배송방법">
+                  <option value="AIR">도쿄에어</option>
+                  <option value="SEA">후쿠오카 고속해상</option>
+                </select>
+                <input class="field field--lg" id="krNo" type="text" placeholder="운송장번호 입력" aria-label="운송장번호" maxlength="30" autocomplete="off">
+                <button class="btn btn--dark btn--lg" type="button" id="krBtn">검색</button>
+              </div>
+              <p class="track-result" id="krResult" role="status"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col col--half">
+          <h4 class="panel-title panel-title--line">일본 운송장조회</h4>
+          <div class="card card--yellow">
+            <div class="card__body">
+              <div class="search-bar">
+                <span class="btn btn--dark btn--lg">일본</span>
+                <select class="field field--lg" id="jpType" aria-label="택배사">
+                  <option value="YAMATO" selected>야마토</option>
+                  <option value="SAGAWA">사가와</option>
+                  <option value="AMAZON">Amazon</option>
+                  <option value="JAPANPOST">우체국</option>
+                  <option value="SEINO">세이노</option>
+                  <option value="FUKUTSU">후쿠야마</option>
+                  <option value="LASTONE">라스트원</option>
+                  <option value="MEITETSU">메이테츠</option>
+                </select>
+                <input class="field field--lg" id="jpNo" type="text" placeholder="트레킹넘버 입력" aria-label="운송장번호" maxlength="30" autocomplete="off">
+                <button class="btn btn--dark btn--lg" type="button" id="jpBtn">검색</button>
+              </div>
+              <p class="track-result" id="jpResult" role="status"></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       3) 공지사항 / 센터 현황 / 계좌정보
+       ================================================================ -->
+  <section class="section">
+    <div class="container">
+      <div class="row">
+
+        <div class="col col--one-third">
+          <h4 class="panel-title panel-title--line">
+            공지사항
+            <a class="panel-title__more" href="<%= ctx %>/community/notice">더보기 +</a>
+          </h4>
+          <div class="card card--pad">
+            <ul class="notice-list">
+<% if (homeNotices.isEmpty()) { %>
+              <li class="notice-list__item"><p class="notice-list__title">등록된 공지사항이 없습니다.</p></li>
+<% } else { for (PostDTO n : homeNotices) { %>
+              <li class="notice-list__item">
+                <p class="notice-list__title">
+                  <% if (n.isNewPost()) { %><span class="badge badge--info">새글</span>&nbsp;&nbsp;<% } %><a href="<%= ctx %>/community/notice/view?id=<%= n.getPostId() %>"><%= Html.esc(n.getTitle()) %></a>
+                </p>
+                <span class="badge badge--date"><%= Html.esc(n.getCreatedAt()) %></span>
+              </li>
+<% } } %>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col col--one-third">
+          <h4 class="panel-title panel-title--line">센터별 현재 출고상황</h4>
+          <div class="card card--pad">
+            <table class="center-status">
+              <tbody>
+                <tr>
+                  <td class="center-status__cell"><img src="<%= ctx %>/images/center_air.png" alt="항공-도쿄"></td>
+                  <td class="center-status__cell"><img src="<%= ctx %>/images/center_sea1.png" alt="해상-후쿠오카 제1센터"></td>
+                  <td class="center-status__cell center-status__cell--last"><img src="<%= ctx %>/images/center_sea2.png" alt="해상-후쿠오카 제2센터"></td>
+                </tr>
+                <tr>
+                  <td class="center-status__cell center-status__name">항공-도쿄(JP)</td>
+                  <td class="center-status__cell center-status__name">해상-후쿠오카 제1센터(JP)</td>
+                  <td class="center-status__cell center-status__cell--last center-status__name">해상-후쿠오카 제2센터(JP)</td>
+                </tr>
+                <tr>
+                  <td class="center-status__cell"><img class="center-status__status" src="<%= ctx %>/images/status_outday.png" alt="당일 입고분 출고중"></td>
+                  <td class="center-status__cell"><img class="center-status__status" src="<%= ctx %>/images/status_outday.png" alt="당일 입고분 출고중"></td>
+                  <td class="center-status__cell center-status__cell--last"><img class="center-status__status" src="<%= ctx %>/images/status_outday.png" alt="당일 입고분 출고중"></td>
+                </tr>
+                <tr>
+                  <td class="center-status__cell">당일 입고분 출고중</td>
+                  <td class="center-status__cell">당일 입고분 출고중</td>
+                  <td class="center-status__cell center-status__cell--last">당일 입고분 출고중</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="col col--one-third">
+          <h4 class="panel-title panel-title--line">계좌정보</h4>
+          <div class="card card--pad">
+            <div class="card__body">
+              <p class="text-16 bank-logo"><img src="<%= ctx %>/images/img_bank.png" alt="SBI SUMISHIN NET BANK"></p>
+              <p class="text-16">SBI SUMISHIN NET BANK, LTD.</p>
+              <p class="text-16">예금주명: NIPPON BUY Co., Ltd</p>
+              <%-- 연습용 임의 계좌번호입니다 (실제 계좌 아님) --%>
+              <p class="text-20 text-blue">1234567 (JAPANESE YEN)/NTSSJPJT</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       4) 고객센터 / 환율정보
+       ================================================================ -->
+  <section class="section">
+    <div class="container">
+      <div class="row">
+
+        <div class="col col--one-third">
+          <h4 class="panel-title panel-title--line">고객센터</h4>
+          <div class="card card--pad">
+            <div class="card__body">
+              <p class="text-18">Tel : <span class="text-blue text-18">(+81) 03-1234-5678 / 일본</span></p>
+              <p class="text-16">평일 9:30~17:30</p>
+              <p class="text-16 text-red text-semibold">일요일휴무, 토요일/공휴일 정상근무(일본기준)</p>
+              <p class="text-16">email : support@nipponbuy.jp</p>
+
+              <div class="stack">
+                <a class="btn btn--dark" href="<%= ctx %>/community/faq">자주묻는질문</a>
+                <a class="btn btn--dark" href="<%= ctx %>/service/manual">사용메뉴얼</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col col--one-third">
+          <h4 class="panel-title panel-title--line">환율정보(100엔)</h4>
+          <div class="card card--pad">
+            <div class="card__body text-center">
+<% if (rate != null) { %>
+              <p class="text-15">환율 기준일 :  <%= rate.getRateDate().toString().replace('-', '.') %></p>
+              <p class="exchange exchange--main">
+                <img class="exchange__flag" src="<%= ctx %>/images/flag_jp.png" alt="JP"> 고시환율(원)<span class="exchange__value text-red"><%= rateFmt.format(rate.getNoticeRate()) %></span>
+              </p>
+              <p class="exchange text-16">기준환율(원)<span class="exchange__value text-blue"><%= rateFmt.format(rate.getBaseRate()) %></span></p>
+              <p class="exchange text-16">송금환율(원)<span class="exchange__value text-blue"><%= rateFmt.format(rate.getSendRate()) %></span></p>
+<% if ("SEED".equals(rate.getSource())) { %>
+              <p style="margin-top:6px;font-size:12px;color:#999">※ 초기 입력값입니다. 서버가 오늘 환율을 받으면 자동으로 바뀝니다.</p>
+<% } %>
+<% } else { %>
+              <p class="text-15">환율 정보를 불러오지 못했습니다.</p>
+<% } %>
+              <p style="margin-top:8px;font-size:11px;color:#999"><a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">Rates By Exchange Rate API</a></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ==================================================================
+     푸터
+     ================================================================== -->
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="row">
+
+      <div class="col col--footer-logo">
+        <img class="site-footer__logo" src="<%= ctx %>/images/logo.png" alt="NIPPON BUY 물류시스템">
+      </div>
+
+      <div class="col col--footer-info">
+        <div class="footer-links">
+          <a href="#">이용약관</a>
+          <a href="#">개인정보처리방침</a>
+          <a href="#">이메일무단수집거부</a>
+          <a href="#">특정상거래법에 따른 표기</a>
+          <a href="#">개인정보 보호방침(일본)</a>
+        </div>
+        <p class="site-footer__text">
+          NIPPON BUY Co., Ltd <br>
+          3F, 1-2-3, Sample-cho, Chiyoda-ku, Tokyo To, 100-0000, Japan<br>
+          Tel(일본) : (+81) 03-1234-5678<br><br>
+          NIPPON BUY 물류시스템 에서 운영하는 배송대행은 관세법등 관련규정을 준수합니다.
+          불법물건을 취급하지 않으며, 분할배송 및 가격허위신고 등 고객의 불법사항 요청에는<br>
+          협조하지 않습니다. 고객님의 허위신고로 인한 불이익에는 책임지지 않습니다.
+        </p>
+      </div>
+
+    </div>
+  </div>
+  <p class="copyright">ⓒ 2023 All Rights Reserved by NIPPON BUY.</p>
+</footer>
+
+<script>
+(function () {
+  /* ---- 배송센터 탭 ---- */
+  var tabItems = document.querySelectorAll('.tabs__item');
+  tabItems.forEach(function (item) {
+    item.querySelector('a').addEventListener('click', function (e) {
+      e.preventDefault();
+      tabItems.forEach(function (other) { other.classList.remove('is-active'); });
+      item.classList.add('is-active');
+      document.querySelectorAll('.tabs__pane').forEach(function (pane) {
+        pane.classList.toggle('is-active', pane.id === item.dataset.pane);
+      });
+    });
+  });
+
+  /* ---- 나의 일본주소 : 배송센터를 바꾸면 우편번호 · 주소 · 전화번호도 함께 바뀐다 ---- */
+  var CENTERS = {
+    air:  { zip: '100-0000', addr: '東京都千代田区サンプル町1-2-3 NIPPON BUY 3F',                 tel: '03-1234-5678' },
+    sea1: { zip: '810-0000', addr: '福岡県福岡市中央区サンプル町4-5-6 NIPPON BUY 3F',          tel: '092-123-4567' },
+    sea2: { zip: '811-0000', addr: '福岡県糟屋郡サンプル町7-8-9 NIPPON BUY',  tel: '092-234-5678' }
+  };
+  var centerSelect = document.getElementById('addrCenter');
+  if (centerSelect) {
+    centerSelect.addEventListener('change', function () {
+      var c = CENTERS[centerSelect.value];
+      if (!c) return;
+      document.getElementById('addrZip').textContent = c.zip;
+      document.getElementById('addrText').textContent = c.addr;
+      document.getElementById('addrTel').textContent = c.tel;
+    });
+  }
+
+  /* ---- 팝업 ---- */
+  var popup = document.getElementById('emergencyPopup');
+  document.querySelectorAll('[data-close-popup]').forEach(function (el) {
+    el.addEventListener('click', function () { popup.classList.add('is-hidden'); });
+  });
+  /* 일주일 동안 보지 않기 */
+  var HIDE_KEY = 'kuroPopupHideUntil';
+  try {
+    var until = parseInt(localStorage.getItem(HIDE_KEY), 10);
+    if (until && until > Date.now()) popup.classList.add('is-hidden');
+    else if (until) localStorage.removeItem(HIDE_KEY);
+  } catch (err) {}
+
+  popup.querySelector('.popup__mute input').addEventListener('change', function (e) {
+    if (e.target.checked) {
+      try { localStorage.setItem(HIDE_KEY, String(Date.now() + 7 * 24 * 60 * 60 * 1000)); } catch (err) {}
+      popup.classList.add('is-hidden');
+    }
+  });
+})();
+</script>
+<script>
+/* ---- 운송장 조회 (시험용) ----
+   결제가 완료되면 결제내역에 만들어지는 한국 · 일본 운송장을 /track/kr, /track/jp 에서 찾아 아래에 보여 준다.
+   결제내역의 "조회" 링크로 들어오면 (?krMethod=..&krNo=.. / ?jpCarrier=..&jpNo=..) 칸을 채우고 바로 조회한다. */
+(function () {
+  var CTX = '<%= ctx %>';
+
+  function show(out, ok, text) {
+    out.className = 'track-result ' + (ok ? 'track-result--ok' : 'track-result--error');
+    out.textContent = text;
+  }
+
+  function track(kind, typeId, noId, resultId) {
+    var type = document.getElementById(typeId).value;
+    var no = document.getElementById(noId).value.trim();
+    var out = document.getElementById(resultId);
+
+    if (!no) { show(out, false, '운송장번호를 입력해 주세요.'); return; }
+    out.className = 'track-result';
+    out.textContent = '조회 중...';
+
+    fetch(CTX + '/track/' + kind + '?type=' + encodeURIComponent(type) + '&no=' + encodeURIComponent(no),
+          { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok) { show(out, false, j.message); return; }
+        show(out, true, '[' + j.type + '] ' + j.number + '\n상태 : ' + j.status + '\n접수일시 : ' + j.date);
+      })
+      .catch(function () {
+        show(out, false, '조회하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      });
+  }
+
+  function bind(kind, typeId, noId, btnId, resultId) {
+    document.getElementById(btnId).addEventListener('click', function () { track(kind, typeId, noId, resultId); });
+    document.getElementById(noId).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); track(kind, typeId, noId, resultId); }
+    });
+  }
+
+  bind('kr', 'krType', 'krNo', 'krBtn', 'krResult');
+  bind('jp', 'jpType', 'jpNo', 'jpBtn', 'jpResult');
+
+  // 결제내역의 "조회" 링크로 들어온 경우 : 값을 채우고 바로 조회
+  var q = new URLSearchParams(location.search);
+
+  function fill(typeId, noId, type, no) {
+    var sel = document.getElementById(typeId);
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === type) { sel.selectedIndex = i; break; }
+    }
+    document.getElementById(noId).value = no;
+  }
+
+  if (q.get('krNo')) {
+    fill('krType', 'krNo', q.get('krMethod') || '', q.get('krNo'));
+    track('kr', 'krType', 'krNo', 'krResult');
+  }
+  if (q.get('jpNo')) {
+    fill('jpType', 'jpNo', q.get('jpCarrier') || '', q.get('jpNo'));
+    track('jp', 'jpType', 'jpNo', 'jpResult');
+  }
+})();
+</script>
+<%@ include file="common/translate.jspf" %>
+</body>
+</html>
